@@ -12,12 +12,12 @@ TEvent = class(TObject)
 end;
 ```
 2. Prepare subscribers
-..*Register your subscriber:
+ * Register your subscriber:
 ```delphi
 TEventBus.GetDefault.RegisterSubscriber(self);
 ```
 
-..*Declare your subscribing method:
+ * Declare your subscribing method:
 ```delphi
 [Subscribe]
 procedure OnEvent(AEvent: TAnyTypeOfEvent);
