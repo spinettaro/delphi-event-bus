@@ -14,29 +14,17 @@
   limitations under the License.
   ******************************************************************************** }
 
-unit AttributesU;
+unit EventBus.Interfaces;
 
 interface
 
-uses CommonsU;
-
 type
 
-  SubscribeAttribute = class(TCustomAttribute)
-  private
-    FThreadMode: TThreadMode;
-  public
-    constructor Create(AThreadMode: TThreadMode = TThreadMode.Posting);
-    property ThreadMode: TThreadMode read FThreadMode;
+  IRunnable = Interface(IInterface)
+    ['{52602159-1B4C-46C9-9C78-79CE60D2F61A}']
+    procedure Run;
   end;
 
 implementation
-
-{ SubscribeAttribute }
-
-constructor SubscribeAttribute.Create(AThreadMode: TThreadMode);
-begin
-  FThreadMode := AThreadMode;
-end;
 
 end.

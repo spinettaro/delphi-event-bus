@@ -14,13 +14,22 @@
   limitations under the License.
   ******************************************************************************** }
 
-unit CommonsU;
+unit EventBus.Poster;
 
 interface
 
-type
+uses EventBus.Interfaces;
 
-  TThreadMode = (Posting, Main, Background, Async);
+{type
+
+  TAsyncPoster = class(TInterfacedObject, IRunnable)
+  end;
+
+  TBackgroundPoster = class(TInterfacedObject, IRunnable)
+  end;
+
+  TMainThreadPoster = class(TInterfacedObject, IRunnable)
+  end;   }
 
 implementation
 

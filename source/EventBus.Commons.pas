@@ -14,16 +14,13 @@
   limitations under the License.
   ******************************************************************************** }
 
-unit InterfacesU;
+unit EventBus.Commons;
 
 interface
 
 type
 
-  IRunnable = Interface(IInterface)
-    ['{52602159-1B4C-46C9-9C78-79CE60D2F61A}']
-    procedure Run;
-  end;
+  TThreadMode = (Posting, Main, Background, Async);
 
 implementation
 

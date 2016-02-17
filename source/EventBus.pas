@@ -14,12 +14,12 @@
   limitations under the License.
   ******************************************************************************** }
 
-unit EventBusU;
+unit EventBus;
 
 interface
 
 uses
-  System.SyncObjs, SubscribersU, Generics.Collections;
+  System.SyncObjs, EventBus.Subscribers, Generics.Collections;
 
 type
 
@@ -72,8 +72,8 @@ type
 implementation
 
 uses
-  System.Rtti, System.Messaging, AttributesU, System.SysUtils, System.Classes,
-  CommonsU, RttiUtilsU;
+  System.Rtti, System.Messaging, EventBus.Attributes, System.SysUtils,
+  System.Classes, EventBus.Commons, RttiUtilsU;
 
 { TEventBus }
 

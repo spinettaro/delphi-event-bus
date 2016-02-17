@@ -4,9 +4,8 @@ interface
 
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants,
-  System.Classes, Vcl.Graphics,
-  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ExtCtrls, AttributesU,
-  EventU;
+  System.Classes, Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs,
+  Vcl.StdCtrls, Vcl.ExtCtrls, EventBus.Attributes, EventU;
 
 type
   TfrmSecond = class(TForm)
@@ -31,7 +30,7 @@ var
 implementation
 
 uses
-  EventBusU, RttiUtilsU, System.Rtti;
+  EventBus, RttiUtilsU, System.Rtti;
 
 {$R *.dfm}
 

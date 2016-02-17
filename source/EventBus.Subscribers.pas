@@ -14,12 +14,12 @@
   limitations under the License.
   ******************************************************************************** }
 
-unit SubscribersU;
+unit EventBus.Subscribers;
 
 interface
 
 uses
-  System.RTTI, CommonsU;
+  System.RTTI, EventBus.Commons;
 
 type
 
@@ -73,7 +73,7 @@ type
 implementation
 
 uses
-  AttributesU, RTTIUtilsU, System.SysUtils;
+  EventBus.Attributes, RTTIUtilsU, System.SysUtils;
 
 { TSubscriberMethod }
 
@@ -131,7 +131,6 @@ end;
 class function TSubscribersFinder.FindSubscriberMethods(ASubscriberClass
   : TClass; ARaiseExcIfEmpty: Boolean = false): TArray<TSubscriberMethod>;
 var
-  LRttiContext: TRttiContext;
   LRttiType: TRttiType;
   LSubscribeAttribute: SubscribeAttribute;
   LRttiMethods: TArray<System.RTTI.TRttiMethod>;
@@ -139,7 +138,7 @@ var
   LParamsLength: Integer;
   LEventType: TClass;
 begin
-  LRttiType := LRttiContext.GetType(ASubscriberClass);
+  LRttiType := TRTTIUtils.ctx.GetType(ASubscriberClass);
   LRttiMethods := LRttiType.GetMethods;
   for LMethod in LRttiMethods do
     if TRTTIUtils.HasAttribute<SubscribeAttribute>(LMethod, LSubscribeAttribute)
@@ -155,7 +154,7 @@ begin
       Result := Result + [TSubscriberMethod.Create(LMethod, LEventType,
         LSubscribeAttribute.ThreadMode)];
     end;
-  if (Length(Result) < 1) then
+  if (Length(Result) < 1) and ARaiseExcIfEmpty then
     raise Exception.CreateFmt
       ('The class %s and its super classes have no public methods with the Subscribe attributes',
       [ASubscriberClass.QualifiedClassName]);

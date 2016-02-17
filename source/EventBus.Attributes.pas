@@ -14,23 +14,29 @@
   limitations under the License.
   ******************************************************************************** }
 
-unit PosterU;
+unit EventBus.Attributes;
 
 interface
 
-uses InterfacesU;
+uses EventBus.Commons;
 
-{type
+type
 
-  TAsyncPoster = class(TInterfacedObject, IRunnable)
+  SubscribeAttribute = class(TCustomAttribute)
+  private
+    FThreadMode: TThreadMode;
+  public
+    constructor Create(AThreadMode: TThreadMode = TThreadMode.Posting);
+    property ThreadMode: TThreadMode read FThreadMode;
   end;
-
-  TBackgroundPoster = class(TInterfacedObject, IRunnable)
-  end;
-
-  TMainThreadPoster = class(TInterfacedObject, IRunnable)
-  end;   }
 
 implementation
+
+{ SubscribeAttribute }
+
+constructor SubscribeAttribute.Create(AThreadMode: TThreadMode);
+begin
+  FThreadMode := AThreadMode;
+end;
 
 end.

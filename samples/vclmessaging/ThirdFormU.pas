@@ -4,7 +4,7 @@ interface
 
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants,
-  System.Classes, Vcl.Graphics,
+  System.Classes, Vcl.Graphics, EventU, EventBus.Attributes,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ExtCtrls;
 
 type
@@ -17,6 +17,8 @@ type
     { Private declarations }
   public
     { Public declarations }
+    [Subscribe]
+    procedure OnMemoChange(AEvent: TMemoChangeEvent);
   end;
 
 var
@@ -25,18 +27,19 @@ var
 implementation
 
 uses
-  System.Messaging, Vcl.GraphUtil;
+  EventBus, Vcl.GraphUtil;
 
 {$R *.dfm}
 
 procedure TfrmThird.FormCreate(Sender: TObject);
 begin
-  TMessageManager.DefaultManager.SubscribeToMessage(TMessage<String>,
-    procedure(const Sender: TObject; const Msg: TMessage)
-    begin
-      FMessage := (Msg as TMessage<String>).Value.ToUpper;
-      PaintBox1.Repaint;
-    end)
+  TEventBus.GetDefault.RegisterSubscriber(self);
+end;
+
+procedure TfrmThird.OnMemoChange(AEvent: TMemoChangeEvent);
+begin
+  FMessage := AEvent.Text;
+  PaintBox1.Repaint;
 end;
 
 procedure TfrmThird.PaintBox1Paint(Sender: TObject);

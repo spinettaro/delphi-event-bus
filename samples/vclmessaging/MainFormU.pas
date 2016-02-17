@@ -26,7 +26,7 @@ var
 implementation
 
 uses
-  EventBusU, EventU;
+  EventBus, EventU;
 
 {$R *.dfm}
 
