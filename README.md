@@ -6,25 +6,25 @@ It was inspired by EventBus framework for the Android platform.
 
 ## Show me the code
 1. Define events:
-```delphi
+  ```delphi
 TEvent = class(TObject)
 // additional information here
 end;
-```
+  ```
 2. Prepare subscribers:
  * Register your subscriber:
-```delphi
+  ```delphi
 TEventBus.GetDefault.RegisterSubscriber(self);
-```
+  ```
  * Declare your subscribing method:
-```delphi
+  ```delphi
 [Subscribe]
 procedure OnEvent(AEvent: TAnyTypeOfEvent);
-```
+  ```
 3. Post events:
-```delphi
+  ```delphi
 TEventBus.GetDefault.post(LEvent);
-```
+  ```
 
 ## License
   Copyright 2016 Daniele Spinetti
