@@ -13,18 +13,18 @@ end;
   ```
 2. Prepare subscribers:
  * Register your subscriber:
-  ```delphi
+```delphi
   TEventBus.GetDefault.RegisterSubscriber(self);
-  ```
+```
  * Declare your subscribing method:
-  ```delphi
+```delphi
   [Subscribe]
   procedure OnEvent(AEvent: TAnyTypeOfEvent);
-  ```
+```
 3. Post events:
-  ```delphi
+```delphi
   TEventBus.GetDefault.post(LEvent);
-  ```
+```
 
 ## License
   Copyright 2016 Daniele Spinetti
