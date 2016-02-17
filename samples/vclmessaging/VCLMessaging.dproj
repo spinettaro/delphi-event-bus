@@ -92,15 +92,12 @@
         </DelphiCompile>
         <DCCReference Include="MainFormU.pas">
             <Form>frmMain</Form>
-            <FormType>dfm</FormType>
         </DCCReference>
         <DCCReference Include="SecondFormU.pas">
             <Form>frmSecond</Form>
-            <FormType>dfm</FormType>
         </DCCReference>
         <DCCReference Include="ThirdFormU.pas">
             <Form>frmThird</Form>
-            <FormType>dfm</FormType>
         </DCCReference>
         <DCCReference Include="EventU.pas"/>
         <BuildConfiguration Include="Release">

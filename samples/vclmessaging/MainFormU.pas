@@ -45,7 +45,6 @@ var
 begin
   Event := TMemoChangeEvent.Create();
   Event.Text := Memo1.Lines.Text;
-  // TMessageManager.DefaultManager.SendMessage(Memo1, Msg);
   TEventBus.GetDefault.Post(Event);
 end;
 

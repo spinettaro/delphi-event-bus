@@ -84,7 +84,7 @@ begin
   FSubscriptionsByEventType := TObjectDictionary < TClass,
     TObjectList < TSubscription >>.Create([doOwnsValues]);
   FTypesBySubscriber := TObjectDictionary < TObject,
-    TList < TClass >>.Create([doOwnsKeys]);
+    TList < TClass >>.Create([doOwnsKeys, doOwnsValues]);
 end;
 
 destructor TEventBus.Destroy;
