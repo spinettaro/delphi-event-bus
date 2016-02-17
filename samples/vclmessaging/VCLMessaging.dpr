@@ -4,7 +4,8 @@ uses
   Vcl.Forms,
   MainFormU in 'MainFormU.pas' {frmMain},
   SecondFormU in 'SecondFormU.pas' {frmSecond},
-  ThirdFormU in 'ThirdFormU.pas' {frmThird};
+  ThirdFormU in 'ThirdFormU.pas' {frmThird},
+  EventU in 'EventU.pas';
 
 {$R *.res}
 
