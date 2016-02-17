@@ -1,5 +1,32 @@
 # DEB a Delphi Event Bus framework
-Delphi Event Bus (for short DEB) is a publish/subscribe Event Bus framework for the Delphi platform
+Delphi Event Bus (for short DEB) is a publish/subscribe Event Bus framework for the Delphi platform.
+
+DEB is designed to decouple different parts/layers of your application while still allowing them to communicate efficiently.
+It was inspired by EventBus framework for the Android platform.
+
+## Show me the code
+1. Define events:
+```delphi
+TEvent = class(TObject)
+// additional information here
+end;
+```
+2. Prepare subscribers
+..*Register your subscriber:
+```delphi
+TEventBus.GetDefault.RegisterSubscriber(self);
+```
+
+..*Declare your subscribing method:
+```delphi
+[Subscribe]
+procedure OnEvent(AEvent: TAnyTypeOfEvent);
+```
+
+3. Post events:
+```delphi
+TEventBus.GetDefault.post(LEvent);
+```
 
 ## License
   Copyright 2016 Daniele Spinetti
