@@ -11,7 +11,8 @@ TEvent = class(TObject)
 // additional information here
 end;
 ```
-2. Prepare subscribers
+
+2. Prepare subscribers:
  * Register your subscriber:
 ```delphi
 TEventBus.GetDefault.RegisterSubscriber(self);
