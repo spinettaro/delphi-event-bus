@@ -13,9 +13,9 @@ end;
   ```
 2. Prepare subscribers:
  * Register your subscriber:
-```delphi
-  TEventBus.GetDefault.RegisterSubscriber(self);
-```
+    ```delphi
+    TEventBus.GetDefault.RegisterSubscriber(self);
+    ```
  * Declare your subscribing method:
 ```delphi
   [Subscribe]
