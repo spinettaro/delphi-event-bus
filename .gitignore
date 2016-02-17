@@ -1,2 +1,6 @@
 /source/__history
 /source/__recovery
+/samples/vclmessaging/__history
+/samples/vclmessaging/__recovery
+/samples/vclmessaging/Win32
+/samples/vclmessaging/*.stat
