@@ -1,0 +1,31 @@
+object frmThird: TfrmThird
+  Left = 144
+  Top = 399
+  Caption = 'frmThird'
+  ClientHeight = 308
+  ClientWidth = 413
+  Color = clBtnFace
+  Font.Charset = DEFAULT_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -11
+  Font.Name = 'Tahoma'
+  Font.Style = []
+  OldCreateOrder = False
+  Position = poDesigned
+  Visible = True
+  OnCreate = FormCreate
+  PixelsPerInch = 96
+  TextHeight = 13
+  object PaintBox1: TPaintBox
+    Left = 0
+    Top = 0
+    Width = 413
+    Height = 308
+    Align = alClient
+    OnPaint = PaintBox1Paint
+    ExplicitLeft = 168
+    ExplicitTop = 80
+    ExplicitWidth = 105
+    ExplicitHeight = 105
+  end
+end
