@@ -5,7 +5,7 @@ interface
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants,
   System.Classes, Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs,
-  Vcl.StdCtrls, Vcl.ExtCtrls, EventBus.Attributes, EventU;
+  Vcl.StdCtrls, Vcl.ExtCtrls, EventBus.Attributes, EventU, EventBus.Commons;
 
 type
   TfrmSecond = class(TForm)
@@ -13,7 +13,8 @@ type
     Panel1: TPanel;
     Label1: TLabel;
     CheckBox1: TCheckBox;
-    procedure FormCreate(Sender: TObject);
+    CheckBox2: TCheckBox;
+    procedure CheckBox2Click(Sender: TObject);
   private
     { Private declarations }
   public
@@ -34,9 +35,12 @@ uses
 
 {$R *.dfm}
 
-procedure TfrmSecond.FormCreate(Sender: TObject);
+procedure TfrmSecond.CheckBox2Click(Sender: TObject);
 begin
-  TEventBus.GetDefault.RegisterSubscriber(self);
+  if (CheckBox2.Checked) then
+    TEventBus.GetDefault.RegisterSubscriber(self)
+  else
+    TEventBus.GetDefault.Unregister(self);
 end;
 
 procedure TfrmSecond.OnCheckBoxChange(AEvent: TCheckBoxEvent);

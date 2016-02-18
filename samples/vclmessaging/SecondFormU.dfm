@@ -12,14 +12,13 @@ object frmSecond: TfrmSecond
   OldCreateOrder = False
   Position = poDesigned
   Visible = True
-  OnCreate = FormCreate
   PixelsPerInch = 96
   TextHeight = 13
   object MemoObserver: TMemo
     Left = 0
     Top = 36
     Width = 350
-    Height = 172
+    Height = 155
     Align = alClient
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clRed
@@ -29,6 +28,7 @@ object frmSecond: TfrmSecond
     ParentFont = False
     ReadOnly = True
     TabOrder = 0
+    ExplicitHeight = 172
   end
   object Panel1: TPanel
     Left = 0
@@ -41,8 +41,8 @@ object frmSecond: TfrmSecond
       AlignWithMargins = True
       Left = 4
       Top = 4
-      Width = 111
-      Height = 23
+      Width = 225
+      Height = 28
       Align = alClient
       Caption = 'Second Form'
       Font.Charset = DEFAULT_CHARSET
@@ -51,6 +51,8 @@ object frmSecond: TfrmSecond
       Font.Name = 'Tahoma'
       Font.Style = []
       ParentFont = False
+      ExplicitWidth = 111
+      ExplicitHeight = 23
     end
     object CheckBox1: TCheckBox
       Left = 232
@@ -61,5 +63,18 @@ object frmSecond: TfrmSecond
       Caption = 'Mirror'
       TabOrder = 0
     end
+  end
+  object CheckBox2: TCheckBox
+    Left = 0
+    Top = 191
+    Width = 350
+    Height = 17
+    Align = alBottom
+    Caption = 'Register/Unregister'
+    TabOrder = 2
+    OnClick = CheckBox2Click
+    ExplicitLeft = 248
+    ExplicitTop = 192
+    ExplicitWidth = 97
   end
 end
