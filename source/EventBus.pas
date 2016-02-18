@@ -73,7 +73,7 @@ implementation
 
 uses
   System.Rtti, System.Messaging, EventBus.Attributes, System.SysUtils,
-  System.Classes, EventBus.Commons, RttiUtilsU;
+  System.Classes, EventBus.Commons, RttiUtilsU, System.Threading;
 
 { TEventBus }
 
@@ -194,17 +194,27 @@ begin
       InvokeSubscriber(ASubscription, AEvent);
     Main:
       if (AIsMainThread) then
-        InvokeSubscriber(ASubscription, AEvent);
-    // else
-    // mainThreadPoster.enqueue(Subscription, Event);
+        InvokeSubscriber(ASubscription, AEvent)
+      else
+        TThread.Queue(nil,
+          procedure
+          begin
+            ASubscription.SubscriberMethod.Method.Invoke
+              (ASubscription.Subscriber, [AEvent]);
+          end);
     Background:
       if (AIsMainThread) then // backgroundPoster.enqueue(subscription, event);
       else
         InvokeSubscriber(ASubscription, AEvent);
     Async:
-      ;
+      TTask.Run(
+        procedure
+        begin
+          ASubscription.SubscriberMethod.Method.Invoke(ASubscription.Subscriber,
+            [AEvent]);
+        end);
   else
-    raise Exception.Create('Unknown thread mode ');
+    raise Exception.Create('Unknown thread mode');
   end;
 
 end;
@@ -228,7 +238,7 @@ begin
 end;
 
 procedure TEventBus.Subscribe(ASubscriber: TObject;
-  ASubscriberMethod: TSubscriberMethod);
+ASubscriberMethod: TSubscriberMethod);
 var
   LEventType: TClass;
   LNewSubscription: TSubscription;
@@ -285,7 +295,7 @@ begin
 end;
 
 procedure TEventBus.UnsubscribeByEventType(ASubscriber: TObject;
-  AEventType: TClass);
+AEventType: TClass);
 var
   LSubscriptions: TObjectList<TSubscription>;
   LSize, I: Integer;
