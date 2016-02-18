@@ -11,17 +11,18 @@ type
   TEventBusTest = class(TBaseTest)
   public
     [Test]
+    procedure TestRegisterUnregister;
+    [Test]
     procedure TestSimplePost;
     [Test]
-    procedure TestPostOnMainThread;
-    [Test]
     procedure TestAsyncPost;
-
+    [Test]
+    procedure TestPostOnMainThread;
   end;
 
 implementation
 
-uses EventBus, BOs, System.SyncObjs;
+uses EventBus, BOs, System.SyncObjs, System.SysUtils;
 
 procedure TEventBusTest.TestSimplePost;
 var
@@ -96,6 +97,26 @@ begin
     finally
       LEvent.Free;
     end;
+  finally
+    // Subscriber.Free;
+  end;
+end;
+
+procedure TEventBusTest.TestRegisterUnregister;
+var
+  LRaisedException: Boolean;
+begin
+  LRaisedException := false;
+  Subscriber := TSubscriber.Create;
+  try
+    TEventBus.GetDefault.RegisterSubscriber(Subscriber);
+    try
+      TEventBus.GetDefault.Unregister(Subscriber);
+    except
+      on E: Exception do
+        LRaisedException := true;
+    end;
+    Assert.IsFalse(LRaisedException);
   finally
     // Subscriber.Free;
   end;

@@ -175,8 +175,6 @@ destructor TSubscription.Destroy;
 begin
   if Assigned(FSubscriberMethod) then
     FreeAndNil(FSubscriberMethod);
-  if Assigned(FSubscriber) then
-    FreeAndNil(FSubscriber);
   inherited;
 end;
 

@@ -4,3 +4,7 @@
 /samples/vclmessaging/__recovery
 /samples/vclmessaging/Win32
 /samples/vclmessaging/*.stat
+/tests/*.stat
+/tests/__history
+/tests/__recovery
+/tests/Win32
