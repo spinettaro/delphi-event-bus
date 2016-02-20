@@ -5,11 +5,11 @@ DEB is designed to decouple different parts/layers of your application while sti
 It was inspired by EventBus framework for the Android platform.
 
 ## Features
-* __Easy and clean:__ DelphiEventBus is super easy to learn and use because it respects KISS and "Convention over configuration" design principles. By using default TEventBus instance, you can start immediately to delivery and receive events. 
+* __Easy and clean:__ DelphiEventBus is super easy to learn and use because it respects KISS and "Convention over configuration" design principles. By using default TEventBus instance, you can start immediately to delivery and receive events 
 * __Designed to decouple different parts/layers of your application__
 * __Event Driven__
-* __Attributes based API:__ Simply put the Subscribe attribute on your subscriber method you are able to receive a specific event.
-* __Support different delivery mode:__ Specifying the TThreadMode in Subscribe attribute, you can choose to delivery the event in the Main Thread or a Background ones, regardless where an event was posted. The EventBus will manage Thread synchronization.     
+* __Attributes based API:__ Simply put the Subscribe attribute on your subscriber method you are able to receive a specific event
+* __Support different delivery mode:__ Specifying the TThreadMode in Subscribe attribute, you can choose to delivery the event in the Main Thread or in a Background ones, regardless where an event was posted. The EventBus will manage Thread synchronization     
 * __Unit Tested__
 
 ## Show me the code
@@ -31,6 +31,9 @@ TEventBus.GetDefault.RegisterSubscriber(self);
 ```delphi
 [Subscribe]
 procedure OnEvent(AEvent: TAnyTypeOfEvent);
+begin
+  // manage the event 	
+end;
 ```
 
 3.Post events:
