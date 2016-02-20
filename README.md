@@ -4,6 +4,12 @@ Delphi Event Bus (for short DEB) is a publish/subscribe Event Bus framework for 
 DEB is designed to decouple different parts/layers of your application while still allowing them to communicate efficiently.
 It was inspired by EventBus framework for the Android platform.
 
+## Features
+* __Simple:__ DelphiEventBus is super easy to learn and use because it respects KISS and "Convention over configuration" design principles. By using default TEventBus instance, you can start immediately to delivery and receive events. 
+* __Attributes based API:__ Simply put the Subscribe attribute on your subscriber method you are able to receive a specific event.
+* __Support different delivery mode:__ Specifying the TThreadMode in Subscribe attribute, you can choose to delivery the event in the Main Thread or a Background ones, regardless where an event was posted. The EventBus will manage Thread synchronization.     
+* __Unit Tested__
+
 ## Show me the code
 1.Define events:
 
