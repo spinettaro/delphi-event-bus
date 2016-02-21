@@ -20,24 +20,23 @@ type
   end;
 
   TAsyncEvent = class(TEventBusEvent)
-  private
-    FEvent: TEvent;
-    procedure SetEvent(const Value: TEvent);
-  public
-    property Event: TEvent read FEvent write SetEvent;
+
   end;
 
   TBaseSubscriber = class(TObject)
   private
     FLastEvent: TEventBusEvent;
     FLastEventThreadID: cardinal;
+    FEvent: TEvent;
     procedure SetLastEvent(const Value: TEventBusEvent);
     procedure SetLastEventThreadID(const Value: cardinal);
+    procedure SetEvent(const Value: TEvent);
   public
     destructor Destroy; override;
     property LastEvent: TEventBusEvent read FLastEvent write SetLastEvent;
     property LastEventThreadID: cardinal read FLastEventThreadID
       write SetLastEventThreadID;
+    property Event: TEvent read FEvent write SetEvent;
   end;
 
   TSubscriber = class(TBaseSubscriber)
@@ -61,7 +60,14 @@ begin
   TEventBus.GetDefault.Unregister(Self);
   if Assigned(FLastEvent) then
     FLastEvent.Free;
+  if Assigned(FEvent) then
+    FEvent.Free;
   inherited;
+end;
+
+procedure TBaseSubscriber.SetEvent(const Value: TEvent);
+begin
+  FEvent := Value;
 end;
 
 procedure TBaseSubscriber.SetLastEvent(const Value: TEventBusEvent);
@@ -80,7 +86,7 @@ procedure TSubscriber.OnSimpleAsyncEvent(AEvent: TAsyncEvent);
 begin
   LastEvent := AEvent;
   LastEventThreadID := TThread.CurrentThread.ThreadID;
-  AEvent.Event.SetEvent;
+  Event.SetEvent;
 end;
 
 procedure TSubscriber.OnSimpleEvent(AEvent: TEventBusEvent);
@@ -99,13 +105,6 @@ end;
 procedure TEventBusEvent.SetMsg(const Value: string);
 begin
   FMsg := Value;
-end;
-
-{ TAsyncEvent }
-
-procedure TAsyncEvent.SetEvent(const Value: TEvent);
-begin
-  FEvent := Value;
 end;
 
 end.

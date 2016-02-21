@@ -87,24 +87,18 @@ procedure TEventBusTest.TestAsyncPost;
 var
   LEvent: TAsyncEvent;
   LMsg: string;
-  LEvt: TEvent;
 begin
+  Subscriber.Event := TEvent.Create;
   TEventBus.GetDefault.RegisterSubscriber(Subscriber);
   LEvent := TAsyncEvent.Create;
   LMsg := 'TestAsyncPost';
   LEvent.Msg := LMsg;
-  LEvt := TEvent.Create;
-  try
-    LEvent.Event := LEvt;
-    TEventBus.GetDefault.Post(LEvent);
-    // attend for max 5 seconds
-    Assert.IsTrue(TWaitResult.wrSignaled = LEvt.WaitFor(5000),
-      'Timeout request');
-    Assert.AreEqual(LMsg, Subscriber.LastEvent.Msg);
-    Assert.AreNotEqual(MainThreadID, Subscriber.LastEventThreadID);
-  finally
-    LEvt.Free;
-  end;
+  TEventBus.GetDefault.Post(LEvent);
+  // attend for max 5 seconds
+  Assert.IsTrue(TWaitResult.wrSignaled = Subscriber.Event.WaitFor(5000),
+    'Timeout request');
+  Assert.AreEqual(LMsg, Subscriber.LastEvent.Msg);
+  Assert.AreNotEqual(MainThreadID, Subscriber.LastEventThreadID);
 end;
 
 initialization

@@ -234,8 +234,7 @@ var
 begin
   FCS.Acquire;
   try
-    LSubscribedTypes := FTypesBySubscriber.Items[ASubscriber];
-    if (Assigned(LSubscribedTypes)) then
+    if FTypesBySubscriber.TryGetValue(ASubscriber, LSubscribedTypes) then
     begin
       for LEventType in LSubscribedTypes do
         UnsubscribeByEventType(ASubscriber, LEventType);
