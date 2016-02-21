@@ -4,6 +4,10 @@ Delphi Event Bus (for short DEB) is a publish/subscribe Event Bus framework for 
 DEB is designed to decouple different parts/layers of your application while still allowing them to communicate efficiently.
 It was inspired by EventBus framework for the Android platform.
 
+![alt text][eventbus_architecture]
+
+[logo]: https://github.com/spinettaro/delphi-event-bus/raw/master/docs/DelphiEventBusArchitecture.png "Delphi Event Bus Architecture"]
+
 ## Features
 * __Easy and clean:__ DelphiEventBus is super easy to learn and use because it respects KISS and "Convention over configuration" design principles. By using default TEventBus instance, you can start immediately to delivery and receive events 
 * __Designed to decouple different parts/layers of your application__
@@ -40,6 +44,11 @@ end;
 ```delphi
   TEventBus.GetDefault.post(LEvent);
 ```
+
+##Support
+* DEB is a 100% ObjectPascal framework so it works on VCL and Firemonkey
+* It works with DelphiXE7 and major
+* It should be works fine also on AppMethod
 
 ## License
   Copyright 2016 Daniele Spinetti
