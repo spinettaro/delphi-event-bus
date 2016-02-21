@@ -6,13 +6,13 @@
     <Transaction>2015/12/04 18.00.00.000.571,=C:\Users\d.spinetti\Documents\Embarcadero\Studio\Projects\Unit4.pas</Transaction>
     <Transaction>2015/12/11 12.00.00.000.634,=C:\Users\d.spinetti\Documents\Embarcadero\Studio\Projects\Unit4.pas</Transaction>
     <Transaction>2016/02/08 18.00.00.000.656,=C:\Users\d.spinetti\Documents\Embarcadero\Studio\Projects\Unit4.pas</Transaction>
-    <Transaction>2016/02/18 23.02.18.054,=C:\Users\d.spinetti\Documents\Embarcadero\Studio\Projects\Unit4.pas</Transaction>
-    <Transaction>2016/02/18 23.02.54.323,C:\DEV\Delphi\delphi-event-bus\tests\EventBusTestU.pas=C:\Users\d.spinetti\Documents\Embarcadero\Studio\Projects\Unit4.pas</Transaction>
-    <Transaction>2016/02/18 23.02.58.711,C:\DEV\Delphi\delphi-event-bus\tests\DelphiEventBusTests.dproj=C:\Users\d.spinetti\Documents\Embarcadero\Studio\Projects\Project4.dproj</Transaction>
-    <Transaction>2016/02/18 23.06.32.964,=C:\DEV\Delphi\delphi-event-bus\tests\Unit1.pas</Transaction>
-    <Transaction>2016/02/18 23.06.46.699,C:\DEV\Delphi\delphi-event-bus\tests\BOs.pas=C:\DEV\Delphi\delphi-event-bus\tests\Unit1.pas</Transaction>
-    <Transaction>2016/02/18 23.16.27.354,=C:\DEV\Delphi\delphi-event-bus\tests\Unit1.pas</Transaction>
-    <Transaction>2016/02/18 23.16.32.615,C:\DEV\Delphi\delphi-event-bus\tests\BaseTestU.pas=C:\DEV\Delphi\delphi-event-bus\tests\Unit1.pas</Transaction>
+    <Transaction>2016/02/18 23.00.00.000.323,C:\Users\d.spinetti\Documents\Embarcadero\Studio\Projects\Unit4.pas=C:\DEV\Delphi\delphi-event-bus\tests\EventBusTestU.pas</Transaction>
+    <Transaction>2016/02/18 23.00.00.000.054,=C:\Users\d.spinetti\Documents\Embarcadero\Studio\Projects\Unit4.pas</Transaction>
+    <Transaction>2016/02/18 23.00.00.000.699,C:\DEV\Delphi\delphi-event-bus\tests\Unit1.pas=C:\DEV\Delphi\delphi-event-bus\tests\BOs.pas</Transaction>
+    <Transaction>2016/02/18 23.00.00.000.354,=C:\DEV\Delphi\delphi-event-bus\tests\Unit1.pas</Transaction>
+    <Transaction>2016/02/18 23.00.00.000.711,C:\Users\d.spinetti\Documents\Embarcadero\Studio\Projects\Project4.dproj=C:\DEV\Delphi\delphi-event-bus\tests\DelphiEventBusTests.dproj</Transaction>
+    <Transaction>2016/02/18 23.00.00.000.964,=C:\DEV\Delphi\delphi-event-bus\tests\Unit1.pas</Transaction>
+    <Transaction>2016/02/18 23.00.00.000.615,C:\DEV\Delphi\delphi-event-bus\tests\Unit1.pas=C:\DEV\Delphi\delphi-event-bus\tests\BaseTestU.pas</Transaction>
   </Transactions>
 	<ActiveMobileDevice>
 		<NoProfile iOSSimulator="iPhone5"/>

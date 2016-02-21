@@ -73,7 +73,7 @@ type
 implementation
 
 uses
-  EventBus.Attributes, RTTIUtilsU, System.SysUtils;
+  EventBus.Attributes, RTTIUtilsU, System.SysUtils, System.TypInfo;
 
 { TSubscriberMethod }
 

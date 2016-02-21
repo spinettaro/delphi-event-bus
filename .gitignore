@@ -1,10 +1,5 @@
-/source/__history
-/source/__recovery
-/samples/vclmessaging/__history
-/samples/vclmessaging/__recovery
-/samples/vclmessaging/Win32
-/samples/vclmessaging/*.stat
-/tests/*.stat
-/tests/__history
-/tests/__recovery
-/tests/Win32
+*.stat
+Win32
+__history
+__recovery
+Android

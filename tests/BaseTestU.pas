@@ -34,11 +34,13 @@ end;
 
 procedure TBaseTest.Setup;
 begin
+  FSubscriber := TSubscriber.Create;
 end;
 
 procedure TBaseTest.TearDown;
 begin
-  // TEventBus.GetDefault.Free;
+  if Assigned(FSubscriber) then
+    FreeAndNil(FSubscriber);
 end;
 
 end.

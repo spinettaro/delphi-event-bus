@@ -13,6 +13,10 @@ type
     [Test]
     procedure TestRegisterUnregister;
     [Test]
+    procedure TestIsRegisteredTrueAfterRegister;
+    [Test]
+    procedure TestIsRegisteredFalseAfterUnregister;
+    [Test]
     procedure TestSimplePost;
     [Test]
     procedure TestAsyncPost;
@@ -29,21 +33,54 @@ var
   LEvent: TEventBusEvent;
   LMsg: string;
 begin
-  Subscriber := TSubscriber.Create;
+  TEventBus.GetDefault.RegisterSubscriber(Subscriber);
+  LEvent := TEventBusEvent.Create;
+  LMsg := 'TestSimplePost';
+  LEvent.Msg := LMsg;
+  TEventBus.GetDefault.Post(LEvent);
+  Assert.AreEqual(LMsg, Subscriber.LastEvent.Msg);
+end;
+
+procedure TEventBusTest.TestRegisterUnregister;
+var
+  LRaisedException: Boolean;
+begin
+  LRaisedException := false;
+  TEventBus.GetDefault.RegisterSubscriber(Subscriber);
   try
-    TEventBus.GetDefault.RegisterSubscriber(Subscriber);
-    LEvent := TEventBusEvent.Create;
-    try
-      LMsg := 'TestSimplePost';
-      LEvent.Msg := LMsg;
-      TEventBus.GetDefault.Post(LEvent);
-      Assert.AreEqual(LMsg, Subscriber.LastEvent.Msg);
-    finally
-      LEvent.Free;
-    end;
-  finally
-    // Subscriber.Free;
+    TEventBus.GetDefault.Unregister(Subscriber);
+  except
+    on E: Exception do
+      LRaisedException := true;
   end;
+  Assert.IsFalse(LRaisedException);
+end;
+
+procedure TEventBusTest.TestIsRegisteredFalseAfterUnregister;
+begin
+  TEventBus.GetDefault.RegisterSubscriber(Subscriber);
+  Assert.IsTrue(TEventBus.GetDefault.IsRegistered(Subscriber));
+end;
+
+procedure TEventBusTest.TestIsRegisteredTrueAfterRegister;
+begin
+  TEventBus.GetDefault.RegisterSubscriber(Subscriber);
+  TEventBus.GetDefault.Unregister(Subscriber);
+  Assert.IsFalse(TEventBus.GetDefault.IsRegistered(Subscriber));
+end;
+
+procedure TEventBusTest.TestPostOnMainThread;
+var
+  LEvent: TMainEvent;
+  LMsg: string;
+begin
+  TEventBus.GetDefault.RegisterSubscriber(Subscriber);
+  LEvent := TMainEvent.Create;
+  LMsg := 'TestPostOnMainThread';
+  LEvent.Msg := LMsg;
+  TEventBus.GetDefault.Post(LEvent);
+  Assert.AreEqual(LMsg, Subscriber.LastEvent.Msg);
+  Assert.AreEqual(MainThreadID, Subscriber.LastEventThreadID);
 end;
 
 procedure TEventBusTest.TestAsyncPost;
@@ -52,73 +89,21 @@ var
   LMsg: string;
   LEvt: TEvent;
 begin
-  Subscriber := TSubscriber.Create;
+  TEventBus.GetDefault.RegisterSubscriber(Subscriber);
+  LEvent := TAsyncEvent.Create;
+  LMsg := 'TestAsyncPost';
+  LEvent.Msg := LMsg;
+  LEvt := TEvent.Create;
   try
-    TEventBus.GetDefault.RegisterSubscriber(Subscriber);
-    LEvent := TAsyncEvent.Create;
-    try
-      LMsg := 'TestAsyncPost';
-      LEvent.Msg := LMsg;
-      LEvt := TEvent.Create;
-      try
-        LEvent.Event := LEvt;
-        TEventBus.GetDefault.Post(LEvent);
-        // attend for max 5 seconds
-        Assert.IsTrue(TWaitResult.wrSignaled = LEvt.WaitFor(5000),
-          'Timeout request');
-        Assert.AreEqual(LMsg, Subscriber.LastEvent.Msg);
-        Assert.AreNotEqual(MainThreadID, Subscriber.LastEventThreadID);
-      finally
-        LEvt.Free;
-      end;
-    finally
-      LEvent.Free;
-    end;
+    LEvent.Event := LEvt;
+    TEventBus.GetDefault.Post(LEvent);
+    // attend for max 5 seconds
+    Assert.IsTrue(TWaitResult.wrSignaled = LEvt.WaitFor(5000),
+      'Timeout request');
+    Assert.AreEqual(LMsg, Subscriber.LastEvent.Msg);
+    Assert.AreNotEqual(MainThreadID, Subscriber.LastEventThreadID);
   finally
-    // Subscriber.Free;
-  end;
-end;
-
-procedure TEventBusTest.TestPostOnMainThread;
-var
-  LEvent: TMainEvent;
-  LMsg: string;
-begin
-  Subscriber := TSubscriber.Create;
-  try
-    TEventBus.GetDefault.RegisterSubscriber(Subscriber);
-    LEvent := TMainEvent.Create;
-    try
-      LMsg := 'TestPostOnMainThread';
-      LEvent.Msg := LMsg;
-      TEventBus.GetDefault.Post(LEvent);
-      Assert.AreEqual(LMsg, Subscriber.LastEvent.Msg);
-      Assert.AreEqual(MainThreadID, Subscriber.LastEventThreadID);
-    finally
-      LEvent.Free;
-    end;
-  finally
-    // Subscriber.Free;
-  end;
-end;
-
-procedure TEventBusTest.TestRegisterUnregister;
-var
-  LRaisedException: Boolean;
-begin
-  LRaisedException := false;
-  Subscriber := TSubscriber.Create;
-  try
-    TEventBus.GetDefault.RegisterSubscriber(Subscriber);
-    try
-      TEventBus.GetDefault.Unregister(Subscriber);
-    except
-      on E: Exception do
-        LRaisedException := true;
-    end;
-    Assert.IsFalse(LRaisedException);
-  finally
-    // Subscriber.Free;
+    LEvt.Free;
   end;
 end;
 

@@ -23,27 +23,6 @@ uses
 
 type
 
-  TPostingThreadState = class(TObject)
-  private
-    FIsMainThread: Boolean;
-    FCanceled: Boolean;
-    FSubscription: TSubscription;
-    FEvent: TObject;
-    FIsPosting: Boolean;
-    procedure SetCanceled(const Value: Boolean);
-    procedure SetEvent(const Value: TObject);
-    procedure SetIsMainThread(const Value: Boolean);
-    procedure SetIsPosting(const Value: Boolean);
-    procedure SetSubscription(const Value: TSubscription);
-  public
-    property IsPosting: Boolean read FIsPosting write SetIsPosting;
-    property IsMainThread: Boolean read FIsMainThread write SetIsMainThread;
-    property Subscription: TSubscription read FSubscription
-      write SetSubscription;
-    property Event: TObject read FEvent write SetEvent;
-    property Canceled: Boolean read FCanceled write SetCanceled;
-  end;
-
   TEventBus = class(TObject)
   private
   class var
@@ -55,7 +34,6 @@ type
     procedure Subscribe(ASubscriber: TObject;
       ASubscriberMethod: TSubscriberMethod);
     procedure UnsubscribeByEventType(ASubscriber: TObject; AEventType: TClass);
-    procedure PostSingleEvent(APostingState: TPostingThreadState);
     procedure PostToSubscription(ASubscription: TSubscription; AEvent: TObject;
       AIsMainThread: Boolean);
     procedure InvokeSubscriber(ASubscription: TSubscription; AEvent: TObject);
@@ -65,7 +43,7 @@ type
     procedure RegisterSubscriber(ASubscriber: TObject);
     function IsRegistered(ASubscriber: TObject): Boolean;
     procedure Unregister(ASubscriber: TObject);
-    procedure Post(AEvent: TObject);
+    procedure Post(AEvent: TObject; AEventOwner: Boolean = true);
     class function GetDefault: TEventBus;
   end;
 
@@ -84,7 +62,7 @@ begin
   FSubscriptionsByEventType := TObjectDictionary < TClass,
     TObjectList < TSubscription >>.Create([doOwnsValues]);
   FTypesBySubscriber := TObjectDictionary < TObject,
-    TList < TClass >>.Create([doOwnsKeys, doOwnsValues]);
+    TList < TClass >>.Create([doOwnsValues]);
 end;
 
 destructor TEventBus.Destroy;
@@ -130,65 +108,42 @@ begin
   end;
 end;
 
-procedure TEventBus.Post(AEvent: TObject);
-var
-  LPostingState: TPostingThreadState;
-  LElement: TObject;
-begin
-  LPostingState := TPostingThreadState.Create;
-  try
-    LPostingState.IsMainThread := TThread.CurrentThread.ThreadID = MainThreadID;
-    LPostingState.IsPosting := true;
-    LPostingState.Event := AEvent;
-    try
-      PostSingleEvent(LPostingState);
-    finally
-      LPostingState.IsPosting := false;
-      LPostingState.IsMainThread := false;
-    end;
-  finally
-    LPostingState.Free;
-  end;
-end;
-
-procedure TEventBus.PostSingleEvent(APostingState: TPostingThreadState);
+procedure TEventBus.Post(AEvent: TObject; AEventOwner: Boolean = true);
 var
   LSubscriptions: TObjectList<TSubscription>;
   LSubscription: TSubscription;
-  LAborted: Boolean;
   LEvent: TObject;
+  LIsMainThread: Boolean;
 begin
-  LEvent := APostingState.Event;
-  TMonitor.Enter(FSubscriptionsByEventType);
   try
-    FSubscriptionsByEventType.TryGetValue(LEvent.ClassType, LSubscriptions);
-  finally
-    TMonitor.Exit(FSubscriptionsByEventType);
-  end;
+    LIsMainThread := MainThreadID = TThread.CurrentThread.ThreadID;
+    LEvent := TRTTIUtils.Clone(AEvent);
 
-  if (not Assigned(LSubscriptions)) then
-    Exit;
-
-  for LSubscription in LSubscriptions do
-  begin
-    APostingState.Subscription := LSubscription;
-    LAborted := false;
+    TMonitor.Enter(FSubscriptionsByEventType);
     try
-      PostToSubscription(LSubscription, LEvent, APostingState.IsMainThread);
-      LAborted := APostingState.Canceled;
+      FSubscriptionsByEventType.TryGetValue(LEvent.ClassType, LSubscriptions);
     finally
-      APostingState.Event := nil;
-      APostingState.Subscription := nil;
-      APostingState.Canceled := false;
+      TMonitor.Exit(FSubscriptionsByEventType);
     end;
-    if (LAborted) then
-      break;
+
+    if (not Assigned(LSubscriptions)) then
+      Exit;
+
+    for LSubscription in LSubscriptions do
+      PostToSubscription(LSubscription, LEvent, LIsMainThread);
+  finally
+    if (AEventOwner and Assigned(AEvent)) then
+      AEvent.Free;
   end;
 end;
 
 procedure TEventBus.PostToSubscription(ASubscription: TSubscription;
   AEvent: TObject; AIsMainThread: Boolean);
 begin
+
+  if not Assigned(ASubscription.Subscriber) then
+    Exit;
+
   case ASubscription.SubscriberMethod.ThreadMode of
     Posting:
       InvokeSubscriber(ASubscription, AEvent);
@@ -263,7 +218,7 @@ begin
 
   LSubscriptions.Add(LNewSubscription);
 
-  if (not FTypesBySubscriber.ContainsKey(ASubscriber)) then
+  if (not FTypesBySubscriber.TryGetValue(ASubscriber, LSubscribedEvents)) then
   begin
     LSubscribedEvents := TList<TClass>.Create;
     FTypesBySubscriber.Add(ASubscriber, LSubscribedEvents);
@@ -302,44 +257,16 @@ var
   LSubscription: TSubscription;
 begin
   LSubscriptions := FSubscriptionsByEventType.Items[AEventType];
-  if (Assigned(LSubscriptions)) then
+  if (not Assigned(LSubscriptions)) or (LSubscriptions.Count < 1) then
+    Exit;
+  LSize := LSubscriptions.Count;
+  for I := LSize - 1 downto 0 do
   begin
-    LSize := LSubscriptions.Count;
-    for I := LSize - 1 downto 0 do
-    begin
-      LSubscription := LSubscriptions[I];
-      if (LSubscription.Subscriber.Equals(ASubscriber)) then
-        LSubscription.Active := false;
-      LSubscriptions.Delete(I);
-    end;
+    LSubscription := LSubscriptions[I];
+    if (LSubscription.Subscriber.Equals(ASubscriber)) then
+      LSubscription.Active := false;
+    LSubscriptions.Delete(I);
   end;
-end;
-
-{ TPostingThreadState }
-
-procedure TPostingThreadState.SetCanceled(const Value: Boolean);
-begin
-  FCanceled := Value;
-end;
-
-procedure TPostingThreadState.SetEvent(const Value: TObject);
-begin
-  FEvent := Value;
-end;
-
-procedure TPostingThreadState.SetIsMainThread(const Value: Boolean);
-begin
-  FIsMainThread := Value;
-end;
-
-procedure TPostingThreadState.SetIsPosting(const Value: Boolean);
-begin
-  FIsPosting := Value;
-end;
-
-procedure TPostingThreadState.SetSubscription(const Value: TSubscription);
-begin
-  FSubscription := Value;
 end;
 
 initialization
