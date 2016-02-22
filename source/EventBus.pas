@@ -157,10 +157,6 @@ begin
             ASubscription.SubscriberMethod.Method.Invoke
               (ASubscription.Subscriber, [AEvent]);
           end);
-    Background:
-      if (AIsMainThread) then // backgroundPoster.enqueue(subscription, event);
-      else
-        InvokeSubscriber(ASubscription, AEvent);
     Async:
       TTask.Run(
         procedure

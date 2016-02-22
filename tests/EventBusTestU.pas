@@ -19,6 +19,8 @@ type
     [Test]
     procedure TestSimplePost;
     [Test]
+    procedure TestSimplePostOnBackgroundThread;
+    [Test]
     procedure TestAsyncPost;
     [Test]
     procedure TestPostOnMainThread;
@@ -26,7 +28,8 @@ type
 
 implementation
 
-uses EventBus, BOs, System.SyncObjs, System.SysUtils;
+uses EventBus, BOs, System.SyncObjs, System.SysUtils, System.Threading,
+  System.Classes;
 
 procedure TEventBusTest.TestSimplePost;
 var
@@ -39,6 +42,23 @@ begin
   LEvent.Msg := LMsg;
   TEventBus.GetDefault.Post(LEvent);
   Assert.AreEqual(LMsg, Subscriber.LastEvent.Msg);
+end;
+
+procedure TEventBusTest.TestSimplePostOnBackgroundThread;
+var
+  LEvent: TEventBusEvent;
+begin
+  TEventBus.GetDefault.RegisterSubscriber(Subscriber);
+  LEvent := TEventBusEvent.Create;
+  TTask.Run(
+    procedure
+    begin
+      TEventBus.GetDefault.Post(LEvent);
+    end);
+  // attend for max 5 seconds
+  Assert.IsTrue(TWaitResult.wrSignaled = Subscriber.Event.WaitFor(5000),
+    'Timeout request');
+  Assert.AreNotEqual(MainThreadID, Subscriber.LastEventThreadID);
 end;
 
 procedure TEventBusTest.TestRegisterUnregister;
@@ -88,7 +108,6 @@ var
   LEvent: TAsyncEvent;
   LMsg: string;
 begin
-  Subscriber.Event := TEvent.Create;
   TEventBus.GetDefault.RegisterSubscriber(Subscriber);
   LEvent := TAsyncEvent.Create;
   LMsg := 'TestAsyncPost';

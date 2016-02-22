@@ -32,6 +32,7 @@ type
     procedure SetLastEventThreadID(const Value: cardinal);
     procedure SetEvent(const Value: TEvent);
   public
+    constructor Create;
     destructor Destroy; override;
     property LastEvent: TEventBusEvent read FLastEvent write SetLastEvent;
     property LastEventThreadID: cardinal read FLastEventThreadID
@@ -54,6 +55,12 @@ uses
   System.Classes, EventBus;
 
 { TBaseSubscriber }
+
+constructor TBaseSubscriber.Create;
+begin
+  inherited Create;
+  FEvent := TEvent.Create;
+end;
 
 destructor TBaseSubscriber.Destroy;
 begin
@@ -92,6 +99,8 @@ end;
 procedure TSubscriber.OnSimpleEvent(AEvent: TEventBusEvent);
 begin
   LastEvent := AEvent;
+  LastEventThreadID := TThread.CurrentThread.ThreadID;
+  Event.SetEvent;
 end;
 
 procedure TSubscriber.OnSimpleMainEvent(AEvent: TMainEvent);
