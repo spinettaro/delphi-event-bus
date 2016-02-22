@@ -66,6 +66,7 @@ begin
   AniIndicator1.Enabled := false;
   Button1.Enabled := true;
   ShowMessage(AEvent.Msg);
+  AEvent.Free;
 end;
 
 end.

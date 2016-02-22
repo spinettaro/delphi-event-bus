@@ -117,11 +117,10 @@ var
 begin
   try
     LIsMainThread := MainThreadID = TThread.CurrentThread.ThreadID;
-    LEvent := TRTTIUtils.Clone(AEvent);
 
     TMonitor.Enter(FSubscriptionsByEventType);
     try
-      FSubscriptionsByEventType.TryGetValue(LEvent.ClassType, LSubscriptions);
+      FSubscriptionsByEventType.TryGetValue(AEvent.ClassType, LSubscriptions);
     finally
       TMonitor.Exit(FSubscriptionsByEventType);
     end;
@@ -130,7 +129,10 @@ begin
       Exit;
 
     for LSubscription in LSubscriptions do
+    begin
+      LEvent := TRTTIUtils.Clone(AEvent);
       PostToSubscription(LSubscription, LEvent, LIsMainThread);
+    end;
   finally
     if (AEventOwner and Assigned(AEvent)) then
       AEvent.Free;

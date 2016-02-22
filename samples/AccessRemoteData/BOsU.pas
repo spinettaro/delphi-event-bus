@@ -68,8 +68,9 @@ end;
 procedure TRemoteProxy.DoLogin(ADoLoginEvent: TDoLoginEvent);
 begin
   // simulate an http request for 5 seconds
-  TThread.Sleep(5000);
+  TThread.Sleep(3000);
   TEventBus.GetDefault.Post(TOnLoginEvent.Create(true, 'Login ok'));
+  ADoLoginEvent.Free;
 end;
 
 class function TRemoteProxy.GetDefault: TRemoteProxy;

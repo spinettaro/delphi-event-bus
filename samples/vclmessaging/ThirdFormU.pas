@@ -40,6 +40,7 @@ procedure TfrmThird.OnMemoChange(AEvent: TMemoChangeEvent);
 begin
   FMessage := AEvent.Text;
   PaintBox1.Repaint;
+  AEvent.Free;
 end;
 
 procedure TfrmThird.PaintBox1Paint(Sender: TObject);

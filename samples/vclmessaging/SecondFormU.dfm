@@ -28,7 +28,6 @@ object frmSecond: TfrmSecond
     ParentFont = False
     ReadOnly = True
     TabOrder = 0
-    ExplicitHeight = 172
   end
   object Panel1: TPanel
     Left = 0
@@ -73,8 +72,5 @@ object frmSecond: TfrmSecond
     Caption = 'Register/Unregister'
     TabOrder = 2
     OnClick = CheckBox2Click
-    ExplicitLeft = 248
-    ExplicitTop = 192
-    ExplicitWidth = 97
   end
 end

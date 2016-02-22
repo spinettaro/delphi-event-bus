@@ -46,11 +46,13 @@ end;
 procedure TfrmSecond.OnCheckBoxChange(AEvent: TCheckBoxEvent);
 begin
   CheckBox1.Checked := AEvent.Checked;
+  AEvent.Free;
 end;
 
 procedure TfrmSecond.OnMemoChange(AEvent: TMemoChangeEvent);
 begin
   MemoObserver.Lines.Text := AEvent.Text;
+  AEvent.Free;
 end;
 
 end.
