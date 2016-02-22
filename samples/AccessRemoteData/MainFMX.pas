@@ -51,7 +51,7 @@ end;
 
 procedure THeaderFooterForm.FormCreate(Sender: TObject);
 begin
-  // register the subscriber
+  // register subscribers
   TEventBus.GetDefault.RegisterSubscriber(Self);
   TEventBus.GetDefault.RegisterSubscriber(TRemoteProxy.GetDefault);
 end;
