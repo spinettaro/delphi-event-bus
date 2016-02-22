@@ -51,7 +51,6 @@ end;
 
 procedure THeaderFooterForm.FormCreate(Sender: TObject);
 begin
-  Text1.Text := 'Delphi' + sLineBreak + 'Event' + sLineBreak + 'Bus';
   // register the subscriber
   TEventBus.GetDefault.RegisterSubscriber(Self);
   TEventBus.GetDefault.RegisterSubscriber(TRemoteProxy.GetDefault);

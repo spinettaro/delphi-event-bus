@@ -45,6 +45,8 @@ object HeaderFooterForm: THeaderFooterForm
       StyleLookup = ''
       TabOrder = 0
       Text = 'TabItem1'
+      ExplicitSize.cx = 8.000000000000000000
+      ExplicitSize.cy = 8.000000000000000000
       object GridPanelLayout1: TGridPanelLayout
         Align = Client
         Size.Width = 384.000000000000000000
@@ -56,7 +58,7 @@ object HeaderFooterForm: THeaderFooterForm
             Value = 9.785596288102472000
           end
           item
-            Value = 80.211974132343550000
+            Value = 80.211974132343560000
           end
           item
             Value = 10.002429579553980000
@@ -120,7 +122,7 @@ object HeaderFooterForm: THeaderFooterForm
           Touch.InteractiveGestures = [LongTap, DoubleTap]
           Align = Client
           TabOrder = 0
-          Size.Width = 308.013977050781200000
+          Size.Width = 308.013977050781300000
           Size.Height = 32.000000000000000000
           Size.PlatformDefault = False
           TextPrompt = 'Username...'
@@ -130,15 +132,15 @@ object HeaderFooterForm: THeaderFooterForm
           Align = Client
           TabOrder = 1
           Password = True
-          Size.Width = 308.013977050781200000
+          Size.Width = 308.013977050781300000
           Size.Height = 32.000000000000000000
           Size.PlatformDefault = False
           TextPrompt = 'Password...'
         end
         object Button1: TButton
           Align = Client
-          Size.Width = 308.013977050781200000
-          Size.Height = 32.608428955078120000
+          Size.Width = 308.013977050781300000
+          Size.Height = 32.608428955078130000
           Size.PlatformDefault = False
           TabOrder = 2
           Text = 'Login'
@@ -146,17 +148,17 @@ object HeaderFooterForm: THeaderFooterForm
         end
         object AniIndicator1: TAniIndicator
           Align = Client
-          Size.Width = 308.013977050781200000
+          Size.Width = 308.013977050781300000
           Size.Height = 32.608459472656250000
           Size.PlatformDefault = False
         end
         object Text1: TText
           Align = Client
-          Size.Width = 308.013977050781200000
+          Size.Width = 308.013977050781300000
           Size.Height = 258.132537841796900000
           Size.PlatformDefault = False
           Stretch = True
-          Text = 'Delphi Event Bus'
+          Text = 'D.E.B.'
           TextSettings.Trimming = Word
         end
       end
