@@ -21,9 +21,14 @@ type
     TabControl1: TTabControl;
     Text1: TText;
     TabItem1: TTabItem;
+    TabItem2: TTabItem;
+    GridPanelLayout2: TGridPanelLayout;
+    Button2: TButton;
+    Text2: TText;
     procedure Button1Click(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
+    procedure Button2Click(Sender: TObject);
   private
     { Private declarations }
   public
@@ -49,8 +54,14 @@ begin
   TEventBus.GetDefault.Post(TDoLoginEvent.Create(Edit1.Text, Edit2.Text));
 end;
 
+procedure THeaderFooterForm.Button2Click(Sender: TObject);
+begin
+  TabControl1.SetActiveTabWithTransition(TabItem1, TTabTransition.None);
+end;
+
 procedure THeaderFooterForm.FormCreate(Sender: TObject);
 begin
+  TabControl1.ActiveTab := TabItem1;
   // register subscribers
   TEventBus.GetDefault.RegisterSubscriber(Self);
   TEventBus.GetDefault.RegisterSubscriber(TRemoteProxy.GetDefault);
@@ -65,7 +76,8 @@ procedure THeaderFooterForm.OnAfterLogin(AEvent: TOnLoginEvent);
 begin
   AniIndicator1.Enabled := false;
   Button1.Enabled := true;
-  ShowMessage(AEvent.Msg);
+  Text2.Text := 'Welcome' + sLineBreak + Edit1.Text;
+  TabControl1.SetActiveTabWithTransition(TabItem2, TTabTransition.Slide);
   AEvent.Free;
 end;
 

@@ -22,7 +22,7 @@ object HeaderFooterForm: THeaderFooterForm
       Size.PlatformDefault = False
       StyleLookup = 'toollabel'
       TextSettings.HorzAlign = Center
-      Text = 'Login Page'
+      Text = 'DEB - Delphi Event Bus'
     end
   end
   object TabControl1: TTabControl
@@ -31,14 +31,14 @@ object HeaderFooterForm: THeaderFooterForm
     Size.Height = 519.000000000000000000
     Size.PlatformDefault = False
     TabHeight = 49.000000000000000000
-    TabIndex = 0
+    TabIndex = 1
     TabOrder = 2
     TabPosition = None
     object TabItem1: TTabItem
       CustomIcon = <
         item
         end>
-      IsSelected = True
+      IsSelected = False
       Size.Width = 8.000000000000000000
       Size.Height = 8.000000000000000000
       Size.PlatformDefault = False
@@ -94,28 +94,28 @@ object HeaderFooterForm: THeaderFooterForm
             Value = 49.736522464674410000
           end
           item
-            Value = 6.282934691915697000
+            Value = 6.282934691915696000
           end
           item
-            Value = 6.282934691915697000
+            Value = 6.282934691915696000
           end
           item
-            Value = 6.282934691915697000
+            Value = 6.282934691915696000
           end
           item
-            Value = 6.282934691915697000
+            Value = 6.282934691915696000
           end
           item
-            Value = 6.282934691915697000
+            Value = 6.282934691915696000
           end
           item
-            Value = 6.282934691915697000
+            Value = 6.282934691915696000
           end
           item
-            Value = 6.282934691915697000
+            Value = 6.282934691915696000
           end
           item
-            Value = 6.282934691915697000
+            Value = 6.282934691915696000
           end>
         object Edit1: TEdit
           Hint = 'Username'
@@ -159,6 +159,92 @@ object HeaderFooterForm: THeaderFooterForm
           Size.PlatformDefault = False
           Stretch = True
           Text = 'D.E.B.'
+          TextSettings.Trimming = Word
+        end
+      end
+    end
+    object TabItem2: TTabItem
+      CustomIcon = <
+        item
+        end>
+      IsSelected = True
+      Size.Width = 8.000000000000000000
+      Size.Height = 8.000000000000000000
+      Size.PlatformDefault = False
+      StyleLookup = ''
+      TabOrder = 0
+      Text = 'TabItem2'
+      object GridPanelLayout2: TGridPanelLayout
+        Align = Client
+        Size.Width = 384.000000000000000000
+        Size.Height = 519.000000000000000000
+        Size.PlatformDefault = False
+        TabOrder = 0
+        ColumnCollection = <
+          item
+            Value = 9.785596288102472000
+          end
+          item
+            Value = 80.211974132343560000
+          end
+          item
+            Value = 10.002429579553980000
+          end>
+        ControlCollection = <
+          item
+            Column = 1
+            Control = Button2
+            Row = 6
+          end
+          item
+            Column = 1
+            Control = Text2
+            Row = 0
+          end>
+        RowCollection = <
+          item
+            Value = 49.736522464674410000
+          end
+          item
+            Value = 6.282934691915696000
+          end
+          item
+            Value = 6.282934691915696000
+          end
+          item
+            Value = 6.282934691915696000
+          end
+          item
+            Value = 6.282934691915696000
+          end
+          item
+            Value = 6.282934691915696000
+          end
+          item
+            Value = 6.282934691915696000
+          end
+          item
+            Value = 6.282934691915696000
+          end
+          item
+            Value = 6.282934691915696000
+          end>
+        object Button2: TButton
+          Align = Client
+          Size.Width = 308.013977050781300000
+          Size.Height = 32.608428955078130000
+          Size.PlatformDefault = False
+          TabOrder = 0
+          Text = 'Logout'
+          OnClick = Button2Click
+        end
+        object Text2: TText
+          Align = Client
+          Size.Width = 308.013977050781300000
+          Size.Height = 258.132537841796900000
+          Size.PlatformDefault = False
+          Stretch = True
+          Text = 'Welcome'
           TextSettings.Trimming = Word
         end
       end
