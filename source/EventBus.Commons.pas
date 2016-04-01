@@ -20,7 +20,7 @@ interface
 
 type
 
-  TThreadMode = (Posting, Main, Async);
+  TThreadMode = (Posting, Main, Async, Background);
 
 implementation
 

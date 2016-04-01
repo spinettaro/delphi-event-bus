@@ -6,9 +6,9 @@ program DelphiEventBusTests;
 
 uses
   SysUtils,
-{$IFDEF TESTINSIGHT}
+  {$IFDEF TESTINSIGHT}
   TestInsight.DUnitX,
-{$ENDIF }
+  {$ENDIF }
   DUnitX.Loggers.Console,
   DUnitX.Loggers.Xml.NUnit,
   DUnitX.TestFramework,

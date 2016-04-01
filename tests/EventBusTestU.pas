@@ -24,6 +24,10 @@ type
     procedure TestAsyncPost;
     [Test]
     procedure TestPostOnMainThread;
+    [Test]
+    procedure TestBackgroundPost;
+    [Test]
+    procedure TestBackgroundsPost;
   end;
 
 implementation
@@ -74,6 +78,45 @@ begin
       LRaisedException := true;
   end;
   Assert.IsFalse(LRaisedException);
+end;
+
+procedure TEventBusTest.TestBackgroundPost;
+var
+  LEvent: TBackgroundEvent;
+  LMsg: string;
+begin
+  TEventBus.GetDefault.RegisterSubscriber(Subscriber);
+  LEvent := TBackgroundEvent.Create;
+  LMsg := 'TestBackgroundPost';
+  LEvent.Msg := LMsg;
+  TEventBus.GetDefault.Post(LEvent);
+  // attend for max 5 seconds
+  Assert.IsTrue(TWaitResult.wrSignaled = Subscriber.Event.WaitFor(5000),
+    'Timeout request');
+  Assert.AreEqual(LMsg, Subscriber.LastEvent.Msg);
+  Assert.AreNotEqual(MainThreadID, Subscriber.LastEventThreadID);
+end;
+
+procedure TEventBusTest.TestBackgroundsPost;
+var
+  LEvent: TBackgroundEvent;
+  LMsg: string;
+  I: Integer;
+begin
+  TEventBus.GetDefault.RegisterSubscriber(Subscriber);
+  for I := 0 to 10 do
+  begin
+    LEvent := TBackgroundEvent.Create;
+    LMsg := 'TestBackgroundPost';
+    LEvent.Msg := LMsg;
+    LEvent.Count := I;
+    TEventBus.GetDefault.Post(LEvent);
+  end;
+  // attend for max 2 seconds
+  for I := 0 to 20 do
+    TThread.Sleep(100);
+
+  Assert.AreEqual(10, TBackgroundEvent(Subscriber.LastEvent).Count);
 end;
 
 procedure TEventBusTest.TestIsRegisteredFalseAfterUnregister;

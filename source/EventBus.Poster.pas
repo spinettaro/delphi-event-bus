@@ -18,19 +18,102 @@ unit EventBus.Poster;
 
 interface
 
-uses EventBus.Interfaces;
+uses EventBus.Interfaces, System.SysUtils, System.Generics.Collections,
+  System.SyncObjs;
 
-{type
+type
 
-  TAsyncPoster = class(TInterfacedObject, IRunnable)
+  TBackgroundPoster = class(TObject)
+  private
+    FisRunning: boolean;
+    FCS: TCriticalSection;
+    procedure SetisRunning(const Value: boolean);
+  protected
+    FQueue: TThreadedQueue<TProc>;
+    procedure Run;
+    property isRunning: boolean read FisRunning write SetisRunning;
+  public
+    constructor Create();
+    destructor Destroy; override;
+    procedure Enqueue(AProc: TProc);
   end;
 
-  TBackgroundPoster = class(TInterfacedObject, IRunnable)
-  end;
+  {
+    TAsyncPoster = class(TInterfacedObject, IRunnable)
+    end;
 
-  TMainThreadPoster = class(TInterfacedObject, IRunnable)
-  end;   }
+
+    TMainThreadPoster = class(TInterfacedObject, IRunnable)
+    end; }
 
 implementation
+
+uses
+  System.Threading, System.Classes;
+
+{ TBackgroundPoster }
+
+constructor TBackgroundPoster.Create();
+begin
+  inherited Create;
+  FQueue := TThreadedQueue<TProc>.Create(20, 10, 10);
+  FCS := TCriticalSection.Create;
+end;
+
+destructor TBackgroundPoster.Destroy;
+begin
+  if Assigned(FQueue) then
+    FQueue.Free;
+  if Assigned(FCS) then
+    FCS.Free;
+  inherited;
+end;
+
+procedure TBackgroundPoster.Enqueue(AProc: TProc);
+var
+  LTask: ITask;
+begin
+  FQueue.PushItem(AProc);
+  if not isRunning then
+  begin
+    isRunning := true;
+    LTask := TTask.Run(self.Run);
+    LTask.Wait;
+  end;
+end;
+
+procedure TBackgroundPoster.Run;
+var
+  LItem: TProc;
+  LWaitResult: TWaitResult;
+begin
+  try
+    try
+      while true do
+      begin
+        LWaitResult := FQueue.PopItem(LItem);
+        if LWaitResult <> TWaitResult.wrSignaled then
+          exit;
+        if Assigned(LItem) then
+          LItem();
+      end;
+    except
+      on E: Exception do
+        { TODO -ospinettaro : Implement Logger }
+    end;
+  finally
+    isRunning := false;
+  end;
+end;
+
+procedure TBackgroundPoster.SetisRunning(const Value: boolean);
+begin
+  FCS.Acquire;
+  try
+    FisRunning := Value;
+  finally
+    FCS.Release;
+  end;
+end;
 
 end.

@@ -19,7 +19,8 @@ unit EventBus;
 interface
 
 uses
-  System.SyncObjs, EventBus.Subscribers, Generics.Collections;
+  System.SyncObjs, EventBus.Subscribers, Generics.Collections, EventBus.Poster,
+  System.SysUtils, System.Classes;
 
 type
 
@@ -31,12 +32,17 @@ type
     FSubscriptionsByEventType
       : TObjectDictionary<TClass, TObjectList<TSubscription>>;
     FTypesBySubscriber: TObjectDictionary<TObject, TList<TClass>>;
+    FBckPoster: TBackgroundPoster;
     procedure Subscribe(ASubscriber: TObject;
       ASubscriberMethod: TSubscriberMethod);
     procedure UnsubscribeByEventType(ASubscriber: TObject; AEventType: TClass);
     procedure PostToSubscription(ASubscription: TSubscription; AEvent: TObject;
       AIsMainThread: Boolean);
     procedure InvokeSubscriber(ASubscription: TSubscription; AEvent: TObject);
+    function GenerateTProc(ASubscription: TSubscription;
+      AEvent: TObject): TProc;
+    function GenerateThreadProc(ASubscription: TSubscription; AEvent: TObject)
+      : TThreadProcedure;
   public
     constructor Create();
     destructor Destroy; override;
@@ -50,8 +56,8 @@ type
 implementation
 
 uses
-  System.Rtti, System.Messaging, EventBus.Attributes, System.SysUtils,
-  System.Classes, EventBus.Commons, RttiUtilsU, System.Threading;
+  System.Rtti, System.Messaging, EventBus.Attributes, EventBus.Commons,
+  RttiUtilsU, System.Threading;
 
 { TEventBus }
 
@@ -63,6 +69,7 @@ begin
     TObjectList < TSubscription >>.Create([doOwnsValues]);
   FTypesBySubscriber := TObjectDictionary < TObject,
     TList < TClass >>.Create([doOwnsValues]);
+  FBckPoster := TBackgroundPoster.Create;
 end;
 
 destructor TEventBus.Destroy;
@@ -70,6 +77,7 @@ begin
   FreeAndNil(FCS);
   FreeAndNil(FSubscriptionsByEventType);
   FreeAndNil(FTypesBySubscriber);
+  FreeAndNil(FBckPoster);
   inherited;
 end;
 
@@ -89,6 +97,26 @@ begin
   finally
     LCS.Free;
   end;
+end;
+
+function TEventBus.GenerateThreadProc(ASubscription: TSubscription;
+  AEvent: TObject): TThreadProcedure;
+begin
+  Result := procedure
+    begin
+      ASubscription.SubscriberMethod.Method.Invoke(ASubscription.Subscriber,
+        [AEvent]);
+    end;
+end;
+
+function TEventBus.GenerateTProc(ASubscription: TSubscription;
+  AEvent: TObject): TProc;
+begin
+  Result := procedure
+    begin
+      ASubscription.SubscriberMethod.Method.Invoke(ASubscription.Subscriber,
+        [AEvent]);
+    end;
 end;
 
 procedure TEventBus.InvokeSubscriber(ASubscription: TSubscription;
@@ -153,19 +181,14 @@ begin
       if (AIsMainThread) then
         InvokeSubscriber(ASubscription, AEvent)
       else
-        TThread.Queue(nil,
-          procedure
-          begin
-            ASubscription.SubscriberMethod.Method.Invoke
-              (ASubscription.Subscriber, [AEvent]);
-          end);
+        TThread.Queue(nil, GenerateThreadProc(ASubscription, AEvent));
+    Background:
+      if (AIsMainThread) then
+        FBckPoster.Enqueue(GenerateTProc(ASubscription, AEvent))
+      else
+        InvokeSubscriber(ASubscription, AEvent);
     Async:
-      TTask.Run(
-        procedure
-        begin
-          ASubscription.SubscriberMethod.Method.Invoke(ASubscription.Subscriber,
-            [AEvent]);
-        end);
+      TTask.Run(GenerateTProc(ASubscription, AEvent));
   else
     raise Exception.Create('Unknown thread mode');
   end;
@@ -191,7 +214,7 @@ begin
 end;
 
 procedure TEventBus.Subscribe(ASubscriber: TObject;
-ASubscriberMethod: TSubscriberMethod);
+  ASubscriberMethod: TSubscriberMethod);
 var
   LEventType: TClass;
   LNewSubscription: TSubscription;
@@ -247,7 +270,7 @@ begin
 end;
 
 procedure TEventBus.UnsubscribeByEventType(ASubscriber: TObject;
-AEventType: TClass);
+  AEventType: TClass);
 var
   LSubscriptions: TObjectList<TSubscription>;
   LSize, I: Integer;

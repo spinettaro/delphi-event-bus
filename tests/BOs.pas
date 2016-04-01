@@ -23,6 +23,14 @@ type
 
   end;
 
+  TBackgroundEvent = class(TEventBusEvent)
+  private
+    FCount: integer;
+    procedure SetCount(const Value: integer);
+  public
+    property Count: integer read FCount write SetCount;
+  end;
+
   TBaseSubscriber = class(TObject)
   private
     FLastEvent: TEventBusEvent;
@@ -47,6 +55,8 @@ type
     procedure OnSimpleAsyncEvent(AEvent: TAsyncEvent);
     [Subscribe(TThreadMode.Main)]
     procedure OnSimpleMainEvent(AEvent: TMainEvent);
+    [Subscribe(TThreadMode.Background)]
+    procedure OnSimpleBackgroundEvent(AEvent: TBackgroundEvent);
   end;
 
 implementation
@@ -79,6 +89,8 @@ end;
 
 procedure TBaseSubscriber.SetLastEvent(const Value: TEventBusEvent);
 begin
+  if Assigned(FLastEvent) then
+    FLastEvent.Free;
   FLastEvent := Value;
 end;
 
@@ -90,6 +102,13 @@ end;
 { TSubscriber }
 
 procedure TSubscriber.OnSimpleAsyncEvent(AEvent: TAsyncEvent);
+begin
+  LastEvent := AEvent;
+  LastEventThreadID := TThread.CurrentThread.ThreadID;
+  Event.SetEvent;
+end;
+
+procedure TSubscriber.OnSimpleBackgroundEvent(AEvent: TBackgroundEvent);
 begin
   LastEvent := AEvent;
   LastEventThreadID := TThread.CurrentThread.ThreadID;
@@ -114,6 +133,13 @@ end;
 procedure TEventBusEvent.SetMsg(const Value: string);
 begin
   FMsg := Value;
+end;
+
+{ TBackgroundEvent }
+
+procedure TBackgroundEvent.SetCount(const Value: integer);
+begin
+  FCount := Value;
 end;
 
 end.
