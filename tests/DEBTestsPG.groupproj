@@ -1,0 +1,48 @@
+﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <PropertyGroup>
+        <ProjectGuid>{A1F1F9B4-3D64-4FAE-8910-D712676DFB26}</ProjectGuid>
+    </PropertyGroup>
+    <ItemGroup>
+        <Projects Include="DEBDUnitXTests.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="DEBDUnitTests.dproj">
+            <Dependencies/>
+        </Projects>
+    </ItemGroup>
+    <ProjectExtensions>
+        <Borland.Personality>Default.Personality.12</Borland.Personality>
+        <Borland.ProjectType/>
+        <BorlandProject>
+            <Default.Personality/>
+        </BorlandProject>
+    </ProjectExtensions>
+    <Target Name="DEBDUnitXTests">
+        <MSBuild Projects="DEBDUnitXTests.dproj"/>
+    </Target>
+    <Target Name="DEBDUnitXTests:Clean">
+        <MSBuild Projects="DEBDUnitXTests.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="DEBDUnitXTests:Make">
+        <MSBuild Projects="DEBDUnitXTests.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="DEBDUnitTests">
+        <MSBuild Projects="DEBDUnitTests.dproj"/>
+    </Target>
+    <Target Name="DEBDUnitTests:Clean">
+        <MSBuild Projects="DEBDUnitTests.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="DEBDUnitTests:Make">
+        <MSBuild Projects="DEBDUnitTests.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="Build">
+        <CallTarget Targets="DEBDUnitXTests;DEBDUnitTests"/>
+    </Target>
+    <Target Name="Clean">
+        <CallTarget Targets="DEBDUnitXTests:Clean;DEBDUnitTests:Clean"/>
+    </Target>
+    <Target Name="Make">
+        <CallTarget Targets="DEBDUnitXTests:Make;DEBDUnitTests:Make"/>
+    </Target>
+    <Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
+</Project>

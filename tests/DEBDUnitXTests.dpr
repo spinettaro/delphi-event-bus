@@ -1,4 +1,4 @@
-program DelphiEventBusTests;
+program DEBDUnitXTests;
 
 {$IFNDEF TESTINSIGHT}
 {$APPTYPE CONSOLE}
