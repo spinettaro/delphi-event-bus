@@ -56,8 +56,11 @@ type
 implementation
 
 uses
-  System.Rtti, System.Messaging, EventBus.Attributes, EventBus.Commons,
-  RttiUtilsU, System.Threading;
+  System.Rtti, EventBus.Attributes, EventBus.Commons,
+  {$IF CompilerVersion >= 28.0}
+  System.Threading,
+  {$ENDIF}
+  RttiUtilsU;
 
 { TEventBus }
 
@@ -188,7 +191,11 @@ begin
       else
         InvokeSubscriber(ASubscription, AEvent);
     Async:
+      {$IF CompilerVersion >= 28.0}
       TTask.Run(GenerateTProc(ASubscription, AEvent));
+      {$ELSE}
+      TThread.CreateAnonymousThread(GenerateTProc(ASubscription, AEvent)).Start;
+      {$ENDIF}
   else
     raise Exception.Create('Unknown thread mode');
   end;

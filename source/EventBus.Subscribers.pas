@@ -137,6 +137,7 @@ var
   LMethod: TRttiMethod;
   LParamsLength: Integer;
   LEventType: TClass;
+  LSubMethod: TSubscriberMethod;
 begin
   LRttiType := TRTTIUtils.ctx.GetType(ASubscriberClass);
   LRttiMethods := LRttiType.GetMethods;
@@ -151,8 +152,14 @@ begin
           [LMethod.Name, LParamsLength]);
       LEventType := LMethod.GetParameters[0].ParamType.Handle.TypeData.
         ClassType;
-      Result := Result + [TSubscriberMethod.Create(LMethod, LEventType,
-        LSubscribeAttribute.ThreadMode)];
+      LSubMethod := TSubscriberMethod.Create(LMethod, LEventType,
+        LSubscribeAttribute.ThreadMode);
+      {$IF CompilerVersion >= 28.0}
+      Result := Result + [LSubMethod];
+      {$ELSE}
+        SetLength(Result, Length(Result)+1);
+        Result[High(Result)] := LSubMethod;
+      {$ENDIF}
     end;
   if (Length(Result) < 1) and ARaiseExcIfEmpty then
     raise Exception.CreateFmt

@@ -49,7 +49,10 @@ type
 implementation
 
 uses
-  System.Threading, System.Classes;
+  {$IF CompilerVersion >= 28.0}
+  System.Threading,
+  {$ENDIF}
+  System.Classes;
 
 { TBackgroundPoster }
 
@@ -69,6 +72,7 @@ begin
   inherited;
 end;
 
+{$IF CompilerVersion >= 28.0}
 procedure TBackgroundPoster.Enqueue(AProc: TProc);
 var
   LTask: ITask;
@@ -78,9 +82,22 @@ begin
   begin
     isRunning := true;
     LTask := TTask.Run(self.Run);
-    LTask.Wait;
   end;
 end;
+{$ELSE}
+procedure TBackgroundPoster.Enqueue(AProc: TProc);
+var
+  LThread: TThread;
+begin
+  FQueue.PushItem(AProc);
+  if not isRunning then
+  begin
+    isRunning := true;
+    LThread := TThread.CreateAnonymousThread(self.Run);
+    LThread.Start;
+  end;
+end;
+{$ENDIF}
 
 procedure TBackgroundPoster.Run;
 var

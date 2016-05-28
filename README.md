@@ -13,6 +13,7 @@ It was inspired by EventBus framework for the Android platform.
 * __Attributes based API:__ Simply put the Subscribe attribute on your subscriber method you are able to receive a specific event
 * __Support different delivery mode:__ Specifying the TThreadMode in Subscribe attribute, you can choose to delivery the event in the Main Thread or in a Background ones, regardless where an event was posted. The EventBus will manage Thread synchronization     
 * __Unit Tested__
+* __Thread Safe__
 
 ## Show me the code
 1.Define events:
@@ -45,7 +46,7 @@ end;
 
 ##Support
 * DEB is a 100% ObjectPascal framework so it works on VCL and Firemonkey
-* It works with DelphiXE7 and major
+* It works with Delphi2010 and major
 * It should be works fine also on AppMethod
 
 ## License
