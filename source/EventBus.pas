@@ -28,7 +28,6 @@ type
   private
   class var
     FDefaultInstance: TEventBus;
-    FCS: TCriticalSection;
     FSubscriptionsByEventType
       : TObjectDictionary<TClass, TObjectList<TSubscription>>;
     FTypesBySubscriber: TObjectDictionary<TObject, TList<TClass>>;
@@ -57,17 +56,19 @@ implementation
 
 uses
   System.Rtti, EventBus.Attributes, EventBus.Commons,
-  {$IF CompilerVersion >= 28.0}
+{$IF CompilerVersion >= 28.0}
   System.Threading,
-  {$ENDIF}
+{$ENDIF}
   RttiUtilsU;
 
-{ TEventBus }
+var
+  FCS: TCriticalSection;
+
+  { TEventBus }
 
 constructor TEventBus.Create;
 begin
   inherited Create;
-  FCS := TCriticalSection.Create;
   FSubscriptionsByEventType := TObjectDictionary < TClass,
     TObjectList < TSubscription >>.Create([doOwnsValues]);
   FTypesBySubscriber := TObjectDictionary < TObject,
@@ -77,7 +78,6 @@ end;
 
 destructor TEventBus.Destroy;
 begin
-  FreeAndNil(FCS);
   FreeAndNil(FSubscriptionsByEventType);
   FreeAndNil(FTypesBySubscriber);
   FreeAndNil(FBckPoster);
@@ -85,20 +85,16 @@ begin
 end;
 
 class function TEventBus.GetDefault: TEventBus;
-var
-  LCS: TCriticalSection;
 begin
-  LCS := TCriticalSection.Create;
+  FCS.Acquire;
   try
     if (not Assigned(FDefaultInstance)) then
     begin
-      LCS.Acquire;
-      if (not Assigned(FDefaultInstance)) then
-        FDefaultInstance := TEventBus.Create;
+      FDefaultInstance := TEventBus.Create;
     end;
     Result := FDefaultInstance;
   finally
-    LCS.Free;
+    FCS.Release;
   end;
 end;
 
@@ -191,11 +187,11 @@ begin
       else
         InvokeSubscriber(ASubscription, AEvent);
     Async:
-      {$IF CompilerVersion >= 28.0}
+{$IF CompilerVersion >= 28.0}
       TTask.Run(GenerateTProc(ASubscription, AEvent));
-      {$ELSE}
+{$ELSE}
       TThread.CreateAnonymousThread(GenerateTProc(ASubscription, AEvent)).Start;
-      {$ENDIF}
+{$ENDIF}
   else
     raise Exception.Create('Unknown thread mode');
   end;
@@ -208,11 +204,11 @@ var
   LSubscriberMethods: TArray<TSubscriberMethod>;
   LSubscriberMethod: TSubscriberMethod;
 begin
-  LSubscriberClass := ASubscriber.ClassType;
-  LSubscriberMethods := TSubscribersFinder.FindSubscriberMethods
-    (LSubscriberClass, true);
   FCS.Acquire;
   try
+    LSubscriberClass := ASubscriber.ClassType;
+    LSubscriberMethods := TSubscribersFinder.FindSubscriberMethods
+      (LSubscriberClass, true);
     for LSubscriberMethod in LSubscriberMethods do
       Subscribe(ASubscriber, LSubscriberMethod);
   finally
@@ -298,8 +294,11 @@ end;
 
 initialization
 
+FCS := TCriticalSection.Create;
+
 finalization
 
 TEventBus.GetDefault.Free;
+FCS.Free;
 
 end.
