@@ -17,6 +17,8 @@ type
     [Test]
     procedure TestIsRegisteredFalseAfterUnregister;
     [Test]
+    procedure TestRegisterUnregisterMultipleSubscriber;
+    [Test]
     procedure TestSimplePost;
     [Test]
     procedure TestSimplePostOnBackgroundThread;
@@ -78,6 +80,31 @@ begin
       LRaisedException := true;
   end;
   Assert.IsFalse(LRaisedException);
+end;
+
+procedure TEventBusTest.TestRegisterUnregisterMultipleSubscriber;
+var
+  LRaisedException: boolean;
+  LSubscriber: TSubscriberCopy;
+  LEvent: TEventBusEvent;
+  LMsg: string;
+begin
+  LSubscriber := TSubscriberCopy.Create;
+  try
+    TEventBus.GetDefault.RegisterSubscriber(Subscriber);
+    TEventBus.GetDefault.RegisterSubscriber(LSubscriber);
+    TEventBus.GetDefault.Unregister(Subscriber);
+    LEvent := TEventBusEvent.Create;
+    LMsg := 'TestSimplePost';
+    LEvent.Msg := LMsg;
+    TEventBus.GetDefault.Post(LEvent);
+    Assert.IsFalse(TEventBus.GetDefault.IsRegistered(Subscriber));
+    Assert.IsTrue(TEventBus.GetDefault.IsRegistered(LSubscriber));
+    Assert.AreEqual(LMsg, LSubscriber.LastEvent.Msg);
+  finally
+    LSubscriber.Free;
+  end;
+
 end;
 
 procedure TEventBusTest.TestBackgroundPost;

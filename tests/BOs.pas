@@ -59,6 +59,11 @@ type
     procedure OnSimpleBackgroundEvent(AEvent: TBackgroundEvent);
   end;
 
+  TSubscriberCopy = class(TBaseSubscriber)
+    [Subscribe]
+    procedure OnSimpleEvent(AEvent: TEventBusEvent);
+  end;
+
 implementation
 
 uses
@@ -140,6 +145,15 @@ end;
 procedure TBackgroundEvent.SetCount(const Value: integer);
 begin
   FCount := Value;
+end;
+
+{ TSubscriberCopy }
+
+procedure TSubscriberCopy.OnSimpleEvent(AEvent: TEventBusEvent);
+begin
+  LastEvent := AEvent;
+  LastEventThreadID := TThread.CurrentThread.ThreadID;
+  Event.SetEvent;
 end;
 
 end.

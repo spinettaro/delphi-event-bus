@@ -29,6 +29,7 @@ type
     procedure TearDown; override;
   published
     procedure TestRegisterUnregister;
+    procedure TestRegisterUnregisterMultipleSubscriber;
     procedure TestIsRegisteredTrueAfterRegister;
     procedure TestIsRegisteredFalseAfterUnregister;
     procedure TestSimplePost;
@@ -90,7 +91,7 @@ end;
 
 procedure TestTEventBus.TestRegisterUnregister;
 var
-  LRaisedException: Boolean;
+  LRaisedException: boolean;
 begin
   LRaisedException := false;
   TEventBus.GetDefault.RegisterSubscriber(Subscriber);
@@ -101,6 +102,30 @@ begin
       LRaisedException := true;
   end;
   CheckFalse(LRaisedException);
+end;
+
+procedure TestTEventBus.TestRegisterUnregisterMultipleSubscriber;
+var
+  LRaisedException: boolean;
+  LSubscriber: TSubscriberCopy;
+  LEvent: TEventBusEvent;
+  LMsg: string;
+begin
+  LSubscriber := TSubscriberCopy.Create;
+  try
+    TEventBus.GetDefault.RegisterSubscriber(Subscriber);
+    TEventBus.GetDefault.RegisterSubscriber(LSubscriber);
+    TEventBus.GetDefault.Unregister(Subscriber);
+    LEvent := TEventBusEvent.Create;
+    LMsg := 'TestSimplePost';
+    LEvent.Msg := LMsg;
+    TEventBus.GetDefault.Post(LEvent);
+    CheckFalse(TEventBus.GetDefault.IsRegistered(Subscriber));
+    CheckTrue(TEventBus.GetDefault.IsRegistered(LSubscriber));
+    CheckEqualsString(LMsg, LSubscriber.LastEvent.Msg);
+  finally
+    LSubscriber.Free;
+  end;
 end;
 
 procedure TestTEventBus.TestBackgroundPost;

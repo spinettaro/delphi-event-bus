@@ -142,27 +142,32 @@ var
   LEvent: TObject;
   LIsMainThread: Boolean;
 begin
+  FCS.Acquire;
   try
-    LIsMainThread := MainThreadID = TThread.CurrentThread.ThreadID;
-
-    TMonitor.Enter(FSubscriptionsByEventType);
     try
-      FSubscriptionsByEventType.TryGetValue(AEvent.ClassType, LSubscriptions);
+      LIsMainThread := MainThreadID = TThread.CurrentThread.ThreadID;
+
+      TMonitor.Enter(FSubscriptionsByEventType);
+      try
+        FSubscriptionsByEventType.TryGetValue(AEvent.ClassType, LSubscriptions);
+      finally
+        TMonitor.Exit(FSubscriptionsByEventType);
+      end;
+
+      if (not Assigned(LSubscriptions)) then
+        Exit;
+
+      for LSubscription in LSubscriptions do
+      begin
+        LEvent := TRTTIUtils.Clone(AEvent);
+        PostToSubscription(LSubscription, LEvent, LIsMainThread);
+      end;
     finally
-      TMonitor.Exit(FSubscriptionsByEventType);
-    end;
-
-    if (not Assigned(LSubscriptions)) then
-      Exit;
-
-    for LSubscription in LSubscriptions do
-    begin
-      LEvent := TRTTIUtils.Clone(AEvent);
-      PostToSubscription(LSubscription, LEvent, LIsMainThread);
+      if (AEventOwner and Assigned(AEvent)) then
+        AEvent.Free;
     end;
   finally
-    if (AEventOwner and Assigned(AEvent)) then
-      AEvent.Free;
+    FCS.Release
   end;
 end;
 
@@ -287,8 +292,10 @@ begin
   begin
     LSubscription := LSubscriptions[I];
     if (LSubscription.Subscriber.Equals(ASubscriber)) then
+    begin
       LSubscription.Active := false;
-    LSubscriptions.Delete(I);
+      LSubscriptions.Delete(I);
+    end;
   end;
 end;
 
