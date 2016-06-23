@@ -25,10 +25,6 @@ end;
 ```
 
 2.Prepare subscribers:
- * Register your subscriber:
-```delphi
-TEventBus.GetDefault.RegisterSubscriber(self);
-```
 
  * Declare your subscribing method:
 ```delphi
@@ -39,6 +35,11 @@ begin
 end;
 ```
 
+ * Register your subscriber:
+```delphi
+TEventBus.GetDefault.RegisterSubscriber(self);
+```
+
 3.Post events:
 ```delphi
   TEventBus.GetDefault.post(LEvent);
@@ -47,7 +48,6 @@ end;
 ##Support
 * DEB is a 100% ObjectPascal framework so it works on VCL and Firemonkey
 * It works with Delphi2010 and major
-* It should be works fine also on AppMethod
 
 ## License
   Copyright 2016 Daniele Spinetti
