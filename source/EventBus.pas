@@ -24,14 +24,21 @@ uses
 
 type
 
-  TEventBus = class(TObject)
+  IEventBus = Interface
+    ['{7BDF4536-F2BA-4FBA-B186-09E1EE6C7E35}']
+    procedure RegisterSubscriber(ASubscriber: TObject);
+    function IsRegistered(ASubscriber: TObject): Boolean;
+    procedure Unregister(ASubscriber: TObject);
+    procedure Post(AEvent: TObject; AEventOwner: Boolean = true);
+  end;
+
+  TEventBus = class(TInterfacedObject, IEventBus)
   private
-  class var
-    FDefaultInstance: TEventBus;
     FSubscriptionsByEventType
       : TObjectDictionary<TClass, TObjectList<TSubscription>>;
     FTypesBySubscriber: TObjectDictionary<TObject, TList<TClass>>;
     FBckPoster: TBackgroundPoster;
+    class var FDefaultInstance: TEventBus;
     procedure Subscribe(ASubscriber: TObject;
       ASubscriberMethod: TSubscriberMethod);
     procedure UnsubscribeByEventType(ASubscriber: TObject; AEventType: TClass);

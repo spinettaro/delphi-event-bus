@@ -7,6 +7,21 @@ uses
 
 type
 
+  TPerson = class(TObject)
+  private
+    FLastname: string;
+    FFirstname: string;
+    FChild: TPerson;
+    procedure SetChild(const Value: TPerson);
+    procedure SetFirstname(const Value: string);
+    procedure SetLastname(const Value: string);
+  published
+    destructor Destroy; override;
+    property Firstname: string read FFirstname write SetFirstname;
+    property Lastname: string read FLastname write SetLastname;
+    property Child: TPerson read FChild write SetChild;
+  end;
+
   TEventBusEvent = class(TObject)
   private
     FMsg: string;
@@ -62,6 +77,17 @@ type
   TSubscriberCopy = class(TBaseSubscriber)
     [Subscribe]
     procedure OnSimpleEvent(AEvent: TEventBusEvent);
+  end;
+
+  TPersonSubscriber = class(TBaseSubscriber)
+  private
+    FPerson: TPerson;
+    procedure SetPerson(const Value: TPerson);
+  public
+    destructor Destroy; override;
+    property Person: TPerson read FPerson write SetPerson;
+    [Subscribe]
+    procedure OnPersonEvent(AEvent: TPerson);
   end;
 
 implementation
@@ -154,6 +180,51 @@ begin
   LastEvent := AEvent;
   LastEventThreadID := TThread.CurrentThread.ThreadID;
   Event.SetEvent;
+end;
+
+{ TPerson }
+
+destructor TPerson.Destroy;
+begin
+  if Assigned(Child) then
+    Child.Free;
+  inherited;
+end;
+
+procedure TPerson.SetChild(const Value: TPerson);
+begin
+  FChild := Value;
+end;
+
+procedure TPerson.SetFirstname(const Value: string);
+begin
+  FFirstname := Value;
+end;
+
+procedure TPerson.SetLastname(const Value: string);
+begin
+  FLastname := Value;
+end;
+
+{ TPersonSubscriber }
+
+destructor TPersonSubscriber.Destroy;
+begin
+  if Assigned(Person) then
+    Person.Free;
+  inherited;
+end;
+
+procedure TPersonSubscriber.OnPersonEvent(AEvent: TPerson);
+begin
+  Person := AEvent;
+  LastEventThreadID := TThread.CurrentThread.ThreadID;
+  Event.SetEvent;
+end;
+
+procedure TPersonSubscriber.SetPerson(const Value: TPerson);
+begin
+  FPerson := Value;
 end;
 
 end.

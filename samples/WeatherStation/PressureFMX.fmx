@@ -1,0 +1,49 @@
+object PressureForm: TPressureForm
+  Left = 0
+  Top = 0
+  BorderStyle = ToolWindow
+  Caption = 'Weather Station'
+  ClientHeight = 180
+  ClientWidth = 250
+  Visible = True
+  FormFactor.Width = 320
+  FormFactor.Height = 480
+  FormFactor.Devices = [Desktop]
+  OnCreate = FormCreate
+  DesignerMasterStyle = 0
+  object Label2: TLabel
+    Align = Bottom
+    AutoSize = True
+    StyledSettings = [Family, Style]
+    Margins.Left = 10.000000000000000000
+    Margins.Top = 10.000000000000000000
+    Margins.Right = 10.000000000000000000
+    Margins.Bottom = 10.000000000000000000
+    Position.X = 10.000000000000000000
+    Position.Y = 103.000000000000000000
+    Size.Width = 230.000000000000000000
+    Size.Height = 67.000000000000000000
+    Size.PlatformDefault = False
+    TextSettings.Font.Size = 50.000000000000000000
+    TextSettings.FontColor = claBlue
+    TextSettings.HorzAlign = Center
+    Text = '13 '#176'C'
+  end
+  object Label1: TLabel
+    Align = Top
+    AutoSize = True
+    StyledSettings = [Family, Style, FontColor]
+    Margins.Left = 10.000000000000000000
+    Margins.Top = 10.000000000000000000
+    Margins.Right = 10.000000000000000000
+    Margins.Bottom = 10.000000000000000000
+    Position.X = 10.000000000000000000
+    Position.Y = 10.000000000000000000
+    Size.Width = 230.000000000000000000
+    Size.Height = 54.000000000000000000
+    Size.PlatformDefault = False
+    TextSettings.Font.Size = 40.000000000000000000
+    TextSettings.HorzAlign = Center
+    Text = 'Pressure'
+  end
+end

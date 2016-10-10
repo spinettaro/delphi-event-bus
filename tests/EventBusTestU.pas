@@ -30,6 +30,11 @@ type
     procedure TestBackgroundPost;
     [Test]
     procedure TestBackgroundsPost;
+    [Test]
+    procedure TestPostEntityWithChildObject;
+    [Test]
+    procedure TestRegisterAndFree;
+
   end;
 
 implementation
@@ -67,6 +72,22 @@ begin
   Assert.AreNotEqual(MainThreadID, Subscriber.LastEventThreadID);
 end;
 
+procedure TEventBusTest.TestRegisterAndFree;
+var
+  LRaisedException: Boolean;
+begin
+  LRaisedException := false;
+  TEventBus.GetDefault.RegisterSubscriber(Subscriber);
+  try
+    Subscriber.Free;
+    TEventBus.GetDefault.Post(TEventBusEvent.Create);
+  except
+    on E: Exception do
+      LRaisedException := true;
+  end;
+  Assert.IsFalse(LRaisedException);
+end;
+
 procedure TEventBusTest.TestRegisterUnregister;
 var
   LRaisedException: Boolean;
@@ -84,7 +105,6 @@ end;
 
 procedure TEventBusTest.TestRegisterUnregisterMultipleSubscriber;
 var
-  LRaisedException: boolean;
   LSubscriber: TSubscriberCopy;
   LEvent: TEventBusEvent;
   LMsg: string;
@@ -157,6 +177,26 @@ begin
   TEventBus.GetDefault.RegisterSubscriber(Subscriber);
   TEventBus.GetDefault.Unregister(Subscriber);
   Assert.IsFalse(TEventBus.GetDefault.IsRegistered(Subscriber));
+end;
+
+procedure TEventBusTest.TestPostEntityWithChildObject;
+var
+  LPerson: TPerson;
+  LSubscriber: TPersonSubscriber;
+begin
+  LSubscriber := TPersonSubscriber.Create;
+  try
+    TEventBus.GetDefault.RegisterSubscriber(LSubscriber);
+    LPerson := TPerson.Create;
+    LPerson.Firstname := 'Howard';
+    LPerson.Lastname := 'Stark';
+    // LPerson.Child := LPerson;
+    TEventBus.GetDefault.Post(LPerson);
+    Assert.AreEqual('Howard', LSubscriber.Person.Firstname);
+    // Assert.AreEqual('Tony', LSubscriber.Person.Child.Firstname);
+  finally
+    LSubscriber.Free;
+  end;
 end;
 
 procedure TEventBusTest.TestPostOnMainThread;
