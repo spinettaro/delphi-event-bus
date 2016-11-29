@@ -80,6 +80,7 @@ begin
   TEventBus.GetDefault.RegisterSubscriber(Subscriber);
   try
     Subscriber.Free;
+    Subscriber := nil;
     TEventBus.GetDefault.Post(TEventBusEvent.Create);
   except
     on E: Exception do
