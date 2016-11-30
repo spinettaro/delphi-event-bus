@@ -12,6 +12,9 @@
         <Projects Include="WeatherStation\WeatherStation.dproj">
             <Dependencies/>
         </Projects>
+        <Projects Include="Analytics\Analytics.dproj">
+            <Dependencies/>
+        </Projects>
     </ItemGroup>
     <ProjectExtensions>
         <Borland.Personality>Default.Personality.12</Borland.Personality>
@@ -47,14 +50,23 @@
     <Target Name="WeatherStation:Make">
         <MSBuild Projects="WeatherStation\WeatherStation.dproj" Targets="Make"/>
     </Target>
+    <Target Name="Analytics">
+        <MSBuild Projects="Analytics\Analytics.dproj"/>
+    </Target>
+    <Target Name="Analytics:Clean">
+        <MSBuild Projects="Analytics\Analytics.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="Analytics:Make">
+        <MSBuild Projects="Analytics\Analytics.dproj" Targets="Make"/>
+    </Target>
     <Target Name="Build">
-        <CallTarget Targets="VCLMessaging;AccessRemoteData;WeatherStation"/>
+        <CallTarget Targets="VCLMessaging;AccessRemoteData;WeatherStation;Analytics"/>
     </Target>
     <Target Name="Clean">
-        <CallTarget Targets="VCLMessaging:Clean;AccessRemoteData:Clean;WeatherStation:Clean"/>
+        <CallTarget Targets="VCLMessaging:Clean;AccessRemoteData:Clean;WeatherStation:Clean;Analytics:Clean"/>
     </Target>
     <Target Name="Make">
-        <CallTarget Targets="VCLMessaging:Make;AccessRemoteData:Make;WeatherStation:Make"/>
+        <CallTarget Targets="VCLMessaging:Make;AccessRemoteData:Make;WeatherStation:Make;Analytics:Make"/>
     </Target>
     <Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
 </Project>
