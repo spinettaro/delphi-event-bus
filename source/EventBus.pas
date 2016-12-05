@@ -154,12 +154,7 @@ begin
     try
       LIsMainThread := MainThreadID = TThread.CurrentThread.ThreadID;
 
-      TMonitor.Enter(FSubscriptionsByEventType);
-      try
-        FSubscriptionsByEventType.TryGetValue(AEvent.ClassType, LSubscriptions);
-      finally
-        TMonitor.Exit(FSubscriptionsByEventType);
-      end;
+      FSubscriptionsByEventType.TryGetValue(AEvent.ClassType, LSubscriptions);
 
       if (not Assigned(LSubscriptions)) then
         Exit;
