@@ -1,4 +1,6 @@
 # DEB an Event Bus framework for Delphi
+![alt text](/docs/DEB_Logo.png "DEB Logo")
+
 Delphi Event Bus (for short DEB) is a publish/subscribe Event Bus framework for the Delphi platform.
 
 DEB is designed to decouple different parts/layers of your application while still allowing them to communicate efficiently.
