@@ -2074,7 +2074,6 @@ var
   ListItem: TValue;
   ListParam: TRttiParameter;
 begin
-  jvalue := nil;
   _type := ctx.GetType(AObject.ClassInfo);
   _fields := _type.GetProperties;
   for _field in _fields do

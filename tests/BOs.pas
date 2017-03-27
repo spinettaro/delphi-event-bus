@@ -15,7 +15,7 @@ type
     procedure SetChild(const Value: TPerson);
     procedure SetFirstname(const Value: string);
     procedure SetLastname(const Value: string);
-  published
+  public
     destructor Destroy; override;
     property Firstname: string read FFirstname write SetFirstname;
     property Lastname: string read FLastname write SetLastname;
