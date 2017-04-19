@@ -154,12 +154,12 @@ begin
         ClassType;
       LSubMethod := TSubscriberMethod.Create(LMethod, LEventType,
         LSubscribeAttribute.ThreadMode);
-      {$IF CompilerVersion >= 28.0}
+{$IF CompilerVersion >= 28.0}
       Result := Result + [LSubMethod];
-      {$ELSE}
-        SetLength(Result, Length(Result)+1);
-        Result[High(Result)] := LSubMethod;
-      {$ENDIF}
+{$ELSE}
+      SetLength(Result, Length(Result) + 1);
+      Result[High(Result)] := LSubMethod;
+{$ENDIF}
     end;
   if (Length(Result) < 1) and ARaiseExcIfEmpty then
     raise Exception.CreateFmt

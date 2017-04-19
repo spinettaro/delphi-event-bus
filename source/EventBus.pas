@@ -20,7 +20,7 @@ interface
 
 uses
   System.SyncObjs, EventBus.Subscribers, Generics.Collections, EventBus.Poster,
-  System.SysUtils, System.Classes;
+  System.SysUtils, System.Classes, EventBus.Commons;
 
 type
 
@@ -49,6 +49,7 @@ type
       AEvent: TObject): TProc;
     function GenerateThreadProc(ASubscription: TSubscription; AEvent: TObject)
       : TThreadProcedure;
+    function CloneEvent(AEvent: TObject): TObject;
   public
     constructor Create();
     destructor Destroy; override;
@@ -62,16 +63,27 @@ type
 implementation
 
 uses
-  System.Rtti, EventBus.Attributes, EventBus.Commons,
+  System.Rtti, EventBus.Attributes,
 {$IF CompilerVersion >= 28.0}
   System.Threading,
 {$ENDIF}
-  RttiUtilsU;
+  RttiUtilsU, ObjectsMappers, System.JSON;
 
 var
   FCS: TCriticalSection;
 
   { TEventBus }
+
+function TEventBus.CloneEvent(AEvent: TObject): TObject;
+begin
+  Result := TRTTIUtils.Clone(AEvent);
+  // LObj := Mapper.ObjectToJSONObject(AEvent);
+  // try
+  // Result := Mapper.JSONObjectToObject(AEvent.ClassType, LObj);
+  // finally
+  // LObj.Free;
+  // end
+end;
 
 constructor TEventBus.Create;
 begin
@@ -161,7 +173,7 @@ begin
 
       for LSubscription in LSubscriptions do
       begin
-        LEvent := TRTTIUtils.Clone(AEvent);
+        LEvent := CloneEvent(AEvent);
         PostToSubscription(LSubscription, LEvent, LIsMainThread);
       end;
     finally

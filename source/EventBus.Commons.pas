@@ -18,10 +18,64 @@ unit EventBus.Commons;
 
 interface
 
+uses
+  System.Classes;
+
 type
 
   TThreadMode = (Posting, Main, Async, Background);
 
+  TDEBEvent<T> = class(TObject)
+  private
+    FDataOwner: boolean;
+    FData: T;
+    procedure SetData(const Value: T);
+    procedure SetDataOwner(const Value: boolean);
+  public
+    constructor Create; overload;
+    constructor Create(AData: T); overload;
+    destructor Destroy; override;
+    property DataOwner: boolean read FDataOwner write SetDataOwner;
+    property Data: T read FData write SetData;
+  end;
+
 implementation
+
+uses
+  RTTIUtilsU, System.Rtti;
+
+{ TDEBSimpleEvent<T> }
+
+constructor TDEBEvent<T>.Create(AData: T);
+begin
+  inherited Create;
+  DataOwner := true;
+  Data := AData;
+end;
+
+constructor TDEBEvent<T>.Create;
+begin
+  inherited Create;
+end;
+
+destructor TDEBEvent<T>.Destroy;
+var
+  LValue: TValue;
+begin
+  LValue := TValue.From<T>(Data);
+  if (LValue.IsObject) and DataOwner then
+    LValue.AsObject.Free;
+  inherited;
+end;
+
+procedure TDEBEvent<T>.SetData(const Value: T);
+begin
+  FData := Value;
+end;
+
+procedure TDEBEvent<T>.SetDataOwner(const Value: boolean);
+begin
+  FDataOwner := Value;
+end;
 
 end.

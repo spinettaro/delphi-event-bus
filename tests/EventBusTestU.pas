@@ -33,6 +33,8 @@ type
     [Test]
     procedure TestPostEntityWithChildObject;
     [Test]
+    procedure TestPostEntityWithObjectList;
+    [Test]
     procedure TestRegisterAndFree;
 
   end;
@@ -40,7 +42,7 @@ type
 implementation
 
 uses EventBus, BOs, System.SyncObjs, System.SysUtils, System.Threading,
-  System.Classes;
+  System.Classes, EventBus.Commons, System.Generics.Collections;
 
 procedure TEventBusTest.TestSimplePost;
 var
@@ -50,9 +52,9 @@ begin
   TEventBus.GetDefault.RegisterSubscriber(Subscriber);
   LEvent := TEventBusEvent.Create;
   LMsg := 'TestSimplePost';
-  LEvent.Msg := LMsg;
+  LEvent.Data := LMsg;
   TEventBus.GetDefault.Post(LEvent);
-  Assert.AreEqual(LMsg, Subscriber.LastEvent.Msg);
+  Assert.AreEqual(LMsg, Subscriber.LastEvent.Data);
 end;
 
 procedure TEventBusTest.TestSimplePostOnBackgroundThread;
@@ -117,11 +119,11 @@ begin
     TEventBus.GetDefault.Unregister(Subscriber);
     LEvent := TEventBusEvent.Create;
     LMsg := 'TestSimplePost';
-    LEvent.Msg := LMsg;
+    LEvent.Data := LMsg;
     TEventBus.GetDefault.Post(LEvent);
     Assert.IsFalse(TEventBus.GetDefault.IsRegistered(Subscriber));
     Assert.IsTrue(TEventBus.GetDefault.IsRegistered(LSubscriber));
-    Assert.AreEqual(LMsg, LSubscriber.LastEvent.Msg);
+    Assert.AreEqual(LMsg, LSubscriber.LastEvent.Data);
   finally
     LSubscriber.Free;
   end;
@@ -136,12 +138,12 @@ begin
   TEventBus.GetDefault.RegisterSubscriber(Subscriber);
   LEvent := TBackgroundEvent.Create;
   LMsg := 'TestBackgroundPost';
-  LEvent.Msg := LMsg;
+  LEvent.Data := LMsg;
   TEventBus.GetDefault.Post(LEvent);
   // attend for max 5 seconds
   Assert.IsTrue(TWaitResult.wrSignaled = Subscriber.Event.WaitFor(5000),
     'Timeout request');
-  Assert.AreEqual(LMsg, Subscriber.LastEvent.Msg);
+  Assert.AreEqual(LMsg, Subscriber.LastEvent.Data);
   Assert.AreNotEqual(MainThreadID, Subscriber.LastEventThreadID);
 end;
 
@@ -156,7 +158,7 @@ begin
   begin
     LEvent := TBackgroundEvent.Create;
     LMsg := 'TestBackgroundPost';
-    LEvent.Msg := LMsg;
+    LEvent.Data := LMsg;
     LEvent.Count := I;
     TEventBus.GetDefault.Post(LEvent);
   end;
@@ -187,13 +189,45 @@ var
 begin
   LSubscriber := TPersonSubscriber.Create;
   try
+    LSubscriber.ObjOwner := true;
     TEventBus.GetDefault.RegisterSubscriber(LSubscriber);
     LPerson := TPerson.Create;
     LPerson.Firstname := 'Howard';
     LPerson.Lastname := 'Stark';
-    // LPerson.Child := LPerson;
-    TEventBus.GetDefault.Post(LPerson);
+    // stackoverflow by TRTTIUtils.clone
+     LPerson.Child := LPerson;
+    TEventBus.GetDefault.Post(TDEBEvent<TPerson>.Create(LPerson));
     Assert.AreEqual('Howard', LSubscriber.Person.Firstname);
+    // Assert.AreEqual('Tony', LSubscriber.Person.Child.Firstname);
+  finally
+    LSubscriber.Free;
+  end;
+end;
+
+procedure TEventBusTest.TestPostEntityWithObjectList;
+var
+  LPerson: TPerson;
+  LSubscriber: TPersonListSubscriber;
+  LList: TObjectList<TPerson>;
+begin
+  LSubscriber := TPersonListSubscriber.Create;
+  try
+    TEventBus.GetDefault.RegisterSubscriber(LSubscriber);
+    LList := TObjectList<TPerson>.Create;
+    LPerson := TPerson.Create;
+    LPerson.Firstname := 'Howard';
+    LPerson.Lastname := 'Stark';
+    LList.Add(LPerson);
+    LPerson := TPerson.Create;
+    LPerson.Firstname := 'Tony';
+    LPerson.Lastname := 'Stark';
+    LList.Add(LPerson);
+    // stackoverflow by TRTTIUtils.clone
+    // LPerson.Child := LPerson;
+    TEventBus.GetDefault.Post(TDEBEvent < TObjectList < TPerson >>
+      .Create(LList));
+    Assert.AreEqual(2, LSubscriber.PersonList.Count);
+    LSubscriber.PersonList.Free;
     // Assert.AreEqual('Tony', LSubscriber.Person.Child.Firstname);
   finally
     LSubscriber.Free;
@@ -208,9 +242,9 @@ begin
   TEventBus.GetDefault.RegisterSubscriber(Subscriber);
   LEvent := TMainEvent.Create;
   LMsg := 'TestPostOnMainThread';
-  LEvent.Msg := LMsg;
+  LEvent.Data := LMsg;
   TEventBus.GetDefault.Post(LEvent);
-  Assert.AreEqual(LMsg, Subscriber.LastEvent.Msg);
+  Assert.AreEqual(LMsg, Subscriber.LastEvent.Data);
   Assert.AreEqual(MainThreadID, Subscriber.LastEventThreadID);
 end;
 
@@ -222,12 +256,12 @@ begin
   TEventBus.GetDefault.RegisterSubscriber(Subscriber);
   LEvent := TAsyncEvent.Create;
   LMsg := 'TestAsyncPost';
-  LEvent.Msg := LMsg;
+  LEvent.Data := LMsg;
   TEventBus.GetDefault.Post(LEvent);
   // attend for max 5 seconds
   Assert.IsTrue(TWaitResult.wrSignaled = Subscriber.Event.WaitFor(5000),
     'Timeout request');
-  Assert.AreEqual(LMsg, Subscriber.LastEvent.Msg);
+  Assert.AreEqual(LMsg, Subscriber.LastEvent.Data);
   Assert.AreNotEqual(MainThreadID, Subscriber.LastEventThreadID);
 end;
 

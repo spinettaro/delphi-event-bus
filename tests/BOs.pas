@@ -3,7 +3,8 @@ unit BOs;
 interface
 
 uses
-  EventBus.Attributes, EventBus.Commons, System.SyncObjs;
+  EventBus.Attributes, EventBus.Commons, System.SyncObjs,
+  System.Generics.Collections;
 
 type
 
@@ -22,12 +23,12 @@ type
     property Child: TPerson read FChild write SetChild;
   end;
 
-  TEventBusEvent = class(TObject)
-  private
-    FMsg: string;
-    procedure SetMsg(const Value: string);
-  public
-    property Msg: string read FMsg write SetMsg;
+  TEventBusEvent = class(TDEBEvent<string>)
+//  private
+//    FMsg: string;
+//    procedure SetMsg(const Value: string);
+//  public
+//    property Msg: string read FMsg write SetMsg;
   end;
 
   TMainEvent = class(TEventBusEvent)
@@ -82,12 +83,27 @@ type
   TPersonSubscriber = class(TBaseSubscriber)
   private
     FPerson: TPerson;
+    FObjOwner: boolean;
     procedure SetPerson(const Value: TPerson);
+    procedure SetObjOwner(const Value: boolean);
   public
+    constructor Create;
     destructor Destroy; override;
+    property ObjOwner: boolean read FObjOwner write SetObjOwner;
     property Person: TPerson read FPerson write SetPerson;
     [Subscribe]
-    procedure OnPersonEvent(AEvent: TPerson);
+    procedure OnPersonEvent(AEvent: TDEBEvent<TPerson>);
+  end;
+
+  TPersonListSubscriber = class(TBaseSubscriber)
+  private
+    FPersonList: TObjectList<TPerson>;
+    procedure SetPersonList(const Value: TObjectList<TPerson>);
+  public
+    property PersonList: TObjectList<TPerson> read FPersonList
+      write SetPersonList;
+    [Subscribe]
+    procedure OnPersonListEvent(AEvent: TDEBEvent < TObjectList < TPerson >> );
   end;
 
 implementation
@@ -161,10 +177,10 @@ end;
 
 { TEvent }
 
-procedure TEventBusEvent.SetMsg(const Value: string);
-begin
-  FMsg := Value;
-end;
+//procedure TEventBusEvent.SetMsg(const Value: string);
+//begin
+//  FMsg := Value;
+//end;
 
 { TBackgroundEvent }
 
@@ -208,23 +224,60 @@ end;
 
 { TPersonSubscriber }
 
+constructor TPersonSubscriber.Create;
+begin
+  inherited Create;
+  FObjOwner := true;
+end;
+
 destructor TPersonSubscriber.Destroy;
 begin
-  if Assigned(Person) then
+  if ObjOwner and Assigned(Person) then
     Person.Free;
   inherited;
 end;
 
-procedure TPersonSubscriber.OnPersonEvent(AEvent: TPerson);
+procedure TPersonSubscriber.OnPersonEvent(AEvent: TDEBEvent<TPerson>);
 begin
-  Person := AEvent;
-  LastEventThreadID := TThread.CurrentThread.ThreadID;
-  Event.SetEvent;
+  try
+    AEvent.DataOwner := false;
+    Person := AEvent.Data;
+    LastEventThreadID := TThread.CurrentThread.ThreadID;
+    Event.SetEvent;
+  finally
+    AEvent.Free;
+  end;
+end;
+
+procedure TPersonSubscriber.SetObjOwner(const Value: boolean);
+begin
+  FObjOwner := Value;
 end;
 
 procedure TPersonSubscriber.SetPerson(const Value: TPerson);
 begin
   FPerson := Value;
+end;
+
+{ TPersonListSubscriber }
+
+procedure TPersonListSubscriber.OnPersonListEvent
+  (AEvent: TDEBEvent < TObjectList < TPerson >> );
+begin
+  try
+    PersonList := AEvent.Data;
+    AEvent.DataOwner := false;
+    LastEventThreadID := TThread.CurrentThread.ThreadID;
+    Event.SetEvent;
+  finally
+    AEvent.Free;
+  end;
+end;
+
+procedure TPersonListSubscriber.SetPersonList(const Value
+  : TObjectList<TPerson>);
+begin
+  FPersonList := Value;
 end;
 
 end.
