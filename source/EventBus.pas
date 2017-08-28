@@ -29,7 +29,8 @@ type
     procedure RegisterSubscriber(ASubscriber: TObject);
     function IsRegistered(ASubscriber: TObject): Boolean;
     procedure Unregister(ASubscriber: TObject);
-    procedure Post(AEvent: TObject; AEventOwner: Boolean = true);
+    procedure Post(AEvent: TObject; AContext: String = '';
+      AEventOwner: Boolean = true);
   end;
 
   TEventBus = class(TInterfacedObject, IEventBus)
@@ -56,7 +57,8 @@ type
     procedure RegisterSubscriber(ASubscriber: TObject);
     function IsRegistered(ASubscriber: TObject): Boolean;
     procedure Unregister(ASubscriber: TObject);
-    procedure Post(AEvent: TObject; AEventOwner: Boolean = true);
+    procedure Post(AEvent: TObject; AContext: String = '';
+      AEventOwner: Boolean = true);
     class function GetDefault: TEventBus;
   end;
 
@@ -154,7 +156,8 @@ begin
   end;
 end;
 
-procedure TEventBus.Post(AEvent: TObject; AEventOwner: Boolean = true);
+procedure TEventBus.Post(AEvent: TObject; AContext: String = '';
+  AEventOwner: Boolean = true);
 var
   LSubscriptions: TObjectList<TSubscription>;
   LSubscription: TSubscription;
@@ -173,6 +176,9 @@ begin
 
       for LSubscription in LSubscriptions do
       begin
+        if ((AContext <> '') and (LSubscription.Context <> AContext)) then
+          continue;
+
         LEvent := CloneEvent(AEvent);
         PostToSubscription(LSubscription, LEvent, LIsMainThread);
       end;
@@ -245,7 +251,6 @@ var
 begin
   LEventType := ASubscriberMethod.EventType;
   LNewSubscription := TSubscription.Create(ASubscriber, ASubscriberMethod);
-
   if (not FSubscriptionsByEventType.ContainsKey(LEventType)) then
   begin
     LSubscriptions := TObjectList<TSubscription>.Create();

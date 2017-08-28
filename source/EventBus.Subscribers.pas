@@ -29,18 +29,21 @@ type
     FThreadMode: TThreadMode;
     FPriority: Integer;
     FMethod: TRttiMethod;
+    FContext: string;
     procedure SetEventType(const Value: TClass);
     procedure SetMethod(const Value: TRttiMethod);
     procedure SetPriority(const Value: Integer);
     procedure SetThreadMode(const Value: TThreadMode);
+    procedure SetContext(const Value: String);
   public
     constructor Create(ARttiMethod: TRttiMethod; AEventType: TClass;
-      AThreadMode: TThreadMode; APriority: Integer = 1);
+      AThreadMode: TThreadMode; AContext: String = ''; APriority: Integer = 1);
     destructor Destroy; override;
     property EventType: TClass read FEventType write SetEventType;
     property Method: TRttiMethod read FMethod write SetMethod;
     property ThreadMode: TThreadMode read FThreadMode write SetThreadMode;
     property Priority: Integer read FPriority write SetPriority;
+    property Context: String read FContext write SetContext;
     function Equals(Obj: TObject): Boolean; override;
   end;
 
@@ -49,10 +52,12 @@ type
     FSubscriberMethod: TSubscriberMethod;
     FSubscriber: TObject;
     FActive: Boolean;
+    FContext: string;
     procedure SetActive(const Value: Boolean);
     function GetActive: Boolean;
     procedure SetSubcriberMethod(const Value: TSubscriberMethod);
     procedure SetSubscriber(const Value: TObject);
+    function GetContext: String;
   public
     constructor Create(ASubscriber: TObject;
       ASubscriberMethod: TSubscriberMethod);
@@ -61,6 +66,7 @@ type
     property Subscriber: TObject read FSubscriber write SetSubscriber;
     property SubscriberMethod: TSubscriberMethod read FSubscriberMethod
       write SetSubcriberMethod;
+    property Context: String read GetContext;
     function Equals(Obj: TObject): Boolean; override;
 
   end;
@@ -78,11 +84,13 @@ uses
 { TSubscriberMethod }
 
 constructor TSubscriberMethod.Create(ARttiMethod: TRttiMethod;
-  AEventType: TClass; AThreadMode: TThreadMode; APriority: Integer);
+  AEventType: TClass; AThreadMode: TThreadMode; AContext: String = '';
+  APriority: Integer = 1);
 begin
   FMethod := ARttiMethod;
   FEventType := AEventType;
   FThreadMode := AThreadMode;
+  FContext := AContext;
   FPriority := APriority;
 end;
 
@@ -104,6 +112,11 @@ begin
   end
   else
     exit(false);
+end;
+
+procedure TSubscriberMethod.SetContext(const Value: String);
+begin
+  FContext := Value;
 end;
 
 procedure TSubscriberMethod.SetEventType(const Value: TClass);
@@ -153,7 +166,7 @@ begin
       LEventType := LMethod.GetParameters[0].ParamType.Handle.TypeData.
         ClassType;
       LSubMethod := TSubscriberMethod.Create(LMethod, LEventType,
-        LSubscribeAttribute.ThreadMode);
+        LSubscribeAttribute.ThreadMode, LSubscribeAttribute.Context);
 {$IF CompilerVersion >= 28.0}
       Result := Result + [LSubMethod];
 {$ELSE}
@@ -207,6 +220,11 @@ begin
   finally
     TMonitor.exit(self);
   end;
+end;
+
+function TSubscription.GetContext: String;
+begin
+  Result := SubscriberMethod.Context;
 end;
 
 procedure TSubscription.SetActive(const Value: Boolean);

@@ -24,11 +24,11 @@ type
   end;
 
   TEventBusEvent = class(TDEBEvent<string>)
-//  private
-//    FMsg: string;
-//    procedure SetMsg(const Value: string);
-//  public
-//    property Msg: string read FMsg write SetMsg;
+    // private
+    // FMsg: string;
+    // procedure SetMsg(const Value: string);
+    // public
+    // property Msg: string read FMsg write SetMsg;
   end;
 
   TMainEvent = class(TEventBusEvent)
@@ -73,6 +73,8 @@ type
     procedure OnSimpleMainEvent(AEvent: TMainEvent);
     [Subscribe(TThreadMode.Background)]
     procedure OnSimpleBackgroundEvent(AEvent: TBackgroundEvent);
+    [Subscribe(TThreadMode.Main, 'TestCtx')]
+    procedure OnSimpleContextEvent(AEvent: TMainEvent);
   end;
 
   TSubscriberCopy = class(TBaseSubscriber)
@@ -162,6 +164,12 @@ begin
   Event.SetEvent;
 end;
 
+procedure TSubscriber.OnSimpleContextEvent(AEvent: TMainEvent);
+begin
+  LastEvent := AEvent;
+  LastEventThreadID := TThread.CurrentThread.ThreadID;
+end;
+
 procedure TSubscriber.OnSimpleEvent(AEvent: TEventBusEvent);
 begin
   LastEvent := AEvent;
@@ -177,10 +185,10 @@ end;
 
 { TEvent }
 
-//procedure TEventBusEvent.SetMsg(const Value: string);
-//begin
-//  FMsg := Value;
-//end;
+// procedure TEventBusEvent.SetMsg(const Value: string);
+// begin
+// FMsg := Value;
+// end;
 
 { TBackgroundEvent }
 

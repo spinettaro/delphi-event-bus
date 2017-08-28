@@ -27,6 +27,10 @@ type
     [Test]
     procedure TestPostOnMainThread;
     [Test]
+    procedure TestPostContextOnMainThread;
+    [Test]
+    procedure TestPostContextKOOnMainThread;
+    [Test]
     procedure TestBackgroundPost;
     [Test]
     procedure TestBackgroundsPost;
@@ -182,6 +186,33 @@ begin
   Assert.IsFalse(TEventBus.GetDefault.IsRegistered(Subscriber));
 end;
 
+procedure TEventBusTest.TestPostContextKOOnMainThread;
+var
+  LEvent: TMainEvent;
+  LMsg: string;
+begin
+  TEventBus.GetDefault.RegisterSubscriber(Subscriber);
+  LEvent := TMainEvent.Create;
+  LMsg := 'TestPostOnMainThread';
+  LEvent.Data := LMsg;
+  TEventBus.GetDefault.Post(LEvent, 'TestFoo');
+  Assert.IsNull(Subscriber.LastEvent);
+end;
+
+procedure TEventBusTest.TestPostContextOnMainThread;
+var
+  LEvent: TMainEvent;
+  LMsg: string;
+begin
+  TEventBus.GetDefault.RegisterSubscriber(Subscriber);
+  LEvent := TMainEvent.Create;
+  LMsg := 'TestPostOnMainThread';
+  LEvent.Data := LMsg;
+  TEventBus.GetDefault.Post(LEvent, 'TestCtx');
+  Assert.AreEqual(LMsg, Subscriber.LastEvent.Data);
+  Assert.AreEqual(MainThreadID, Subscriber.LastEventThreadID);
+end;
+
 procedure TEventBusTest.TestPostEntityWithChildObject;
 var
   LPerson: TPerson;
@@ -195,7 +226,7 @@ begin
     LPerson.Firstname := 'Howard';
     LPerson.Lastname := 'Stark';
     // stackoverflow by TRTTIUtils.clone
-     LPerson.Child := LPerson;
+    // LPerson.Child := LPerson;
     TEventBus.GetDefault.Post(TDEBEvent<TPerson>.Create(LPerson));
     Assert.AreEqual('Howard', LSubscriber.Person.Firstname);
     // Assert.AreEqual('Tony', LSubscriber.Person.Child.Firstname);

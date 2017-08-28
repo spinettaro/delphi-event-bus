@@ -24,18 +24,23 @@ type
 
   SubscribeAttribute = class(TCustomAttribute)
   private
+    FContext: String;
     FThreadMode: TThreadMode;
   public
-    constructor Create(AThreadMode: TThreadMode = TThreadMode.Posting);
+    constructor Create(AThreadMode: TThreadMode = TThreadMode.Posting;
+      AContext: String = '');
     property ThreadMode: TThreadMode read FThreadMode;
+    property Context: String read FContext;
   end;
 
 implementation
 
 { SubscribeAttribute }
 
-constructor SubscribeAttribute.Create(AThreadMode: TThreadMode);
+constructor SubscribeAttribute.Create(AThreadMode
+  : TThreadMode = TThreadMode.Posting; AContext: String = '');
 begin
+  FContext := AContext;
   FThreadMode := AThreadMode;
 end;
 
