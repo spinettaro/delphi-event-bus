@@ -37,7 +37,7 @@ type
     procedure SetContext(const Value: String);
   public
     constructor Create(ARttiMethod: TRttiMethod; AEventType: TClass;
-      AThreadMode: TThreadMode; AContext: String = ''; APriority: Integer = 1);
+      AThreadMode: TThreadMode; const AContext: String = ''; APriority: Integer = 1);
     destructor Destroy; override;
     property EventType: TClass read FEventType write SetEventType;
     property Method: TRttiMethod read FMethod write SetMethod;
@@ -52,10 +52,9 @@ type
     FSubscriberMethod: TSubscriberMethod;
     FSubscriber: TObject;
     FActive: Boolean;
-    FContext: string;
     procedure SetActive(const Value: Boolean);
     function GetActive: Boolean;
-    procedure SetSubcriberMethod(const Value: TSubscriberMethod);
+    procedure SetSubscriberMethod(const Value: TSubscriberMethod);
     procedure SetSubscriber(const Value: TObject);
     function GetContext: String;
   public
@@ -65,7 +64,7 @@ type
     property Active: Boolean read GetActive write SetActive;
     property Subscriber: TObject read FSubscriber write SetSubscriber;
     property SubscriberMethod: TSubscriberMethod read FSubscriberMethod
-      write SetSubcriberMethod;
+      write SetSubscriberMethod;
     property Context: String read GetContext;
     function Equals(Obj: TObject): Boolean; override;
 
@@ -84,7 +83,7 @@ uses
 { TSubscriberMethod }
 
 constructor TSubscriberMethod.Create(ARttiMethod: TRttiMethod;
-  AEventType: TClass; AThreadMode: TThreadMode; AContext: String = '';
+  AEventType: TClass; AThreadMode: TThreadMode; const AContext: String = '';
   APriority: Integer = 1);
 begin
   FMethod := ARttiMethod;
@@ -237,7 +236,7 @@ begin
   end;
 end;
 
-procedure TSubscription.SetSubcriberMethod(const Value: TSubscriberMethod);
+procedure TSubscription.SetSubscriberMethod(const Value: TSubscriberMethod);
 begin
   FSubscriberMethod := Value;
 end;

@@ -37,6 +37,8 @@ type
     [Test]
     procedure TestPostEntityWithChildObject;
     [Test]
+    procedure TestPostEntityWithItsSelfInChildObject;
+    [Test]
     procedure TestPostEntityWithObjectList;
     [Test]
     procedure TestRegisterAndFree;
@@ -225,11 +227,34 @@ begin
     LPerson := TPerson.Create;
     LPerson.Firstname := 'Howard';
     LPerson.Lastname := 'Stark';
-    // stackoverflow by TRTTIUtils.clone
-    // LPerson.Child := LPerson;
+    LPerson.Child := TPerson.Create;
+    LPerson.Child.Firstname := 'Tony';
+    LPerson.Child.Lastname := 'Stark';
     TEventBus.GetDefault.Post(TDEBEvent<TPerson>.Create(LPerson));
     Assert.AreEqual('Howard', LSubscriber.Person.Firstname);
-    // Assert.AreEqual('Tony', LSubscriber.Person.Child.Firstname);
+    Assert.AreEqual('Tony', LSubscriber.Person.Child.Firstname);
+  finally
+    LSubscriber.Free;
+  end;
+end;
+
+procedure TEventBusTest.TestPostEntityWithItsSelfInChildObject;
+var
+  LPerson: TPerson;
+  LSubscriber: TPersonSubscriber;
+begin
+  LSubscriber := TPersonSubscriber.Create;
+  try
+    LSubscriber.ObjOwner := true;
+    TEventBus.GetDefault.RegisterSubscriber(LSubscriber);
+    LPerson := TPerson.Create;
+    LPerson.Firstname := 'Howard';
+    LPerson.Lastname := 'Stark';
+    // stackoverflow by TRTTIUtils.clone
+    LPerson.Child := LPerson;
+    TEventBus.GetDefault.Post(TDEBEvent<TPerson>.Create(LPerson));
+    Assert.AreEqual('Howard', LSubscriber.Person.Firstname);
+    Assert.AreEqual('Tony', LSubscriber.Person.Child.Firstname);
   finally
     LSubscriber.Free;
   end;

@@ -28,7 +28,7 @@ type
     FThreadMode: TThreadMode;
   public
     constructor Create(AThreadMode: TThreadMode = TThreadMode.Posting;
-      AContext: String = '');
+      const AContext: String = '');
     property ThreadMode: TThreadMode read FThreadMode;
     property Context: String read FContext;
   end;
@@ -38,8 +38,9 @@ implementation
 { SubscribeAttribute }
 
 constructor SubscribeAttribute.Create(AThreadMode
-  : TThreadMode = TThreadMode.Posting; AContext: String = '');
+  : TThreadMode = TThreadMode.Posting; const AContext: String = '');
 begin
+  inherited Create;
   FContext := AContext;
   FThreadMode := AThreadMode;
 end;

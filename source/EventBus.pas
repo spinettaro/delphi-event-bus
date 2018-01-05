@@ -29,7 +29,7 @@ type
     procedure RegisterSubscriber(ASubscriber: TObject);
     function IsRegistered(ASubscriber: TObject): Boolean;
     procedure Unregister(ASubscriber: TObject);
-    procedure Post(AEvent: TObject; AContext: String = '';
+    procedure Post(AEvent: TObject; const AContext: String = '';
       AEventOwner: Boolean = true);
   end;
 
@@ -57,7 +57,7 @@ type
     procedure RegisterSubscriber(ASubscriber: TObject);
     function IsRegistered(ASubscriber: TObject): Boolean;
     procedure Unregister(ASubscriber: TObject);
-    procedure Post(AEvent: TObject; AContext: String = '';
+    procedure Post(AEvent: TObject; const AContext: String = '';
       AEventOwner: Boolean = true);
     class function GetDefault: TEventBus;
   end;
@@ -69,7 +69,7 @@ uses
 {$IF CompilerVersion >= 28.0}
   System.Threading,
 {$ENDIF}
-  RttiUtilsU, ObjectsMappers, System.JSON;
+  System.JSON, REST.JSON, RTTIUtilsU;
 
 var
   FCS: TCriticalSection;
@@ -77,8 +77,17 @@ var
   { TEventBus }
 
 function TEventBus.CloneEvent(AEvent: TObject): TObject;
+var
+  LJSONObj: TJSONObject;
 begin
-  Result := TRTTIUtils.Clone(AEvent);
+  Result := TRTTIUtils.CreateObject(AEvent.QualifiedClassName);
+  LJSONObj := TJson.ObjectToJsonObject(AEvent);
+  try
+    TJson.JsonToObject(Result, LJSONObj);
+  finally
+    LJSONObj.Free;
+  end;
+//   Result := TRTTIUtils.Clone(AEvent);
   // LObj := Mapper.ObjectToJSONObject(AEvent);
   // try
   // Result := Mapper.JSONObjectToObject(AEvent.ClassType, LObj);
@@ -156,7 +165,7 @@ begin
   end;
 end;
 
-procedure TEventBus.Post(AEvent: TObject; AContext: String = '';
+procedure TEventBus.Post(AEvent: TObject; const AContext: String = '';
   AEventOwner: Boolean = true);
 var
   LSubscriptions: TObjectList<TSubscription>;
