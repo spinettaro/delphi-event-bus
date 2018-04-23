@@ -4,8 +4,8 @@ interface
 
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants,
-  System.Classes, Vcl.Graphics,
-  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, BOU, EventBus.Attributes;
+  System.Classes, Vcl.Graphics, EventBus.Commons,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, BOU;
 
 type
   TFormLogger = class(TForm)

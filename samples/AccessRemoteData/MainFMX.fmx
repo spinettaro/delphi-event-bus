@@ -34,6 +34,11 @@ object HeaderFooterForm: THeaderFooterForm
     TabIndex = 1
     TabOrder = 2
     TabPosition = None
+    Sizes = (
+      384s
+      519s
+      384s
+      519s)
     object TabItem1: TTabItem
       CustomIcon = <
         item
@@ -118,12 +123,12 @@ object HeaderFooterForm: THeaderFooterForm
             Value = 6.282934691915696000
           end>
         object Edit1: TEdit
-          Hint = 'Username'
           Touch.InteractiveGestures = [LongTap, DoubleTap]
           Align = Client
           TabOrder = 0
+          Hint = 'Username'
           Size.Width = 308.013977050781300000
-          Size.Height = 32.000000000000000000
+          Size.Height = 32.608428955078130000
           Size.PlatformDefault = False
           TextPrompt = 'Username...'
         end
@@ -133,7 +138,7 @@ object HeaderFooterForm: THeaderFooterForm
           TabOrder = 1
           Password = True
           Size.Width = 308.013977050781300000
-          Size.Height = 32.000000000000000000
+          Size.Height = 32.608428955078130000
           Size.PlatformDefault = False
           TextPrompt = 'Password...'
         end
@@ -174,6 +179,8 @@ object HeaderFooterForm: THeaderFooterForm
       StyleLookup = ''
       TabOrder = 0
       Text = 'TabItem2'
+      ExplicitSize.cx = 8.000000000000000000
+      ExplicitSize.cy = 8.000000000000000000
       object GridPanelLayout2: TGridPanelLayout
         Align = Client
         Size.Width = 384.000000000000000000

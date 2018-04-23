@@ -4,7 +4,7 @@ interface
 
 uses
   System.SysUtils, System.Types, System.UITypes, System.Classes,
-  System.Variants, EventBus.Attributes,
+  System.Variants,
   FMX.Types, FMX.Controls, FMX.Forms, FMX.Graphics, FMX.Dialogs, FMX.Objects,
   System.ImageList, FMX.ImgList, ModelU, EventBus.Commons;
 

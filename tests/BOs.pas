@@ -3,8 +3,7 @@ unit BOs;
 interface
 
 uses
-  EventBus.Attributes, EventBus.Commons, System.SyncObjs,
-  System.Generics.Collections;
+  EventBus.Commons, System.SyncObjs, System.Generics.Collections;
 
 type
 

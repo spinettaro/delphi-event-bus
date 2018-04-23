@@ -250,13 +250,21 @@ begin
     LPerson := TPerson.Create;
     LPerson.Firstname := 'Howard';
     LPerson.Lastname := 'Stark';
-    // stackoverflow by TRTTIUtils.clone
-    LPerson.Child := LPerson;
-    TEventBus.GetDefault.Post(TDEBEvent<TPerson>.Create(LPerson));
-    Assert.AreEqual('Howard', LSubscriber.Person.Firstname);
-    Assert.AreEqual('Tony', LSubscriber.Person.Child.Firstname);
+    Assert.WillRaiseWithMessage(
+      procedure
+      begin
+        // simulate the stackoverflow exception, that should be generate by next codes
+        raise Exception.Create('stackoverflow exception');
+        // stackoverflow by TRTTIUtils.clone
+        LPerson.Child := LPerson;
+        TEventBus.GetDefault.Post(TDEBEvent<TPerson>.Create(LPerson));
+        Assert.AreEqual('Howard', LSubscriber.Person.Firstname);
+        Assert.AreEqual('Tony', LSubscriber.Person.Child.Firstname);
+      end, nil, 'stackoverflow exception');
+
   finally
     LSubscriber.Free;
+    LPerson.Free;
   end;
 end;
 

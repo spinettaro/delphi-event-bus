@@ -25,6 +25,17 @@ type
 
   TThreadMode = (Posting, Main, Async, Background);
 
+  SubscribeAttribute = class(TCustomAttribute)
+  private
+    FContext: String;
+    FThreadMode: TThreadMode;
+  public
+    constructor Create(AThreadMode: TThreadMode = TThreadMode.Posting;
+      const AContext: String = '');
+    property ThreadMode: TThreadMode read FThreadMode;
+    property Context: String read FContext;
+  end;
+
   TDEBEvent<T> = class(TObject)
   private
     FDataOwner: boolean;
@@ -43,6 +54,16 @@ implementation
 
 uses
   RTTIUtilsU, System.Rtti;
+
+{ SubscribeAttribute }
+
+constructor SubscribeAttribute.Create(AThreadMode
+  : TThreadMode = TThreadMode.Posting; const AContext: String = '');
+begin
+  inherited Create;
+  FContext := AContext;
+  FThreadMode := AThreadMode;
+end;
 
 { TDEBSimpleEvent<T> }
 
@@ -79,3 +100,4 @@ begin
 end;
 
 end.
+

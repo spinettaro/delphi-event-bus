@@ -4,7 +4,7 @@ interface
 
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants,
-  System.Classes, Vcl.Graphics, EventU, EventBus.Attributes,
+  System.Classes, Vcl.Graphics, EventU, EventBus.Commons,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ExtCtrls;
 
 type

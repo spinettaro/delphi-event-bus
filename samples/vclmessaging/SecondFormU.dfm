@@ -40,8 +40,8 @@ object frmSecond: TfrmSecond
       AlignWithMargins = True
       Left = 4
       Top = 4
-      Width = 225
-      Height = 28
+      Width = 111
+      Height = 23
       Align = alClient
       Caption = 'Second Form'
       Font.Charset = DEFAULT_CHARSET
@@ -50,8 +50,6 @@ object frmSecond: TfrmSecond
       Font.Name = 'Tahoma'
       Font.Style = []
       ParentFont = False
-      ExplicitWidth = 111
-      ExplicitHeight = 23
     end
     object CheckBox1: TCheckBox
       Left = 232

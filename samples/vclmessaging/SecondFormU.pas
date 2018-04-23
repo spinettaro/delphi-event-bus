@@ -5,7 +5,7 @@ interface
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants,
   System.Classes, Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs,
-  Vcl.StdCtrls, Vcl.ExtCtrls, EventBus.Attributes, EventU, EventBus.Commons;
+  Vcl.StdCtrls, Vcl.ExtCtrls, EventU, EventBus.Commons;
 
 type
   TfrmSecond = class(TForm)

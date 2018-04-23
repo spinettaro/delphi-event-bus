@@ -19,7 +19,7 @@ unit EventBus;
 interface
 
 uses
-  System.SyncObjs, EventBus.Subscribers, Generics.Collections, EventBus.Poster,
+  System.SyncObjs, EventBus.Subscribers, Generics.Collections,
   System.SysUtils, System.Classes, EventBus.Commons;
 
 type
@@ -38,7 +38,6 @@ type
     FSubscriptionsByEventType
       : TObjectDictionary<TClass, TObjectList<TSubscription>>;
     FTypesBySubscriber: TObjectDictionary<TObject, TList<TClass>>;
-    FBckPoster: TBackgroundPoster;
     class var FDefaultInstance: TEventBus;
     procedure Subscribe(ASubscriber: TObject;
       ASubscriberMethod: TSubscriberMethod);
@@ -65,11 +64,11 @@ type
 implementation
 
 uses
-  System.Rtti, EventBus.Attributes,
+  System.Rtti,
 {$IF CompilerVersion >= 28.0}
   System.Threading,
 {$ENDIF}
-  System.JSON, REST.JSON, RTTIUtilsU;
+  RTTIUtilsU;
 
 var
   FCS: TCriticalSection;
@@ -77,17 +76,17 @@ var
   { TEventBus }
 
 function TEventBus.CloneEvent(AEvent: TObject): TObject;
-var
-  LJSONObj: TJSONObject;
+// var
+// LJSONObj: TJSONObject;
 begin
-  Result := TRTTIUtils.CreateObject(AEvent.QualifiedClassName);
-  LJSONObj := TJson.ObjectToJsonObject(AEvent);
-  try
-    TJson.JsonToObject(Result, LJSONObj);
-  finally
-    LJSONObj.Free;
-  end;
-//   Result := TRTTIUtils.Clone(AEvent);
+  // Result := TRTTIUtils.CreateObject(AEvent.QualifiedClassName);
+  // LJSONObj := TJson.ObjectToJsonObject(AEvent);
+  // try
+  // TJson.JsonToObject(Result, LJSONObj);
+  // finally
+  // LJSONObj.Free;
+  // end;
+  Result := TRTTIUtils.Clone(AEvent);
   // LObj := Mapper.ObjectToJSONObject(AEvent);
   // try
   // Result := Mapper.JSONObjectToObject(AEvent.ClassType, LObj);
@@ -103,14 +102,12 @@ begin
     TObjectList < TSubscription >>.Create([doOwnsValues]);
   FTypesBySubscriber := TObjectDictionary < TObject,
     TList < TClass >>.Create([doOwnsValues]);
-  FBckPoster := TBackgroundPoster.Create;
 end;
 
 destructor TEventBus.Destroy;
 begin
   FreeAndNil(FSubscriptionsByEventType);
   FreeAndNil(FTypesBySubscriber);
-  FreeAndNil(FBckPoster);
   inherited;
 end;
 
@@ -217,7 +214,12 @@ begin
         TThread.Queue(nil, GenerateThreadProc(ASubscription, AEvent));
     Background:
       if (AIsMainThread) then
-        FBckPoster.Enqueue(GenerateTProc(ASubscription, AEvent))
+{$IF CompilerVersion >= 28.0}
+        TTask.Run(GenerateTProc(ASubscription, AEvent))
+{$ELSE}
+        TThread.CreateAnonymousThread(GenerateTProc(ASubscription,
+          AEvent)).Start
+{$ENDIF}
       else
         InvokeSubscriber(ASubscription, AEvent);
     Async:

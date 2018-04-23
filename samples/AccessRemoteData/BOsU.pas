@@ -3,7 +3,7 @@ unit BOsU;
 interface
 
 uses
-  EventBus.Subscribers, EventBus.Commons, EventBus.Attributes;
+  EventBus.Subscribers, EventBus.Commons;
 
 type
 

@@ -37,7 +37,8 @@ type
     procedure SetContext(const Value: String);
   public
     constructor Create(ARttiMethod: TRttiMethod; AEventType: TClass;
-      AThreadMode: TThreadMode; const AContext: String = ''; APriority: Integer = 1);
+      AThreadMode: TThreadMode; const AContext: String = '';
+      APriority: Integer = 1);
     destructor Destroy; override;
     property EventType: TClass read FEventType write SetEventType;
     property Method: TRttiMethod read FMethod write SetMethod;
@@ -78,7 +79,7 @@ type
 implementation
 
 uses
-  EventBus.Attributes, RTTIUtilsU, System.SysUtils, System.TypInfo;
+  RTTIUtilsU, System.SysUtils, System.TypInfo;
 
 { TSubscriberMethod }
 
