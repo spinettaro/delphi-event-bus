@@ -191,6 +191,8 @@ begin
     finally
       if (AEventOwner and Assigned(AEvent)) then
         AEvent.Free;
+      if Assigned(LEvent) then
+        LEvent.Free;
     end;
   finally
     FCS.Release
