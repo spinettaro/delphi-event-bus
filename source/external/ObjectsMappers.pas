@@ -784,73 +784,43 @@ begin
         AJSONObject.AddPair(key, ADataSet.Fields[I].AsString);
       TFieldType.ftDate:
         begin
-          if not ADataSet.Fields[I].IsNull then
-          begin
-            AJSONObject.AddPair(key, ISODateToString(ADataSet.Fields[I].AsDateTime));
-          end
-          else
-            AJSONObject.AddPair(key, TJSONNull.Create);
+          AJSONObject.AddPair(key, ISODateToString(ADataSet.Fields[I].AsDateTime));
         end;
       TFieldType.ftDateTime:
         begin
-          if not ADataSet.Fields[I].IsNull then
-          begin
-            AJSONObject.AddPair(key, ISODateTimeToString(ADataSet.Fields[I].AsDateTime));
-          end
-          else
-            AJSONObject.AddPair(key, TJSONNull.Create);
+          AJSONObject.AddPair(key, ISODateTimeToString(ADataSet.Fields[I].AsDateTime));
         end;
       TFieldType.ftTimeStamp:
         begin
-          if not ADataSet.Fields[I].IsNull then
-          begin
-            ts := ADataSet.Fields[I].AsSQLTimeStamp;
-            AJSONObject.AddPair(key, SQLTimeStampToStr('yyyy-mm-dd hh:nn:ss', ts));
-          end
-          else
-            AJSONObject.AddPair(key, TJSONNull.Create);
+          ts := ADataSet.Fields[I].AsSQLTimeStamp;
+          AJSONObject.AddPair(key, SQLTimeStampToStr('yyyy-mm-dd hh:nn:ss', ts));
         end;
       TFieldType.ftCurrency:
         begin
-          if not ADataSet.Fields[I].IsNull then
-          begin
-            // AJSONObject.AddPair(key, FormatCurr('0.00##', ADataSet.Fields[I].AsCurrency));
-            AJSONObject.AddPair(key, TJSONNumber.Create(ADataSet.Fields[I].AsCurrency));
-          end
-          else
-            AJSONObject.AddPair(key, TJSONNull.Create);
+          // AJSONObject.AddPair(key, FormatCurr('0.00##', ADataSet.Fields[I].AsCurrency));
+          AJSONObject.AddPair(key, TJSONNumber.Create(ADataSet.Fields[I].AsCurrency));
         end;
       TFieldType.ftBCD, TFieldType.ftFMTBcd:
         begin
-          if not ADataSet.Fields[I].IsNull then
-          begin
-            AJSONObject.AddPair(key, TJSONNumber.Create(BcdToDouble(ADataSet.Fields[I].AsBcd)));
-          end
-          else
-            AJSONObject.AddPair(key, TJSONNull.Create);
+          AJSONObject.AddPair(key, TJSONNumber.Create(BcdToDouble(ADataSet.Fields[I].AsBcd)));
         end;
       TFieldType.ftGraphic, TFieldType.ftBlob, TFieldType.ftStream:
         begin
-          if not ADataSet.Fields[I].IsNull then
-          begin
-            MS := TMemoryStream.Create;
+          MS := TMemoryStream.Create;
+          try
+            TBlobField(ADataSet.Fields[I]).SaveToStream(MS);
+            MS.Position := 0;
+            SS := TStringStream.Create('', TEncoding.ASCII);
             try
-              TBlobField(ADataSet.Fields[I]).SaveToStream(MS);
-              MS.Position := 0;
-              SS := TStringStream.Create('', TEncoding.ASCII);
-              try
-                EncodeStream(MS, SS);
-                SS.Position := 0;
-                AJSONObject.AddPair(key, SS.DataString);
-              finally
-                SS.Free;
-              end;
+              EncodeStream(MS, SS);
+              SS.Position := 0;
+              AJSONObject.AddPair(key, SS.DataString);
             finally
-              MS.Free;
+              SS.Free;
             end;
-          end
-          else
-            AJSONObject.AddPair(key, TJSONNull.Create);
+          finally
+            MS.Free;
+          end;
         end;
 
       // else
@@ -1234,7 +1204,7 @@ begin
                       Arr.AddElement(ObjectToJSONObject(Obj));
                 end;
               end
-              else //Ezequiel J. Müller convert regular list
+              else //Ezequiel J. MÃ¼ller convert regular list
               begin
                 ListCount := ctx.GetType(o.ClassInfo).GetProperty('Count').GetValue(o).AsInteger;
                 ListItems := ctx.GetType(o.ClassInfo).GetIndexedProperty('Items').ReadMethod;
@@ -2211,7 +2181,7 @@ begin
                     list.Add(Mapper.JSONObjectToObject(cref, Arr.Get(I) as TJSONObject));
                   end;
                 end
-                else //Ezequiel J. Müller convert regular list
+                else //Ezequiel J. MÃ¼ller convert regular list
                 begin
                   ListMethod := ctx.GetType(o.ClassInfo).GetMethod('Add');
                   if (ListMethod <> nil) then
@@ -2269,7 +2239,7 @@ begin
     InternalJSONObjectToObject(ctx, AJSONObject, AObject);
     Result := AObject;
   except
-    //Ezequiel J. Müller
+    //Ezequiel J. MÃ¼ller
     //It is important to pass on the exception, to be able to identify the problem you are experiencing.
     on E: Exception do
     begin
