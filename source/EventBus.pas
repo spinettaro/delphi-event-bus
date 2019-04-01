@@ -148,8 +148,20 @@ end;
 procedure TEventBus.InvokeSubscriber(ASubscription: TSubscription;
   AEvent: TObject);
 begin
-  ASubscription.SubscriberMethod.Method.Invoke(ASubscription.Subscriber,
-    [AEvent]);
+  try
+    ASubscription.SubscriberMethod.Method.Invoke(ASubscription.Subscriber,
+      [AEvent]);
+  except
+    on E: Exception do
+    begin
+      raise Exception.CreateFmt(
+        'Error invoking subscriber method. Subscriber class: %s. Event type: %s. Original exception: %s: %s',
+        [ASubscription.Subscriber.ClassName,
+         ASubscription.SubscriberMethod.EventType.ClassName,
+         E.ClassName, E.Message
+        ]);
+    end;
+  end;
 end;
 
 function TEventBus.IsRegistered(ASubscriber: TObject): Boolean;
