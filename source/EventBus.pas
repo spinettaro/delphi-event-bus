@@ -1,5 +1,5 @@
 { *******************************************************************************
-  Copyright 2016 Daniele Spinetti
+  Copyright 2016-2019 Daniele Spinetti
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -35,9 +35,9 @@ type
 
   TEventBus = class(TInterfacedObject, IEventBus)
   private
-    FSubscriptionsByEventType
+    FSubscriptionsOfGivenEventType
       : TObjectDictionary<TClass, TObjectList<TSubscription>>;
-    FTypesBySubscriber: TObjectDictionary<TObject, TList<TClass>>;
+    FTypesOfGivenSubscriber: TObjectDictionary<TObject, TList<TClass>>;
     class var FDefaultInstance: TEventBus;
     procedure Subscribe(ASubscriber: TObject;
       ASubscriberMethod: TSubscriberMethod);
@@ -98,16 +98,16 @@ end;
 constructor TEventBus.Create;
 begin
   inherited Create;
-  FSubscriptionsByEventType := TObjectDictionary < TClass,
+  FSubscriptionsOfGivenEventType := TObjectDictionary < TClass,
     TObjectList < TSubscription >>.Create([doOwnsValues]);
-  FTypesBySubscriber := TObjectDictionary < TObject,
+  FTypesOfGivenSubscriber := TObjectDictionary < TObject,
     TList < TClass >>.Create([doOwnsValues]);
 end;
 
 destructor TEventBus.Destroy;
 begin
-  FreeAndNil(FSubscriptionsByEventType);
-  FreeAndNil(FTypesBySubscriber);
+  FreeAndNil(FSubscriptionsOfGivenEventType);
+  FreeAndNil(FTypesOfGivenSubscriber);
   inherited;
 end;
 
@@ -156,7 +156,7 @@ function TEventBus.IsRegistered(ASubscriber: TObject): Boolean;
 begin
   FCS.Acquire;
   try
-    Result := FTypesBySubscriber.ContainsKey(ASubscriber);
+    Result := FTypesOfGivenSubscriber.ContainsKey(ASubscriber);
   finally
     FCS.Release;
   end;
@@ -175,14 +175,18 @@ begin
     try
       LIsMainThread := MainThreadID = TThread.CurrentThread.ThreadID;
 
-      FSubscriptionsByEventType.TryGetValue(AEvent.ClassType, LSubscriptions);
+      FSubscriptionsOfGivenEventType.TryGetValue(AEvent.ClassType, LSubscriptions);
 
       if (not Assigned(LSubscriptions)) then
         Exit;
 
       for LSubscription in LSubscriptions do
       begin
-        if ((AContext <> '') and (LSubscription.Context <> AContext)) then
+
+        if not LSubscription.Active then
+          continue;
+
+        if ((not AContext.IsEmpty) and (LSubscription.Context <> AContext)) then
           continue;
 
         LEvent := CloneEvent(AEvent);
@@ -262,14 +266,14 @@ var
 begin
   LEventType := ASubscriberMethod.EventType;
   LNewSubscription := TSubscription.Create(ASubscriber, ASubscriberMethod);
-  if (not FSubscriptionsByEventType.ContainsKey(LEventType)) then
+  if (not FSubscriptionsOfGivenEventType.ContainsKey(LEventType)) then
   begin
     LSubscriptions := TObjectList<TSubscription>.Create();
-    FSubscriptionsByEventType.Add(LEventType, LSubscriptions);
+    FSubscriptionsOfGivenEventType.Add(LEventType, LSubscriptions);
   end
   else
   begin
-    LSubscriptions := FSubscriptionsByEventType.Items[LEventType];
+    LSubscriptions := FSubscriptionsOfGivenEventType.Items[LEventType];
     if (LSubscriptions.Contains(LNewSubscription)) then
       raise Exception.CreateFmt('Subscriber %s already registered to event %s ',
         [ASubscriber.ClassName, LEventType.ClassName]);
@@ -277,10 +281,10 @@ begin
 
   LSubscriptions.Add(LNewSubscription);
 
-  if (not FTypesBySubscriber.TryGetValue(ASubscriber, LSubscribedEvents)) then
+  if (not FTypesOfGivenSubscriber.TryGetValue(ASubscriber, LSubscribedEvents)) then
   begin
     LSubscribedEvents := TList<TClass>.Create;
-    FTypesBySubscriber.Add(ASubscriber, LSubscribedEvents);
+    FTypesOfGivenSubscriber.Add(ASubscriber, LSubscribedEvents);
   end;
   LSubscribedEvents.Add(LEventType);
 
@@ -293,11 +297,11 @@ var
 begin
   FCS.Acquire;
   try
-    if FTypesBySubscriber.TryGetValue(ASubscriber, LSubscribedTypes) then
+    if FTypesOfGivenSubscriber.TryGetValue(ASubscriber, LSubscribedTypes) then
     begin
       for LEventType in LSubscribedTypes do
         UnsubscribeByEventType(ASubscriber, LEventType);
-      FTypesBySubscriber.Remove(ASubscriber);
+      FTypesOfGivenSubscriber.Remove(ASubscriber);
     end;
     // else {
     // Log.w(TAG, "Subscriber to unregister was not registered before: " + subscriber.getClass());
@@ -314,7 +318,7 @@ var
   LSize, I: Integer;
   LSubscription: TSubscription;
 begin
-  LSubscriptions := FSubscriptionsByEventType.Items[AEventType];
+  LSubscriptions := FSubscriptionsOfGivenEventType.Items[AEventType];
   if (not Assigned(LSubscriptions)) or (LSubscriptions.Count < 1) then
     Exit;
   LSize := LSubscriptions.Count;
