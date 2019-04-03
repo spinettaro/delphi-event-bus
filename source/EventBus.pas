@@ -337,7 +337,9 @@ begin
   for I := LSize - 1 downto 0 do
   begin
     LSubscription := LSubscriptions[I];
-    if (LSubscription.Subscriber.Equals(ASubscriber)) then
+    // Notes: In case the subscriber has been freed but it didn't unregister itself, calling
+    // LSubscription.Subscriber.Equals() will cause Access Violation, so we use '=' instead.
+    if LSubscription.Subscriber = ASubscriber then
     begin
       LSubscription.Active := false;
       LSubscriptions.Delete(I);
