@@ -130,8 +130,11 @@ function TEventBus.GenerateThreadProc(ASubscription: TSubscription;
 begin
   Result := procedure
     begin
-      ASubscription.SubscriberMethod.Method.Invoke(ASubscription.Subscriber,
-        [AEvent]);
+      if ASubscription.Active then
+      begin
+        ASubscription.SubscriberMethod.Method.Invoke(ASubscription.Subscriber,
+          [AEvent]);
+      end;
     end;
 end;
 
@@ -140,8 +143,11 @@ function TEventBus.GenerateTProc(ASubscription: TSubscription;
 begin
   Result := procedure
     begin
-      ASubscription.SubscriberMethod.Method.Invoke(ASubscription.Subscriber,
-        [AEvent]);
+      if ASubscription.Active then
+      begin
+        ASubscription.SubscriberMethod.Method.Invoke(ASubscription.Subscriber,
+          [AEvent]);
+      end;
     end;
 end;
 
