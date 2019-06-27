@@ -34,31 +34,34 @@ type
   end;
 
   TEventBus = class(TInterfacedObject, IEventBus)
+  protected
   private
-    FSubscriptionsOfGivenEventType
-      : TObjectDictionary<TClass, TObjectList<TSubscription>>;
-    FTypesOfGivenSubscriber: TObjectDictionary<TObject, TList<TClass>>;
     class var FDefaultInstance: TEventBus;
+  var
+    FTypesOfGivenSubscriber: TObjectDictionary<TObject, TList<TClass>>;
+    FSubscriptionsOfGivenEventType: TObjectDictionary<TClass, TObjectList<TSubscription>>;
     procedure Subscribe(ASubscriber: TObject;
       ASubscriberMethod: TSubscriberMethod);
     procedure UnsubscribeByEventType(ASubscriber: TObject; AEventType: TClass);
-    procedure PostToSubscription(ASubscription: TSubscription; AEvent: TObject;
-      AIsMainThread: Boolean);
     procedure InvokeSubscriber(ASubscription: TSubscription; AEvent: TObject);
     function GenerateTProc(ASubscription: TSubscription;
       AEvent: TObject): TProc;
     function GenerateThreadProc(ASubscription: TSubscription; AEvent: TObject)
       : TThreadProcedure;
-    function CloneEvent(AEvent: TObject): TObject;
+  protected
+    function CloneEvent(AEvent: TObject): TObject; virtual;
+    procedure PostToSubscription(ASubscription: TSubscription; AEvent: TObject; AIsMainThread: Boolean); virtual;
   public
-    constructor Create();
+    constructor Create; virtual;
     destructor Destroy; override;
-    procedure RegisterSubscriber(ASubscriber: TObject);
+    procedure RegisterSubscriber(ASubscriber: TObject); virtual;
     function IsRegistered(ASubscriber: TObject): Boolean;
-    procedure Unregister(ASubscriber: TObject);
-    procedure Post(AEvent: TObject; const AContext: String = '';
-      AEventOwner: Boolean = true);
+    procedure Unregister(ASubscriber: TObject); virtual;
+    procedure Post(AEvent: TObject; const AContext: String = ''; AEventOwner: Boolean = true); virtual;
     class function GetDefault: TEventBus;
+    property TypesOfGivenSubscriber: TObjectDictionary<TObject, TList<TClass>> read FTypesOfGivenSubscriber;
+    property SubscriptionsOfGivenEventType: TObjectDictionary<TClass, TObjectList<TSubscription>> read
+        FSubscriptionsOfGivenEventType;
   end;
 
 implementation
@@ -130,8 +133,11 @@ function TEventBus.GenerateThreadProc(ASubscription: TSubscription;
 begin
   Result := procedure
     begin
-      ASubscription.SubscriberMethod.Method.Invoke(ASubscription.Subscriber,
-        [AEvent]);
+      if ASubscription.Active then
+      begin
+        ASubscription.SubscriberMethod.Method.Invoke(ASubscription.Subscriber,
+          [AEvent]);
+      end;
     end;
 end;
 
@@ -140,8 +146,11 @@ function TEventBus.GenerateTProc(ASubscription: TSubscription;
 begin
   Result := procedure
     begin
-      ASubscription.SubscriberMethod.Method.Invoke(ASubscription.Subscriber,
-        [AEvent]);
+      if ASubscription.Active then
+      begin
+        ASubscription.SubscriberMethod.Method.Invoke(ASubscription.Subscriber,
+          [AEvent]);
+      end;
     end;
 end;
 
@@ -174,8 +183,7 @@ begin
   end;
 end;
 
-procedure TEventBus.Post(AEvent: TObject; const AContext: String = '';
-  AEventOwner: Boolean = true);
+procedure TEventBus.Post(AEvent: TObject; const AContext: String = ''; AEventOwner: Boolean = true);
 var
   LSubscriptions: TObjectList<TSubscription>;
   LSubscription: TSubscription;
@@ -213,8 +221,7 @@ begin
   end;
 end;
 
-procedure TEventBus.PostToSubscription(ASubscription: TSubscription;
-  AEvent: TObject; AIsMainThread: Boolean);
+procedure TEventBus.PostToSubscription(ASubscription: TSubscription; AEvent: TObject; AIsMainThread: Boolean);
 begin
 
   if not Assigned(ASubscription.Subscriber) then
