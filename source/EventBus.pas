@@ -58,7 +58,7 @@ type
     function IsRegistered(ASubscriber: TObject): Boolean;
     procedure Unregister(ASubscriber: TObject); virtual;
     procedure Post(AEvent: TObject; const AContext: String = ''; AEventOwner: Boolean = true); virtual;
-    class function GetDefault: TEventBus;
+    class function GetDefault: TEventBus; virtual;
     property TypesOfGivenSubscriber: TObjectDictionary<TObject, TList<TClass>> read FTypesOfGivenSubscriber;
     property SubscriptionsOfGivenEventType: TObjectDictionary<TClass, TObjectList<TSubscription>> read
         FSubscriptionsOfGivenEventType;
@@ -120,7 +120,7 @@ begin
   try
     if (not Assigned(FDefaultInstance)) then
     begin
-      FDefaultInstance := TEventBus.Create;
+      FDefaultInstance := Self.Create;
     end;
     Result := FDefaultInstance;
   finally
