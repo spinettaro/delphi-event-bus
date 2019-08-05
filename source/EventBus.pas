@@ -24,7 +24,8 @@ uses
 
 type
 
-  TCloneEvent = TFunc<TObject,TObject>;
+  TCloneEventCallback = function (const AObject: TObject): TObject of object;
+  TCloneEventMethod = TFunc<TObject,TObject>;
 
   IEventBus = Interface
     ['{7BDF4536-F2BA-4FBA-B186-09E1EE6C7E35}']
@@ -42,8 +43,8 @@ type
   var
     FTypesOfGivenSubscriber: TObjectDictionary<TObject, TList<TClass>>;
     FSubscriptionsOfGivenEventType: TObjectDictionary<TClass, TObjectList<TSubscription>>;
-    FCustomClonerDict: TDictionary<String, TCloneEvent>;
-    FOnCloneEvent: TCloneEvent;
+    FCustomClonerDict: TDictionary<String, TCloneEventMethod>;
+    FOnCloneEvent: TCloneEventCallback;
     procedure Subscribe(ASubscriber: TObject;
       ASubscriberMethod: TSubscriberMethod);
     procedure UnsubscribeByEventType(ASubscriber: TObject; AEventType: TClass);
@@ -66,8 +67,8 @@ type
     property TypesOfGivenSubscriber: TObjectDictionary<TObject, TList<TClass>> read FTypesOfGivenSubscriber;
     property SubscriptionsOfGivenEventType: TObjectDictionary<TClass, TObjectList<TSubscription>> read
         FSubscriptionsOfGivenEventType;
-    property OnCloneEvent: TCloneEvent write FOnCloneEvent;
-    procedure AddCustomClassCloning(const AQualifiedClassName: String; const ACloneEvent: TCloneEvent);
+    property OnCloneEvent: TCloneEventCallback write FOnCloneEvent;
+    procedure AddCustomClassCloning(const AQualifiedClassName: String; const ACloneEvent: TCloneEventMethod);
     procedure RemoveCustomClassCloning(const AQualifiedClassName: String);
   end;
 
@@ -92,7 +93,7 @@ begin
     TObjectList < TSubscription >>.Create([doOwnsValues]);
   FTypesOfGivenSubscriber := TObjectDictionary < TObject,
     TList < TClass >>.Create([doOwnsValues]);
-  FCustomClonerDict := TDictionary<String, TCloneEvent>.Create;
+  FCustomClonerDict := TDictionary<String, TCloneEventMethod>.Create;
 end;
 
 destructor TEventBus.Destroy;
@@ -104,14 +105,14 @@ begin
 end;
 
 procedure TEventBus.AddCustomClassCloning(const AQualifiedClassName: String;
-  const ACloneEvent: TCloneEvent);
+  const ACloneEvent: TCloneEventMethod);
 begin
   FCustomClonerDict.Add(AQualifiedClassName, ACloneEvent);
 end;
 
 function TEventBus.CloneEvent(AEvent: TObject): TObject;
 var
-  LCloneEvent: TCloneEvent;
+  LCloneEvent: TCloneEventMethod;
 begin
   if FCustomClonerDict.TryGetValue(AEvent.QualifiedClassName, LCloneEvent) then
     Result := LCloneEvent(AEvent)

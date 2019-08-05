@@ -255,17 +255,7 @@ begin
     LPerson.Firstname := 'Howard';
     LPerson.Lastname := 'Stark';
 
-    TEventBus.GetDefault.OnCloneEvent := function(AObject: TObject):TObject
-    var
-      LEvent: TDEBEvent<TPerson>;
-    begin
-      LEvent:= TDEBEvent<TPerson>.Create;
-      LEvent.DataOwner := (AObject as TDEBEvent<TPerson>).DataOwner;
-      LEvent.Data := TPerson.Create;
-      LEvent.Data.Firstname := (AObject as TDEBEvent<TPerson>).Data.Firstname + 'Custom';
-      LEvent.Data.Lastname := (AObject as TDEBEvent<TPerson>).Data.Lastname + 'Custom';
-      Result := LEvent;
-    end;
+    TEventBus.GetDefault.OnCloneEvent := SimpleCustomClone;
 
     TEventBus.GetDefault.Post(TDEBEvent<TPerson>.Create(LPerson));
     Assert.AreEqual('HowardCustom', LSubscriber.Person.Firstname);
