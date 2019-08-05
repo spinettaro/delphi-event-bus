@@ -210,7 +210,8 @@ end;
 destructor TPerson.Destroy;
 begin
   if Assigned(Child) then
-    Child.Free;
+    if integer(self) <> integer(Child) then
+      Child.Free;
   inherited;
 end;
 
