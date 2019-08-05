@@ -24,6 +24,8 @@ uses
 
 type
 
+  TCloneEvent = TFunc<TObject,TObject>;
+
   IEventBus = Interface
     ['{7BDF4536-F2BA-4FBA-B186-09E1EE6C7E35}']
     procedure RegisterSubscriber(ASubscriber: TObject);
@@ -40,6 +42,8 @@ type
   var
     FTypesOfGivenSubscriber: TObjectDictionary<TObject, TList<TClass>>;
     FSubscriptionsOfGivenEventType: TObjectDictionary<TClass, TObjectList<TSubscription>>;
+    FCustomClonerDict: TDictionary<String, TCloneEvent>;
+    FOnCloneEvent: TCloneEvent;
     procedure Subscribe(ASubscriber: TObject;
       ASubscriberMethod: TSubscriberMethod);
     procedure UnsubscribeByEventType(ASubscriber: TObject; AEventType: TClass);
@@ -62,6 +66,9 @@ type
     property TypesOfGivenSubscriber: TObjectDictionary<TObject, TList<TClass>> read FTypesOfGivenSubscriber;
     property SubscriptionsOfGivenEventType: TObjectDictionary<TClass, TObjectList<TSubscription>> read
         FSubscriptionsOfGivenEventType;
+    property OnCloneEvent: TCloneEvent write FOnCloneEvent;
+    procedure AddCustomClassCloning(const AQualifiedClassName: String; const ACloneEvent: TCloneEvent);
+    procedure RemoveCustomClassCloning(const AQualifiedClassName: String);
   end;
 
 implementation
@@ -78,26 +85,6 @@ var
 
   { TEventBus }
 
-function TEventBus.CloneEvent(AEvent: TObject): TObject;
-// var
-// LJSONObj: TJSONObject;
-begin
-  // Result := TRTTIUtils.CreateObject(AEvent.QualifiedClassName);
-  // LJSONObj := TJson.ObjectToJsonObject(AEvent);
-  // try
-  // TJson.JsonToObject(Result, LJSONObj);
-  // finally
-  // LJSONObj.Free;
-  // end;
-  Result := TRTTIUtils.Clone(AEvent);
-  // LObj := Mapper.ObjectToJSONObject(AEvent);
-  // try
-  // Result := Mapper.JSONObjectToObject(AEvent.ClassType, LObj);
-  // finally
-  // LObj.Free;
-  // end
-end;
-
 constructor TEventBus.Create;
 begin
   inherited Create;
@@ -105,13 +92,33 @@ begin
     TObjectList < TSubscription >>.Create([doOwnsValues]);
   FTypesOfGivenSubscriber := TObjectDictionary < TObject,
     TList < TClass >>.Create([doOwnsValues]);
+  FCustomClonerDict := TDictionary<String, TCloneEvent>.Create;
 end;
 
 destructor TEventBus.Destroy;
 begin
   FreeAndNil(FSubscriptionsOfGivenEventType);
   FreeAndNil(FTypesOfGivenSubscriber);
+  FreeAndNil(FCustomClonerDict);
   inherited;
+end;
+
+procedure TEventBus.AddCustomClassCloning(const AQualifiedClassName: String;
+  const ACloneEvent: TCloneEvent);
+begin
+  FCustomClonerDict.Add(AQualifiedClassName, ACloneEvent);
+end;
+
+function TEventBus.CloneEvent(AEvent: TObject): TObject;
+var
+  LCloneEvent: TCloneEvent;
+begin
+  if FCustomClonerDict.TryGetValue(AEvent.QualifiedClassName, LCloneEvent) then
+    Result := LCloneEvent(AEvent)
+  else if Assigned(FOnCloneEvent) then
+    Result := FOnCloneEvent(AEvent)
+  else
+    Result := TRTTIUtils.Clone(AEvent);
 end;
 
 class function TEventBus.GetDefault: TEventBus;
@@ -273,6 +280,12 @@ begin
   finally
     FCS.Release;
   end;
+end;
+
+procedure TEventBus.RemoveCustomClassCloning(const AQualifiedClassName: String);
+begin
+  // No exception is thrown if the key is not in the dictionary
+  FCustomClonerDict.Remove(AQualifiedClassName);
 end;
 
 procedure TEventBus.Subscribe(ASubscriber: TObject;
