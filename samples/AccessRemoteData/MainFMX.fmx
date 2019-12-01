@@ -8,7 +8,6 @@ object HeaderFooterForm: THeaderFooterForm
   FormFactor.Height = 900
   FormFactor.Devices = [Desktop]
   OnCreate = FormCreate
-  OnDestroy = FormDestroy
   DesignerMasterStyle = 3
   object Header: TToolBar
     Size.Width = 384.000000000000000000

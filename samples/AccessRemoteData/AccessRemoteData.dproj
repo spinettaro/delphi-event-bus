@@ -1,13 +1,13 @@
 ﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
     <PropertyGroup>
         <ProjectGuid>{A1E00957-BA39-49E3-9093-73504C30DB51}</ProjectGuid>
-        <ProjectVersion>18.4</ProjectVersion>
+        <ProjectVersion>18.7</ProjectVersion>
         <FrameworkType>FMX</FrameworkType>
         <MainSource>AccessRemoteData.dpr</MainSource>
         <Base>True</Base>
         <Config Condition="'$(Config)'==''">Debug</Config>
         <Platform Condition="'$(Platform)'==''">Win32</Platform>
-        <TargetedPlatforms>1119</TargetedPlatforms>
+        <TargetedPlatforms>5215</TargetedPlatforms>
         <AppType>Application</AppType>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Config)'=='Base' or '$(Base)'!=''">
@@ -35,6 +35,11 @@
     </PropertyGroup>
     <PropertyGroup Condition="('$(Platform)'=='OSX32' and '$(Base)'=='true') or '$(Base_OSX32)'!=''">
         <Base_OSX32>true</Base_OSX32>
+        <CfgParent>Base</CfgParent>
+        <Base>true</Base>
+    </PropertyGroup>
+    <PropertyGroup Condition="('$(Platform)'=='OSX64' and '$(Base)'=='true') or '$(Base_OSX64)'!=''">
+        <Base_OSX64>true</Base_OSX64>
         <CfgParent>Base</CfgParent>
         <Base>true</Base>
     </PropertyGroup>
@@ -67,6 +72,12 @@
     </PropertyGroup>
     <PropertyGroup Condition="('$(Platform)'=='OSX32' and '$(Cfg_1)'=='true') or '$(Cfg_1_OSX32)'!=''">
         <Cfg_1_OSX32>true</Cfg_1_OSX32>
+        <CfgParent>Cfg_1</CfgParent>
+        <Cfg_1>true</Cfg_1>
+        <Base>true</Base>
+    </PropertyGroup>
+    <PropertyGroup Condition="('$(Platform)'=='OSX64' and '$(Cfg_1)'=='true') or '$(Cfg_1_OSX64)'!=''">
+        <Cfg_1_OSX64>true</Cfg_1_OSX64>
         <CfgParent>Cfg_1</CfgParent>
         <Cfg_1>true</Cfg_1>
         <Base>true</Base>
@@ -136,6 +147,11 @@
         <Android_LauncherIcon48>$(BDS)\bin\Artwork\Android\FM_LauncherIcon_48x48.png</Android_LauncherIcon48>
         <VerInfo_Keys>package=com.embarcadero.$(MSBuildProjectName);label=$(MSBuildProjectName);versionCode=1;versionName=1.0.0;persistent=False;restoreAnyVersion=False;installLocation=preferExternal;largeHeap=False;theme=TitleBar;hardwareAccelerated=true;apiKey=</VerInfo_Keys>
         <BT_BuildType>Debug</BT_BuildType>
+        <Android_NotificationIcon24>$(BDS)\bin\Artwork\Android\FM_NotificationIcon_24x24.png</Android_NotificationIcon24>
+        <Android_NotificationIcon36>$(BDS)\bin\Artwork\Android\FM_NotificationIcon_36x36.png</Android_NotificationIcon36>
+        <Android_NotificationIcon48>$(BDS)\bin\Artwork\Android\FM_NotificationIcon_48x48.png</Android_NotificationIcon48>
+        <Android_NotificationIcon72>$(BDS)\bin\Artwork\Android\FM_NotificationIcon_72x72.png</Android_NotificationIcon72>
+        <Android_NotificationIcon96>$(BDS)\bin\Artwork\Android\FM_NotificationIcon_96x96.png</Android_NotificationIcon96>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Base_iOSDevice32)'!=''">
         <iPhone_Spotlight58>$(BDS)\bin\Artwork\iOS\iPhone\FM_SpotlightSearchIcon_58x58.png</iPhone_Spotlight58>
@@ -171,7 +187,7 @@
         <iPhone_Launch320>$(BDS)\bin\Artwork\iOS\iPhone\FM_LaunchImage_320x480.png</iPhone_Launch320>
         <iPhone_AppIcon60>$(BDS)\bin\Artwork\iOS\iPhone\FM_ApplicationIcon_60x60.png</iPhone_AppIcon60>
         <iPhone_Spotlight40>$(BDS)\bin\Artwork\iOS\iPhone\FM_SpotlightSearchIcon_40x40.png</iPhone_Spotlight40>
-        <VerInfo_Keys>CFBundleName=$(MSBuildProjectName);CFBundleDevelopmentRegion=en;CFBundleDisplayName=$(MSBuildProjectName);CFBundleIdentifier=$(MSBuildProjectName);CFBundleInfoDictionaryVersion=6.0;CFBundleVersion=1.0.0;CFBundlePackageType=APPL;CFBundleSignature=????;LSRequiresIPhoneOS=true;CFBundleAllowMixedLocalizations=YES;CFBundleExecutable=$(MSBuildProjectName);CFBundleResourceSpecification=ResourceRules.plist;UIDeviceFamily=iPhone &amp; iPad;NSLocationWhenInUseUsageDescription=The reason for accessing the location information of the user;NSLocationAlwaysUsageDescription=The reason for accessing the location information of the user;FMLocalNotificationPermission=false;UIBackgroundModes=;NSContactsUsageDescription=The reason for accessing the contacts;NSPhotoLibraryUsageDescription=The reason for accessing the photo library;NSCameraUsageDescription=The reason for accessing the camera;CFBundleShortVersionString=1.0.0</VerInfo_Keys>
+        <VerInfo_Keys>CFBundleName=$(MSBuildProjectName);CFBundleDevelopmentRegion=en;CFBundleDisplayName=$(MSBuildProjectName);CFBundleIdentifier=$(MSBuildProjectName);CFBundleInfoDictionaryVersion=6.0;CFBundleVersion=1.0.0;CFBundlePackageType=APPL;CFBundleSignature=????;LSRequiresIPhoneOS=true;CFBundleAllowMixedLocalizations=YES;CFBundleExecutable=$(MSBuildProjectName);CFBundleResourceSpecification=ResourceRules.plist;UIDeviceFamily=iPhone &amp; iPad;NSLocationWhenInUseUsageDescription=The reason for accessing the location information of the user;NSLocationAlwaysUsageDescription=The reason for accessing the location information of the user;FMLocalNotificationPermission=false;UIBackgroundModes=;NSContactsUsageDescription=The reason for accessing the contacts;NSPhotoLibraryUsageDescription=The reason for accessing the photo library;NSCameraUsageDescription=The reason for accessing the camera;CFBundleShortVersionString=1.0.0;NSPhotoLibraryAddUsageDescription=The reason for adding to the photo library;NSFaceIDUsageDescription=The reason for accessing the face id;NSLocationAlwaysAndWhenInUseUsageDescription=The reason for accessing the location information of the user;NSMicrophoneUsageDescription=The reason for accessing the microphone;NSSiriUsageDescription=The reason for accessing Siri;ITSAppUsesNonExemptEncryption=false</VerInfo_Keys>
         <iPad_Launch768x1024>$(BDS)\bin\Artwork\iOS\iPad\FM_LaunchImagePortrait_768x1024.png</iPad_Launch768x1024>
         <iPhone_Launch1242>$(BDS)\bin\Artwork\iOS\iPhone\FM_LaunchImage_1242x2208.png</iPhone_Launch1242>
         <iPhone_AppIcon114>$(BDS)\bin\Artwork\iOS\iPhone\FM_ApplicationIcon_114x114.png</iPhone_AppIcon114>
@@ -183,6 +199,20 @@
         <BT_BuildType>Debug</BT_BuildType>
         <iPhone_Launch1125>$(BDS)\bin\Artwork\iOS\iPhone\FM_LaunchImage_1125x2436.png</iPhone_Launch1125>
         <iPhone_Launch2436>$(BDS)\bin\Artwork\iOS\iPhone\FM_LaunchImage_2436x1125.png</iPhone_Launch2436>
+        <iPhone_Spotlight120>$(BDS)\bin\Artwork\iOS\iPhone\FM_SpotlightSearchIcon_120x120.png</iPhone_Spotlight120>
+        <iPhone_Launch828>$(BDS)\bin\Artwork\iOS\iPhone\FM_LaunchImage_828x1792.png</iPhone_Launch828>
+        <iPhone_Launch1136x640>$(BDS)\bin\Artwork\iOS\iPhone\FM_LaunchImage_1136x640.png</iPhone_Launch1136x640>
+        <iPhone_Launch1242x2688>$(BDS)\bin\Artwork\iOS\iPhone\FM_LaunchImage_1242x2688.png</iPhone_Launch1242x2688>
+        <iPhone_Launch1334>$(BDS)\bin\Artwork\iOS\iPhone\FM_LaunchImage_1334x750.png</iPhone_Launch1334>
+        <iPhone_Launch1792>$(BDS)\bin\Artwork\iOS\iPhone\FM_LaunchImage_1792x828.png</iPhone_Launch1792>
+        <iPhone_Launch2688x1242>$(BDS)\bin\Artwork\iOS\iPhone\FM_LaunchImage_2688x1242.png</iPhone_Launch2688x1242>
+        <iPad_AppIcon167>$(BDS)\bin\Artwork\iOS\iPad\FM_ApplicationIcon_167x167.png</iPad_AppIcon167>
+        <iPad_Launch1668>$(BDS)\bin\Artwork\iOS\iPad\FM_LaunchImagePortrait_1668x2224.png</iPad_Launch1668>
+        <iPad_Launch1668x2388>$(BDS)\bin\Artwork\iOS\iPad\FM_LaunchImagePortrait_1668x2388.png</iPad_Launch1668x2388>
+        <iPad_Launch2048x2732>$(BDS)\bin\Artwork\iOS\iPad\FM_LaunchImagePortrait_2048x2732.png</iPad_Launch2048x2732>
+        <iPad_Launch2224>$(BDS)\bin\Artwork\iOS\iPad\FM_LaunchImageLandscape_2224x1668.png</iPad_Launch2224>
+        <iPad_Launch2388x1668>$(BDS)\bin\Artwork\iOS\iPad\FM_LaunchImageLandscape_2388x1668.png</iPad_Launch2388x1668>
+        <iPad_Launch2732x2048>$(BDS)\bin\Artwork\iOS\iPad\FM_LaunchImageLandscape_2732x2048.png</iPad_Launch2732x2048>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Base_iOSDevice64)'!=''">
         <iPhone_Launch750>$(BDS)\bin\Artwork\iOS\iPhone\FM_LaunchImage_750x1334.png</iPhone_Launch750>
@@ -220,7 +250,7 @@
         <iPhone_AppIcon60>$(BDS)\bin\Artwork\iOS\iPhone\FM_ApplicationIcon_60x60.png</iPhone_AppIcon60>
         <iPad_Launch2048>$(BDS)\bin\Artwork\iOS\iPad\FM_LaunchImageLandscape_2048x1496.png</iPad_Launch2048>
         <iPhone_Spotlight80>$(BDS)\bin\Artwork\iOS\iPhone\FM_SpotlightSearchIcon_80x80.png</iPhone_Spotlight80>
-        <VerInfo_Keys>CFBundleName=$(MSBuildProjectName);CFBundleDevelopmentRegion=en;CFBundleDisplayName=$(MSBuildProjectName);CFBundleIdentifier=$(MSBuildProjectName);CFBundleInfoDictionaryVersion=6.0;CFBundleVersion=1.0.0;CFBundlePackageType=APPL;CFBundleSignature=????;LSRequiresIPhoneOS=true;CFBundleAllowMixedLocalizations=YES;CFBundleExecutable=$(MSBuildProjectName);CFBundleResourceSpecification=ResourceRules.plist;UIDeviceFamily=iPhone &amp; iPad;NSLocationWhenInUseUsageDescription=The reason for accessing the location information of the user;NSLocationAlwaysUsageDescription=The reason for accessing the location information of the user;FMLocalNotificationPermission=false;UIBackgroundModes=;NSContactsUsageDescription=The reason for accessing the contacts;NSPhotoLibraryUsageDescription=The reason for accessing the photo library;NSCameraUsageDescription=The reason for accessing the camera;CFBundleShortVersionString=1.0.0</VerInfo_Keys>
+        <VerInfo_Keys>CFBundleName=$(MSBuildProjectName);CFBundleDevelopmentRegion=en;CFBundleDisplayName=$(MSBuildProjectName);CFBundleIdentifier=$(MSBuildProjectName);CFBundleInfoDictionaryVersion=6.0;CFBundleVersion=1.0.0;CFBundlePackageType=APPL;CFBundleSignature=????;LSRequiresIPhoneOS=true;CFBundleAllowMixedLocalizations=YES;CFBundleExecutable=$(MSBuildProjectName);CFBundleResourceSpecification=ResourceRules.plist;UIDeviceFamily=iPhone &amp; iPad;NSLocationWhenInUseUsageDescription=The reason for accessing the location information of the user;NSLocationAlwaysUsageDescription=The reason for accessing the location information of the user;FMLocalNotificationPermission=false;UIBackgroundModes=;NSContactsUsageDescription=The reason for accessing the contacts;NSPhotoLibraryUsageDescription=The reason for accessing the photo library;NSCameraUsageDescription=The reason for accessing the camera;CFBundleShortVersionString=1.0.0;NSPhotoLibraryAddUsageDescription=The reason for adding to the photo library;NSFaceIDUsageDescription=The reason for accessing the face id;NSLocationAlwaysAndWhenInUseUsageDescription=The reason for accessing the location information of the user;NSMicrophoneUsageDescription=The reason for accessing the microphone;NSSiriUsageDescription=The reason for accessing Siri;ITSAppUsesNonExemptEncryption=false</VerInfo_Keys>
         <iPad_AppIcon144>$(BDS)\bin\Artwork\iOS\iPad\FM_ApplicationIcon_144x144.png</iPad_AppIcon144>
         <iPhone_AppIcon114>$(BDS)\bin\Artwork\iOS\iPhone\FM_ApplicationIcon_114x114.png</iPhone_AppIcon114>
         <Base_iOSDevice>true</Base_iOSDevice>
@@ -230,6 +260,20 @@
         <BT_BuildType>Debug</BT_BuildType>
         <iPhone_Launch1125>$(BDS)\bin\Artwork\iOS\iPhone\FM_LaunchImage_1125x2436.png</iPhone_Launch1125>
         <iPhone_Launch2436>$(BDS)\bin\Artwork\iOS\iPhone\FM_LaunchImage_2436x1125.png</iPhone_Launch2436>
+        <iPhone_Spotlight120>$(BDS)\bin\Artwork\iOS\iPhone\FM_SpotlightSearchIcon_120x120.png</iPhone_Spotlight120>
+        <iPhone_Launch828>$(BDS)\bin\Artwork\iOS\iPhone\FM_LaunchImage_828x1792.png</iPhone_Launch828>
+        <iPhone_Launch1136x640>$(BDS)\bin\Artwork\iOS\iPhone\FM_LaunchImage_1136x640.png</iPhone_Launch1136x640>
+        <iPhone_Launch1242x2688>$(BDS)\bin\Artwork\iOS\iPhone\FM_LaunchImage_1242x2688.png</iPhone_Launch1242x2688>
+        <iPhone_Launch1334>$(BDS)\bin\Artwork\iOS\iPhone\FM_LaunchImage_1334x750.png</iPhone_Launch1334>
+        <iPhone_Launch1792>$(BDS)\bin\Artwork\iOS\iPhone\FM_LaunchImage_1792x828.png</iPhone_Launch1792>
+        <iPhone_Launch2688x1242>$(BDS)\bin\Artwork\iOS\iPhone\FM_LaunchImage_2688x1242.png</iPhone_Launch2688x1242>
+        <iPad_AppIcon167>$(BDS)\bin\Artwork\iOS\iPad\FM_ApplicationIcon_167x167.png</iPad_AppIcon167>
+        <iPad_Launch1668>$(BDS)\bin\Artwork\iOS\iPad\FM_LaunchImagePortrait_1668x2224.png</iPad_Launch1668>
+        <iPad_Launch1668x2388>$(BDS)\bin\Artwork\iOS\iPad\FM_LaunchImagePortrait_1668x2388.png</iPad_Launch1668x2388>
+        <iPad_Launch2048x2732>$(BDS)\bin\Artwork\iOS\iPad\FM_LaunchImagePortrait_2048x2732.png</iPad_Launch2048x2732>
+        <iPad_Launch2224>$(BDS)\bin\Artwork\iOS\iPad\FM_LaunchImageLandscape_2224x1668.png</iPad_Launch2224>
+        <iPad_Launch2388x1668>$(BDS)\bin\Artwork\iOS\iPad\FM_LaunchImageLandscape_2388x1668.png</iPad_Launch2388x1668>
+        <iPad_Launch2732x2048>$(BDS)\bin\Artwork\iOS\iPad\FM_LaunchImageLandscape_2732x2048.png</iPad_Launch2732x2048>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Base_iOSSimulator)'!=''">
         <iPhone_Launch750>$(BDS)\bin\Artwork\iOS\iPhone\FM_LaunchImage_750x1334.png</iPhone_Launch750>
@@ -252,7 +296,7 @@
         <VerInfo_UIDeviceFamily>iPhoneAndiPad</VerInfo_UIDeviceFamily>
         <DCC_UsePackage>fmxhrh;bindcompfmx;DBXSqliteDriver;fmx;rtl;dbrtl;DbxClientDriver;IndySystem;bindcomp;DBXInterBaseDriver;DataSnapClient;DataSnapCommon;DataSnapProviderClient;xmlrtl;DbxCommonDriver;IndyProtocols;dbxcds;bindengine;bindcompdbx;CustomIPTransport;dsnap;fmxase;IndyCore;IndyIPCommon;dbexpress;IndyIPClient;$(DCC_UsePackage)</DCC_UsePackage>
         <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
-        <VerInfo_Keys>CFBundleName=$(MSBuildProjectName);CFBundleDevelopmentRegion=en;CFBundleDisplayName=$(MSBuildProjectName);CFBundleIdentifier=$(MSBuildProjectName);CFBundleInfoDictionaryVersion=6.0;CFBundleVersion=1.0.0.0;CFBundlePackageType=APPL;CFBundleSignature=????;LSRequiresIPhoneOS=true;CFBundleAllowMixedLocalizations=YES;CFBundleExecutable=$(MSBuildProjectName);CFBundleResourceSpecification=ResourceRules.plist;UIDeviceFamily=iPhone &amp; iPad;NSLocationWhenInUseUsageDescription=The reason for accessing the location information of the user;NSLocationAlwaysUsageDescription=The reason for accessing the location information of the user;FMLocalNotificationPermission=false;UIBackgroundModes=;NSContactsUsageDescription=The reason for accessing the contacts;NSPhotoLibraryUsageDescription=The reason for accessing the photo library;NSCameraUsageDescription=The reason for accessing the camera;CFBundleShortVersionString=1.0.0</VerInfo_Keys>
+        <VerInfo_Keys>CFBundleName=$(MSBuildProjectName);CFBundleDevelopmentRegion=en;CFBundleDisplayName=$(MSBuildProjectName);CFBundleIdentifier=$(MSBuildProjectName);CFBundleInfoDictionaryVersion=6.0;CFBundleVersion=1.0.0.0;CFBundlePackageType=APPL;CFBundleSignature=????;LSRequiresIPhoneOS=true;CFBundleAllowMixedLocalizations=YES;CFBundleExecutable=$(MSBuildProjectName);CFBundleResourceSpecification=ResourceRules.plist;UIDeviceFamily=iPhone &amp; iPad;NSLocationWhenInUseUsageDescription=The reason for accessing the location information of the user;NSLocationAlwaysUsageDescription=The reason for accessing the location information of the user;FMLocalNotificationPermission=false;UIBackgroundModes=;NSContactsUsageDescription=The reason for accessing the contacts;NSPhotoLibraryUsageDescription=The reason for accessing the photo library;NSCameraUsageDescription=The reason for accessing the camera;CFBundleShortVersionString=1.0.0;NSPhotoLibraryAddUsageDescription=The reason for adding to the photo library;NSFaceIDUsageDescription=The reason for accessing the face id;NSLocationAlwaysAndWhenInUseUsageDescription=The reason for accessing the location information of the user;NSMicrophoneUsageDescription=The reason for accessing the microphone;NSSiriUsageDescription=The reason for accessing Siri;ITSAppUsesNonExemptEncryption=false</VerInfo_Keys>
         <iPad_Launch1536>$(BDS)\bin\Artwork\iOS\iPad\FM_LaunchImagePortrait_1536x2008.png</iPad_Launch1536>
         <iPad_AppIcon144>$(BDS)\bin\Artwork\iOS\iPad\FM_ApplicationIcon_144x144.png</iPad_AppIcon144>
         <iPad_AppIcon72>$(BDS)\bin\Artwork\iOS\iPad\FM_ApplicationIcon_72x72.png</iPad_AppIcon72>
@@ -272,11 +316,34 @@
         <iPhone_Launch320>$(BDS)\bin\Artwork\iOS\iPhone\FM_LaunchImage_320x480.png</iPhone_Launch320>
         <iPhone_Launch1125>$(BDS)\bin\Artwork\iOS\iPhone\FM_LaunchImage_1125x2436.png</iPhone_Launch1125>
         <iPhone_Launch2436>$(BDS)\bin\Artwork\iOS\iPhone\FM_LaunchImage_2436x1125.png</iPhone_Launch2436>
+        <iPhone_Spotlight120>$(BDS)\bin\Artwork\iOS\iPhone\FM_SpotlightSearchIcon_120x120.png</iPhone_Spotlight120>
+        <iPhone_Launch828>$(BDS)\bin\Artwork\iOS\iPhone\FM_LaunchImage_828x1792.png</iPhone_Launch828>
+        <iPhone_Launch1136x640>$(BDS)\bin\Artwork\iOS\iPhone\FM_LaunchImage_1136x640.png</iPhone_Launch1136x640>
+        <iPhone_Launch1242x2688>$(BDS)\bin\Artwork\iOS\iPhone\FM_LaunchImage_1242x2688.png</iPhone_Launch1242x2688>
+        <iPhone_Launch1334>$(BDS)\bin\Artwork\iOS\iPhone\FM_LaunchImage_1334x750.png</iPhone_Launch1334>
+        <iPhone_Launch1792>$(BDS)\bin\Artwork\iOS\iPhone\FM_LaunchImage_1792x828.png</iPhone_Launch1792>
+        <iPhone_Launch2688x1242>$(BDS)\bin\Artwork\iOS\iPhone\FM_LaunchImage_2688x1242.png</iPhone_Launch2688x1242>
+        <iPad_AppIcon167>$(BDS)\bin\Artwork\iOS\iPad\FM_ApplicationIcon_167x167.png</iPad_AppIcon167>
+        <iPad_Launch1668>$(BDS)\bin\Artwork\iOS\iPad\FM_LaunchImagePortrait_1668x2224.png</iPad_Launch1668>
+        <iPad_Launch1668x2388>$(BDS)\bin\Artwork\iOS\iPad\FM_LaunchImagePortrait_1668x2388.png</iPad_Launch1668x2388>
+        <iPad_Launch2048x2732>$(BDS)\bin\Artwork\iOS\iPad\FM_LaunchImagePortrait_2048x2732.png</iPad_Launch2048x2732>
+        <iPad_Launch2224>$(BDS)\bin\Artwork\iOS\iPad\FM_LaunchImageLandscape_2224x1668.png</iPad_Launch2224>
+        <iPad_Launch2388x1668>$(BDS)\bin\Artwork\iOS\iPad\FM_LaunchImageLandscape_2388x1668.png</iPad_Launch2388x1668>
+        <iPad_Launch2732x2048>$(BDS)\bin\Artwork\iOS\iPad\FM_LaunchImageLandscape_2732x2048.png</iPad_Launch2732x2048>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Base_OSX32)'!=''">
         <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
         <DCC_UsePackage>fmxhrh;FireDACSqliteDriver;FireDACDSDriver;DBXSqliteDriver;FireDACPgDriver;fmx;IndySystem;tethering;DataSnapClient;DataSnapServer;DataSnapCommon;DBXInterBaseDriver;DataSnapProviderClient;DbxCommonDriver;dbxcds;fmxFireDAC;DBXOracleDriver;dsnap;IndyIPServer;fmxase;IndyCore;CloudService;IndyIPCommon;FireDACIBDriver;DataSnapFireDAC;FireDACDBXDriver;soapserver;dsnapxml;FireDACInfxDriver;FireDACASADriver;bindcompfmx;FireDACODBCDriver;RESTBackendComponents;rtl;dbrtl;DbxClientDriver;FireDACCommon;bindcomp;xmlrtl;DataSnapNativeClient;ibxpress;IndyProtocols;DBXMySQLDriver;FireDACCommonDriver;bindcompdbx;bindengine;soaprtl;FireDAC;DBXInformixDriver;FireDACMSSQLDriver;DataSnapServerMidas;DBXFirebirdDriver;inet;fmxobj;FireDACMySQLDriver;soapmidas;DBXSybaseASADriver;FireDACOracleDriver;fmxdae;RESTComponents;DataSnapIndy10ServerTransport;dbexpress;IndyIPClient;$(DCC_UsePackage)</DCC_UsePackage>
-        <VerInfo_Keys>CFBundleName=$(MSBuildProjectName);CFBundleDisplayName=$(MSBuildProjectName);CFBundleIdentifier=$(MSBuildProjectName);CFBundleVersion=1.0.0;CFBundlePackageType=APPL;CFBundleSignature=????;CFBundleAllowMixedLocalizations=YES;CFBundleExecutable=$(MSBuildProjectName);NSHighResolutionCapable=true;LSApplicationCategoryType=public.app-category.utilities;NSLocationWhenInUseUsageDescription=The reason for accessing the location information of the user;NSLocationAlwaysUsageDescription=The reason for accessing the location information of the user;NSContactsUsageDescription=The reason for accessing the contacts;CFBundleShortVersionString=1.0.0</VerInfo_Keys>
+        <VerInfo_Keys>CFBundleName=$(MSBuildProjectName);CFBundleDisplayName=$(MSBuildProjectName);CFBundleIdentifier=$(MSBuildProjectName);CFBundleVersion=1.0.0;CFBundlePackageType=APPL;CFBundleSignature=????;CFBundleAllowMixedLocalizations=YES;CFBundleExecutable=$(MSBuildProjectName);NSHighResolutionCapable=true;LSApplicationCategoryType=public.app-category.utilities;NSContactsUsageDescription=The reason for accessing the contacts;CFBundleShortVersionString=1.0.0;NSLocationUsageDescription=The reason for accessing the location information of the user</VerInfo_Keys>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(Base_OSX64)'!=''">
+        <VerInfo_Keys>CFBundleName=$(MSBuildProjectName);CFBundleDisplayName=$(MSBuildProjectName);CFBundleIdentifier=$(MSBuildProjectName);CFBundleVersion=1.0.0;CFBundlePackageType=APPL;CFBundleSignature=????;CFBundleAllowMixedLocalizations=YES;CFBundleExecutable=$(MSBuildProjectName);NSHighResolutionCapable=true;LSApplicationCategoryType=public.app-category.utilities;NSContactsUsageDescription=The reason for accessing the contacts;CFBundleShortVersionString=1.0.0;NSLocationUsageDescription=The reason for accessing the location information of the user</VerInfo_Keys>
+        <BT_BuildType>Debug</BT_BuildType>
+        <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
+        <Base_OSX32>true</Base_OSX32>
+        <CfgParent>Base</CfgParent>
+        <Base>true</Base>
+        <DCC_UsePackage>fmxhrh;FireDACSqliteDriver;FireDACDSDriver;DBXSqliteDriver;FireDACPgDriver;fmx;IndySystem;tethering;DataSnapClient;DataSnapServer;DataSnapCommon;DBXInterBaseDriver;DataSnapProviderClient;DbxCommonDriver;dbxcds;fmxFireDAC;DBXOracleDriver;dsnap;IndyIPServer;fmxase;IndyCore;CloudService;IndyIPCommon;FireDACIBDriver;DataSnapFireDAC;FireDACDBXDriver;soapserver;dsnapxml;FireDACInfxDriver;FireDACASADriver;bindcompfmx;FireDACODBCDriver;RESTBackendComponents;rtl;dbrtl;DbxClientDriver;FireDACCommon;bindcomp;xmlrtl;DataSnapNativeClient;ibxpress;IndyProtocols;DBXMySQLDriver;FireDACCommonDriver;bindcompdbx;bindengine;soaprtl;FireDAC;DBXInformixDriver;FireDACMSSQLDriver;DataSnapServerMidas;DBXFirebirdDriver;inet;fmxobj;FireDACMySQLDriver;soapmidas;DBXSybaseASADriver;FireDACOracleDriver;fmxdae;RESTComponents;DataSnapIndy10ServerTransport;dbexpress;IndyIPClient;$(DCC_UsePackage);$(DCC_UsePackage)</DCC_UsePackage>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Base_Win32)'!=''">
         <UWP_DelphiLogo150>$(BDS)\bin\Artwork\Windows\UWP\delphi_UwpDefault_150.png</UWP_DelphiLogo150>
@@ -309,11 +376,16 @@
         <VerInfo_Build>1</VerInfo_Build>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_1_iOSSimulator)'!=''">
-        <VerInfo_Keys>CFBundleName=$(MSBuildProjectName);CFBundleDevelopmentRegion=en;CFBundleDisplayName=$(MSBuildProjectName);CFBundleIdentifier=$(MSBuildProjectName);CFBundleInfoDictionaryVersion=6.0;CFBundleVersion=1.0.0;CFBundlePackageType=APPL;CFBundleSignature=????;LSRequiresIPhoneOS=true;CFBundleAllowMixedLocalizations=YES;CFBundleExecutable=$(MSBuildProjectName);CFBundleResourceSpecification=ResourceRules.plist;UIDeviceFamily=iPhone &amp; iPad;NSLocationWhenInUseUsageDescription=The reason for accessing the location information of the user;NSLocationAlwaysUsageDescription=The reason for accessing the location information of the user;FMLocalNotificationPermission=false;UIBackgroundModes=;NSContactsUsageDescription=The reason for accessing the contacts;NSPhotoLibraryUsageDescription=The reason for accessing the photo library;NSCameraUsageDescription=The reason for accessing the camera;CFBundleShortVersionString=1.0.0</VerInfo_Keys>
+        <VerInfo_Keys>CFBundleName=$(MSBuildProjectName);CFBundleDevelopmentRegion=en;CFBundleDisplayName=$(MSBuildProjectName);CFBundleIdentifier=$(MSBuildProjectName);CFBundleInfoDictionaryVersion=6.0;CFBundleVersion=1.0.0;CFBundlePackageType=APPL;CFBundleSignature=????;LSRequiresIPhoneOS=true;CFBundleAllowMixedLocalizations=YES;CFBundleExecutable=$(MSBuildProjectName);CFBundleResourceSpecification=ResourceRules.plist;UIDeviceFamily=iPhone &amp; iPad;NSLocationWhenInUseUsageDescription=The reason for accessing the location information of the user;NSLocationAlwaysUsageDescription=The reason for accessing the location information of the user;FMLocalNotificationPermission=false;UIBackgroundModes=;NSContactsUsageDescription=The reason for accessing the contacts;NSPhotoLibraryUsageDescription=The reason for accessing the photo library;NSCameraUsageDescription=The reason for accessing the camera;CFBundleShortVersionString=1.0.0;NSPhotoLibraryAddUsageDescription=The reason for adding to the photo library;NSFaceIDUsageDescription=The reason for accessing the face id;NSLocationAlwaysAndWhenInUseUsageDescription=The reason for accessing the location information of the user;NSMicrophoneUsageDescription=The reason for accessing the microphone;NSSiriUsageDescription=The reason for accessing Siri;ITSAppUsesNonExemptEncryption=false</VerInfo_Keys>
         <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_1_OSX32)'!=''">
         <BT_BuildType>Debug</BT_BuildType>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(Cfg_1_OSX64)'!=''">
+        <Cfg_1_OSX32>true</Cfg_1_OSX32>
+        <CfgParent>Cfg_1</CfgParent>
+        <Cfg_1>true</Cfg_1>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_1_Win32)'!=''">
         <BT_BuildType>Debug</BT_BuildType>
@@ -340,6 +412,7 @@
             <FormType>fmx</FormType>
         </DCCReference>
         <DCCReference Include="BOsU.pas"/>
+        <DCCReference Include="ServicesU.pas"/>
         <BuildConfiguration Include="Release">
             <Key>Cfg_2</Key>
             <CfgParent>Base</CfgParent>
@@ -371,6 +444,7 @@
                 <Platform value="iOSDevice64">True</Platform>
                 <Platform value="iOSSimulator">True</Platform>
                 <Platform value="OSX32">True</Platform>
+                <Platform value="OSX64">True</Platform>
                 <Platform value="Win32">True</Platform>
                 <Platform value="Win64">True</Platform>
             </Platforms>
@@ -381,14 +455,9 @@
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
-                <DeployFile LocalName="Android\Debug\AndroidManifest.xml" Configuration="Debug" Class="ProjectAndroidManifest">
-                    <Platform Name="Android">
-                        <Overwrite>true</Overwrite>
-                    </Platform>
-                </DeployFile>
-                <DeployFile LocalName="$(BDS)\lib\android\debug\armeabi\libnative-activity.so" Configuration="Debug" Class="AndroidLibnativeArmeabiFile">
-                    <Platform Name="Android">
-                        <RemoteName>libAccessRemoteData.so</RemoteName>
+                <DeployFile LocalName="Win32\Debug\AccessRemoteData.rsm" Configuration="Debug" Class="DebugSymbols">
+                    <Platform Name="Win32">
+                        <RemoteName>AccessRemoteData.rsm</RemoteName>
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
@@ -398,35 +467,7 @@
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
-                <DeployFile LocalName="$(BDS)\Redist\iossimulator\libcgunwind.1.0.dylib" Class="DependencyModule">
-                    <Platform Name="iOSSimulator">
-                        <Overwrite>true</Overwrite>
-                    </Platform>
-                </DeployFile>
-                <DeployFile LocalName="$(BDS)\bin\Artwork\Android\FM_LauncherIcon_144x144.png" Configuration="Debug" Class="Android_LauncherIcon144">
-                    <Platform Name="Android">
-                        <RemoteName>ic_launcher.png</RemoteName>
-                        <Overwrite>true</Overwrite>
-                    </Platform>
-                </DeployFile>
-                <DeployFile LocalName="$(BDS)\Redist\osx32\libcgsqlite3.dylib" Class="DependencyModule">
-                    <Platform Name="OSX32">
-                        <Overwrite>true</Overwrite>
-                    </Platform>
-                </DeployFile>
-                <DeployFile LocalName="$(BDS)\bin\Artwork\Android\FM_SplashImage_470x320.png" Configuration="Debug" Class="Android_SplashImage470">
-                    <Platform Name="Android">
-                        <RemoteName>splash_image.png</RemoteName>
-                        <Overwrite>true</Overwrite>
-                    </Platform>
-                </DeployFile>
                 <DeployFile LocalName="$(BDS)\bin\Artwork\Android\FM_SplashImage_640x480.png" Configuration="Debug" Class="Android_SplashImage640">
-                    <Platform Name="Android">
-                        <RemoteName>splash_image.png</RemoteName>
-                        <Overwrite>true</Overwrite>
-                    </Platform>
-                </DeployFile>
-                <DeployFile LocalName="$(BDS)\bin\Artwork\Android\FM_SplashImage_426x320.png" Configuration="Debug" Class="Android_SplashImage426">
                     <Platform Name="Android">
                         <RemoteName>splash_image.png</RemoteName>
                         <Overwrite>true</Overwrite>
@@ -438,14 +479,9 @@
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
-                <DeployFile LocalName="$(BDS)\Redist\osx32\libcgunwind.1.0.dylib" Class="DependencyModule">
-                    <Platform Name="OSX32">
-                        <Overwrite>true</Overwrite>
-                    </Platform>
-                </DeployFile>
-                <DeployFile LocalName="$(BDS)\bin\Artwork\Android\FM_LauncherIcon_96x96.png" Configuration="Debug" Class="Android_LauncherIcon96">
+                <DeployFile LocalName="$(BDS)\bin\Artwork\Android\FM_SplashImage_426x320.png" Configuration="Debug" Class="Android_SplashImage426">
                     <Platform Name="Android">
-                        <RemoteName>ic_launcher.png</RemoteName>
+                        <RemoteName>splash_image.png</RemoteName>
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
@@ -488,8 +524,63 @@
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
+                <DeployFile LocalName="Win32\Debug\AccessRemoteData.exe" Configuration="Debug" Class="ProjectOutput">
+                    <Platform Name="Win32">
+                        <RemoteName>AccessRemoteData.exe</RemoteName>
+                        <Overwrite>true</Overwrite>
+                    </Platform>
+                </DeployFile>
                 <DeployFile LocalName="Android\Debug\styles.xml" Configuration="Debug" Class="AndroidSplashStyles">
                     <Platform Name="Android">
+                        <Overwrite>true</Overwrite>
+                    </Platform>
+                </DeployFile>
+                <DeployFile LocalName="$(BDS)\bin\Artwork\Android\FM_LauncherIcon_144x144.png" Configuration="Debug" Class="Android_LauncherIcon144">
+                    <Platform Name="Android">
+                        <RemoteName>ic_launcher.png</RemoteName>
+                        <Overwrite>true</Overwrite>
+                    </Platform>
+                </DeployFile>
+                <DeployFile LocalName="$(BDS)\lib\android\debug\armeabi\libnative-activity.so" Configuration="Debug" Class="AndroidLibnativeArmeabiFile">
+                    <Platform Name="Android">
+                        <RemoteName>libAccessRemoteData.so</RemoteName>
+                        <Overwrite>true</Overwrite>
+                    </Platform>
+                </DeployFile>
+                <DeployFile LocalName="Android\Debug\AndroidManifest.xml" Configuration="Debug" Class="ProjectAndroidManifest">
+                    <Platform Name="Android">
+                        <Overwrite>true</Overwrite>
+                    </Platform>
+                </DeployFile>
+                <DeployFile LocalName="$(BDS)\Redist\iossimulator\libcgunwind.1.0.dylib" Class="DependencyModule">
+                    <Platform Name="iOSSimulator">
+                        <Overwrite>true</Overwrite>
+                    </Platform>
+                </DeployFile>
+                <DeployFile LocalName="$(BDS)\bin\Artwork\Android\FM_SplashImage_470x320.png" Configuration="Debug" Class="Android_SplashImage470">
+                    <Platform Name="Android">
+                        <RemoteName>splash_image.png</RemoteName>
+                        <Overwrite>true</Overwrite>
+                    </Platform>
+                </DeployFile>
+                <DeployFile LocalName="$(BDS)\Redist\osx32\libcgsqlite3.dylib" Class="DependencyModule">
+                    <Platform Name="OSX32">
+                        <Overwrite>true</Overwrite>
+                    </Platform>
+                </DeployFile>
+                <DeployFile LocalName="$(BDS)\Redist\iossimulator\libpcre.dylib" Class="DependencyModule">
+                    <Platform Name="iOSSimulator">
+                        <Overwrite>true</Overwrite>
+                    </Platform>
+                </DeployFile>
+                <DeployFile LocalName="$(BDS)\Redist\osx32\libcgunwind.1.0.dylib" Class="DependencyModule">
+                    <Platform Name="OSX32">
+                        <Overwrite>true</Overwrite>
+                    </Platform>
+                </DeployFile>
+                <DeployFile LocalName="$(BDS)\bin\Artwork\Android\FM_LauncherIcon_96x96.png" Configuration="Debug" Class="Android_LauncherIcon96">
+                    <Platform Name="Android">
+                        <RemoteName>ic_launcher.png</RemoteName>
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
@@ -508,13 +599,18 @@
                         <Operation>1</Operation>
                     </Platform>
                     <Platform Name="Win32">
-                        <RemoteDir>Contents\MacOS</RemoteDir>
                         <Operation>0</Operation>
                     </Platform>
                 </DeployClass>
                 <DeployClass Name="AndroidClassesDexFile">
                     <Platform Name="Android">
                         <RemoteDir>classes</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="AndroidFileProvider">
+                    <Platform Name="Android">
+                        <RemoteDir>res\xml</RemoteDir>
                         <Operation>1</Operation>
                     </Platform>
                 </DeployClass>
@@ -550,6 +646,18 @@
                     </Platform>
                 </DeployClass>
                 <DeployClass Name="AndroidSplashStyles">
+                    <Platform Name="Android">
+                        <RemoteDir>res\values</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="AndroidSplashStylesV21">
+                    <Platform Name="Android">
+                        <RemoteDir>res\values-v21</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="Android_Colors">
                     <Platform Name="Android">
                         <RemoteDir>res\values</RemoteDir>
                         <Operation>1</Operation>
@@ -591,6 +699,36 @@
                         <Operation>1</Operation>
                     </Platform>
                 </DeployClass>
+                <DeployClass Name="Android_NotificationIcon24">
+                    <Platform Name="Android">
+                        <RemoteDir>res\drawable-mdpi</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="Android_NotificationIcon36">
+                    <Platform Name="Android">
+                        <RemoteDir>res\drawable-hdpi</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="Android_NotificationIcon48">
+                    <Platform Name="Android">
+                        <RemoteDir>res\drawable-xhdpi</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="Android_NotificationIcon72">
+                    <Platform Name="Android">
+                        <RemoteDir>res\drawable-xxhdpi</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="Android_NotificationIcon96">
+                    <Platform Name="Android">
+                        <RemoteDir>res\drawable-xxxhdpi</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
                 <DeployClass Name="Android_SplashImage426">
                     <Platform Name="Android">
                         <RemoteDir>res\drawable-small</RemoteDir>
@@ -615,6 +753,12 @@
                         <Operation>1</Operation>
                     </Platform>
                 </DeployClass>
+                <DeployClass Name="Android_Strings">
+                    <Platform Name="Android">
+                        <RemoteDir>res\values</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
                 <DeployClass Name="DebugSymbols">
                     <Platform Name="iOSSimulator">
                         <Operation>1</Operation>
@@ -629,6 +773,11 @@
                 </DeployClass>
                 <DeployClass Name="DependencyFramework">
                     <Platform Name="OSX32">
+                        <RemoteDir>Contents\MacOS</RemoteDir>
+                        <Operation>1</Operation>
+                        <Extensions>.framework</Extensions>
+                    </Platform>
+                    <Platform Name="OSX64">
                         <RemoteDir>Contents\MacOS</RemoteDir>
                         <Operation>1</Operation>
                         <Extensions>.framework</Extensions>
@@ -651,6 +800,11 @@
                         <Extensions>.dylib</Extensions>
                     </Platform>
                     <Platform Name="OSX32">
+                        <RemoteDir>Contents\MacOS</RemoteDir>
+                        <Operation>1</Operation>
+                        <Extensions>.dylib</Extensions>
+                    </Platform>
+                    <Platform Name="OSX64">
                         <RemoteDir>Contents\MacOS</RemoteDir>
                         <Operation>1</Operation>
                         <Extensions>.dylib</Extensions>
@@ -678,6 +832,11 @@
                         <Operation>1</Operation>
                         <Extensions>.dylib</Extensions>
                     </Platform>
+                    <Platform Name="OSX64">
+                        <RemoteDir>Contents\MacOS</RemoteDir>
+                        <Operation>1</Operation>
+                        <Extensions>.dylib</Extensions>
+                    </Platform>
                     <Platform Name="Win32">
                         <Operation>0</Operation>
                         <Extensions>.bpl</Extensions>
@@ -700,11 +859,26 @@
                         <RemoteDir>Contents\Resources\StartUp\</RemoteDir>
                         <Operation>0</Operation>
                     </Platform>
+                    <Platform Name="OSX64">
+                        <RemoteDir>Contents\Resources\StartUp\</RemoteDir>
+                        <Operation>0</Operation>
+                    </Platform>
                     <Platform Name="Win32">
                         <Operation>0</Operation>
                     </Platform>
                 </DeployClass>
                 <DeployClass Name="iPad_Launch1024">
+                    <Platform Name="iOSDevice32">
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="iOSDevice64">
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="iOSSimulator">
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="iPad_Launch1024x768">
                     <Platform Name="iOSDevice32">
                         <Operation>1</Operation>
                     </Platform>
@@ -726,6 +900,39 @@
                         <Operation>1</Operation>
                     </Platform>
                 </DeployClass>
+                <DeployClass Name="iPad_Launch1536x2048">
+                    <Platform Name="iOSDevice32">
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="iOSDevice64">
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="iOSSimulator">
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="iPad_Launch1668">
+                    <Platform Name="iOSDevice32">
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="iOSDevice64">
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="iOSSimulator">
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="iPad_Launch1668x2388">
+                    <Platform Name="iOSDevice32">
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="iOSDevice64">
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="iOSSimulator">
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
                 <DeployClass Name="iPad_Launch2048">
                     <Platform Name="iOSDevice32">
                         <Operation>1</Operation>
@@ -737,7 +944,172 @@
                         <Operation>1</Operation>
                     </Platform>
                 </DeployClass>
+                <DeployClass Name="iPad_Launch2048x1536">
+                    <Platform Name="iOSDevice32">
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="iOSDevice64">
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="iOSSimulator">
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="iPad_Launch2048x2732">
+                    <Platform Name="iOSDevice32">
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="iOSDevice64">
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="iOSSimulator">
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="iPad_Launch2224">
+                    <Platform Name="iOSDevice32">
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="iOSDevice64">
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="iOSSimulator">
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="iPad_Launch2388x1668">
+                    <Platform Name="iOSDevice32">
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="iOSDevice64">
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="iOSSimulator">
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="iPad_Launch2732x2048">
+                    <Platform Name="iOSDevice32">
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="iOSDevice64">
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="iOSSimulator">
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
                 <DeployClass Name="iPad_Launch768">
+                    <Platform Name="iOSDevice32">
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="iOSDevice64">
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="iOSSimulator">
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="iPad_Launch768x1024">
+                    <Platform Name="iOSDevice32">
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="iOSDevice64">
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="iOSSimulator">
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="iPhone_Launch1125">
+                    <Platform Name="iOSDevice32">
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="iOSDevice64">
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="iOSSimulator">
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="iPhone_Launch1136x640">
+                    <Platform Name="iOSDevice32">
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="iOSDevice64">
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="iOSSimulator">
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="iPhone_Launch1242">
+                    <Platform Name="iOSDevice32">
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="iOSDevice64">
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="iOSSimulator">
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="iPhone_Launch1242x2688">
+                    <Platform Name="iOSDevice32">
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="iOSDevice64">
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="iOSSimulator">
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="iPhone_Launch1334">
+                    <Platform Name="iOSDevice32">
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="iOSDevice64">
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="iOSSimulator">
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="iPhone_Launch1792">
+                    <Platform Name="iOSDevice32">
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="iOSDevice64">
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="iOSSimulator">
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="iPhone_Launch2208">
+                    <Platform Name="iOSDevice32">
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="iOSDevice64">
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="iOSSimulator">
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="iPhone_Launch2436">
+                    <Platform Name="iOSDevice32">
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="iOSDevice64">
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="iOSSimulator">
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="iPhone_Launch2688x1242">
                     <Platform Name="iOSDevice32">
                         <Operation>1</Operation>
                     </Platform>
@@ -771,6 +1143,28 @@
                     </Platform>
                 </DeployClass>
                 <DeployClass Name="iPhone_Launch640x1136">
+                    <Platform Name="iOSDevice32">
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="iOSDevice64">
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="iOSSimulator">
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="iPhone_Launch750">
+                    <Platform Name="iOSDevice32">
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="iOSDevice64">
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="iOSSimulator">
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="iPhone_Launch828">
                     <Platform Name="iOSDevice32">
                         <Operation>1</Operation>
                     </Platform>
@@ -836,8 +1230,18 @@
                         <Operation>1</Operation>
                     </Platform>
                 </DeployClass>
+                <DeployClass Name="ProjectOSXDebug">
+                    <Platform Name="OSX64">
+                        <RemoteDir>..\$(PROJECTNAME).app.dSYM\Contents\Resources\DWARF</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
                 <DeployClass Name="ProjectOSXEntitlements">
                     <Platform Name="OSX32">
+                        <RemoteDir>..\</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="OSX64">
                         <RemoteDir>..\</RemoteDir>
                         <Operation>1</Operation>
                     </Platform>
@@ -847,9 +1251,17 @@
                         <RemoteDir>Contents</RemoteDir>
                         <Operation>1</Operation>
                     </Platform>
+                    <Platform Name="OSX64">
+                        <RemoteDir>Contents</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
                 </DeployClass>
                 <DeployClass Name="ProjectOSXResource">
                     <Platform Name="OSX32">
+                        <RemoteDir>Contents\Resources</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="OSX64">
                         <RemoteDir>Contents\Resources</RemoteDir>
                         <Operation>1</Operation>
                     </Platform>
@@ -872,6 +1284,10 @@
                         <Operation>1</Operation>
                     </Platform>
                     <Platform Name="OSX32">
+                        <RemoteDir>Contents\MacOS</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="OSX64">
                         <RemoteDir>Contents\MacOS</RemoteDir>
                         <Operation>1</Operation>
                     </Platform>
@@ -914,6 +1330,7 @@
                 <ProjectRoot Platform="Linux64" Name="$(PROJECTNAME)"/>
                 <ProjectRoot Platform="OSX32" Name="$(PROJECTNAME).app"/>
                 <ProjectRoot Platform="Android" Name="$(PROJECTNAME)"/>
+                <ProjectRoot Platform="OSX64" Name="$(PROJECTNAME).app"/>
                 <ProjectRoot Platform="iOSSimulator" Name="$(PROJECTNAME).app"/>
             </Deployment>
         </BorlandProject>

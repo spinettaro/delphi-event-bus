@@ -7,7 +7,7 @@ uses
 
 type
 
-  TDoLoginEvent = class(TObject)
+  TLoginDTO = class(TObject)
   private
     FPassword: string;
     FUsername: string;
@@ -31,53 +31,27 @@ type
     property Msg: string read FMsg write SetMsg;
   end;
 
-  TRemoteProxy = class(TObject)
-  private
-    class var FDefaultInstance: TRemoteProxy;
-  public
-    class function GetDefault: TRemoteProxy;
-    [Subscribe(TThreadMode.Async)]
-    procedure DoLogin(ADoLoginEvent: TDoLoginEvent);
-  end;
-
 implementation
 
 uses
   System.Classes, EventBus;
 
-{ TDoLoginEvent }
+{ TLoginDTO }
 
-constructor TDoLoginEvent.Create(AUsername, APwd: string);
+constructor TLoginDTO.Create(AUsername, APwd: string);
 begin
   FPassword := APwd;
   FUsername := AUsername;
 end;
 
-procedure TDoLoginEvent.SetPassword(const Value: string);
+procedure TLoginDTO.SetPassword(const Value: string);
 begin
   FPassword := Value;
 end;
 
-procedure TDoLoginEvent.SetUsername(const Value: string);
+procedure TLoginDTO.SetUsername(const Value: string);
 begin
   FUsername := Value;
-end;
-
-{ TRemoteProxy }
-
-procedure TRemoteProxy.DoLogin(ADoLoginEvent: TDoLoginEvent);
-begin
-  // simulate an http request for 5 seconds
-  TThread.Sleep(3000);
-  TEventBus.GetDefault.Post(TOnLoginEvent.Create(true, 'Login ok'));
-  ADoLoginEvent.Free;
-end;
-
-class function TRemoteProxy.GetDefault: TRemoteProxy;
-begin
-  if (not Assigned(FDefaultInstance)) then
-    FDefaultInstance := TRemoteProxy.Create;
-  Result := FDefaultInstance;
 end;
 
 { TOnLoginEvent }
