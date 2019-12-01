@@ -1,5 +1,5 @@
 { *******************************************************************************
-  Copyright 2016 Daniele Spinetti
+  Copyright 2016-2019 Daniele Spinetti
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -24,6 +24,9 @@ uses
 
 type
 
+  TCloneEventCallback = function (const AObject: TObject): TObject of object;
+  TCloneEventMethod = TFunc<TObject,TObject>;
+
   IEventBus = Interface
     ['{7BDF4536-F2BA-4FBA-B186-09E1EE6C7E35}']
     procedure RegisterSubscriber(ASubscriber: TObject);
@@ -34,31 +37,39 @@ type
   end;
 
   TEventBus = class(TInterfacedObject, IEventBus)
+  protected
   private
-    FSubscriptionsByEventType
-      : TObjectDictionary<TClass, TObjectList<TSubscription>>;
-    FTypesBySubscriber: TObjectDictionary<TObject, TList<TClass>>;
     class var FDefaultInstance: TEventBus;
+  var
+    FTypesOfGivenSubscriber: TObjectDictionary<TObject, TList<TClass>>;
+    FSubscriptionsOfGivenEventType: TObjectDictionary<TClass, TObjectList<TSubscription>>;
+    FCustomClonerDict: TDictionary<String, TCloneEventMethod>;
+    FOnCloneEvent: TCloneEventCallback;
     procedure Subscribe(ASubscriber: TObject;
       ASubscriberMethod: TSubscriberMethod);
     procedure UnsubscribeByEventType(ASubscriber: TObject; AEventType: TClass);
-    procedure PostToSubscription(ASubscription: TSubscription; AEvent: TObject;
-      AIsMainThread: Boolean);
     procedure InvokeSubscriber(ASubscription: TSubscription; AEvent: TObject);
     function GenerateTProc(ASubscription: TSubscription;
       AEvent: TObject): TProc;
     function GenerateThreadProc(ASubscription: TSubscription; AEvent: TObject)
       : TThreadProcedure;
-    function CloneEvent(AEvent: TObject): TObject;
+  protected
+    function CloneEvent(AEvent: TObject): TObject; virtual;
+    procedure PostToSubscription(ASubscription: TSubscription; AEvent: TObject; AIsMainThread: Boolean); virtual;
   public
-    constructor Create();
+    constructor Create; virtual;
     destructor Destroy; override;
-    procedure RegisterSubscriber(ASubscriber: TObject);
+    procedure RegisterSubscriber(ASubscriber: TObject); virtual;
     function IsRegistered(ASubscriber: TObject): Boolean;
-    procedure Unregister(ASubscriber: TObject);
-    procedure Post(AEvent: TObject; const AContext: String = '';
-      AEventOwner: Boolean = true);
-    class function GetDefault: TEventBus;
+    procedure Unregister(ASubscriber: TObject); virtual;
+    procedure Post(AEvent: TObject; const AContext: String = ''; AEventOwner: Boolean = true); virtual;
+    class function GetDefault: TEventBus; virtual;
+    property TypesOfGivenSubscriber: TObjectDictionary<TObject, TList<TClass>> read FTypesOfGivenSubscriber;
+    property SubscriptionsOfGivenEventType: TObjectDictionary<TClass, TObjectList<TSubscription>> read
+        FSubscriptionsOfGivenEventType;
+    property OnCloneEvent: TCloneEventCallback write FOnCloneEvent;
+    procedure AddCustomClassCloning(const AQualifiedClassName: String; const ACloneEvent: TCloneEventMethod);
+    procedure RemoveCustomClassCloning(const AQualifiedClassName: String);
   end;
 
 implementation
@@ -75,40 +86,40 @@ var
 
   { TEventBus }
 
-function TEventBus.CloneEvent(AEvent: TObject): TObject;
-// var
-// LJSONObj: TJSONObject;
-begin
-  // Result := TRTTIUtils.CreateObject(AEvent.QualifiedClassName);
-  // LJSONObj := TJson.ObjectToJsonObject(AEvent);
-  // try
-  // TJson.JsonToObject(Result, LJSONObj);
-  // finally
-  // LJSONObj.Free;
-  // end;
-  Result := TRTTIUtils.Clone(AEvent);
-  // LObj := Mapper.ObjectToJSONObject(AEvent);
-  // try
-  // Result := Mapper.JSONObjectToObject(AEvent.ClassType, LObj);
-  // finally
-  // LObj.Free;
-  // end
-end;
-
 constructor TEventBus.Create;
 begin
   inherited Create;
-  FSubscriptionsByEventType := TObjectDictionary < TClass,
+  FSubscriptionsOfGivenEventType := TObjectDictionary < TClass,
     TObjectList < TSubscription >>.Create([doOwnsValues]);
-  FTypesBySubscriber := TObjectDictionary < TObject,
+  FTypesOfGivenSubscriber := TObjectDictionary < TObject,
     TList < TClass >>.Create([doOwnsValues]);
+  FCustomClonerDict := TDictionary<String, TCloneEventMethod>.Create;
 end;
 
 destructor TEventBus.Destroy;
 begin
-  FreeAndNil(FSubscriptionsByEventType);
-  FreeAndNil(FTypesBySubscriber);
+  FreeAndNil(FSubscriptionsOfGivenEventType);
+  FreeAndNil(FTypesOfGivenSubscriber);
+  FreeAndNil(FCustomClonerDict);
   inherited;
+end;
+
+procedure TEventBus.AddCustomClassCloning(const AQualifiedClassName: String;
+  const ACloneEvent: TCloneEventMethod);
+begin
+  FCustomClonerDict.Add(AQualifiedClassName, ACloneEvent);
+end;
+
+function TEventBus.CloneEvent(AEvent: TObject): TObject;
+var
+  LCloneEvent: TCloneEventMethod;
+begin
+  if FCustomClonerDict.TryGetValue(AEvent.QualifiedClassName, LCloneEvent) then
+    Result := LCloneEvent(AEvent)
+  else if Assigned(FOnCloneEvent) then
+    Result := FOnCloneEvent(AEvent)
+  else
+    Result := TRTTIUtils.Clone(AEvent);
 end;
 
 class function TEventBus.GetDefault: TEventBus;
@@ -117,7 +128,7 @@ begin
   try
     if (not Assigned(FDefaultInstance)) then
     begin
-      FDefaultInstance := TEventBus.Create;
+      FDefaultInstance := Self.Create;
     end;
     Result := FDefaultInstance;
   finally
@@ -130,8 +141,11 @@ function TEventBus.GenerateThreadProc(ASubscription: TSubscription;
 begin
   Result := procedure
     begin
-      ASubscription.SubscriberMethod.Method.Invoke(ASubscription.Subscriber,
-        [AEvent]);
+      if ASubscription.Active then
+      begin
+        ASubscription.SubscriberMethod.Method.Invoke(ASubscription.Subscriber,
+          [AEvent]);
+      end;
     end;
 end;
 
@@ -140,30 +154,44 @@ function TEventBus.GenerateTProc(ASubscription: TSubscription;
 begin
   Result := procedure
     begin
-      ASubscription.SubscriberMethod.Method.Invoke(ASubscription.Subscriber,
-        [AEvent]);
+      if ASubscription.Active then
+      begin
+        ASubscription.SubscriberMethod.Method.Invoke(ASubscription.Subscriber,
+          [AEvent]);
+      end;
     end;
 end;
 
 procedure TEventBus.InvokeSubscriber(ASubscription: TSubscription;
   AEvent: TObject);
 begin
-  ASubscription.SubscriberMethod.Method.Invoke(ASubscription.Subscriber,
-    [AEvent]);
+  try
+    ASubscription.SubscriberMethod.Method.Invoke(ASubscription.Subscriber,
+      [AEvent]);
+  except
+    on E: Exception do
+    begin
+      raise Exception.CreateFmt(
+        'Error invoking subscriber method. Subscriber class: %s. Event type: %s. Original exception: %s: %s',
+        [ASubscription.Subscriber.ClassName,
+         ASubscription.SubscriberMethod.EventType.ClassName,
+         E.ClassName, E.Message
+        ]);
+    end;
+  end;
 end;
 
 function TEventBus.IsRegistered(ASubscriber: TObject): Boolean;
 begin
   FCS.Acquire;
   try
-    Result := FTypesBySubscriber.ContainsKey(ASubscriber);
+    Result := FTypesOfGivenSubscriber.ContainsKey(ASubscriber);
   finally
     FCS.Release;
   end;
 end;
 
-procedure TEventBus.Post(AEvent: TObject; const AContext: String = '';
-  AEventOwner: Boolean = true);
+procedure TEventBus.Post(AEvent: TObject; const AContext: String = ''; AEventOwner: Boolean = true);
 var
   LSubscriptions: TObjectList<TSubscription>;
   LSubscription: TSubscription;
@@ -175,14 +203,18 @@ begin
     try
       LIsMainThread := MainThreadID = TThread.CurrentThread.ThreadID;
 
-      FSubscriptionsByEventType.TryGetValue(AEvent.ClassType, LSubscriptions);
+      FSubscriptionsOfGivenEventType.TryGetValue(AEvent.ClassType, LSubscriptions);
 
       if (not Assigned(LSubscriptions)) then
         Exit;
 
       for LSubscription in LSubscriptions do
       begin
-        if ((AContext <> '') and (LSubscription.Context <> AContext)) then
+
+        if not LSubscription.Active then
+          continue;
+
+        if ((not AContext.IsEmpty) and (LSubscription.Context <> AContext)) then
           continue;
 
         LEvent := CloneEvent(AEvent);
@@ -197,8 +229,7 @@ begin
   end;
 end;
 
-procedure TEventBus.PostToSubscription(ASubscription: TSubscription;
-  AEvent: TObject; AIsMainThread: Boolean);
+procedure TEventBus.PostToSubscription(ASubscription: TSubscription; AEvent: TObject; AIsMainThread: Boolean);
 begin
 
   if not Assigned(ASubscription.Subscriber) then
@@ -252,6 +283,12 @@ begin
   end;
 end;
 
+procedure TEventBus.RemoveCustomClassCloning(const AQualifiedClassName: String);
+begin
+  // No exception is thrown if the key is not in the dictionary
+  FCustomClonerDict.Remove(AQualifiedClassName);
+end;
+
 procedure TEventBus.Subscribe(ASubscriber: TObject;
   ASubscriberMethod: TSubscriberMethod);
 var
@@ -262,14 +299,14 @@ var
 begin
   LEventType := ASubscriberMethod.EventType;
   LNewSubscription := TSubscription.Create(ASubscriber, ASubscriberMethod);
-  if (not FSubscriptionsByEventType.ContainsKey(LEventType)) then
+  if (not FSubscriptionsOfGivenEventType.ContainsKey(LEventType)) then
   begin
     LSubscriptions := TObjectList<TSubscription>.Create();
-    FSubscriptionsByEventType.Add(LEventType, LSubscriptions);
+    FSubscriptionsOfGivenEventType.Add(LEventType, LSubscriptions);
   end
   else
   begin
-    LSubscriptions := FSubscriptionsByEventType.Items[LEventType];
+    LSubscriptions := FSubscriptionsOfGivenEventType.Items[LEventType];
     if (LSubscriptions.Contains(LNewSubscription)) then
       raise Exception.CreateFmt('Subscriber %s already registered to event %s ',
         [ASubscriber.ClassName, LEventType.ClassName]);
@@ -277,10 +314,10 @@ begin
 
   LSubscriptions.Add(LNewSubscription);
 
-  if (not FTypesBySubscriber.TryGetValue(ASubscriber, LSubscribedEvents)) then
+  if (not FTypesOfGivenSubscriber.TryGetValue(ASubscriber, LSubscribedEvents)) then
   begin
     LSubscribedEvents := TList<TClass>.Create;
-    FTypesBySubscriber.Add(ASubscriber, LSubscribedEvents);
+    FTypesOfGivenSubscriber.Add(ASubscriber, LSubscribedEvents);
   end;
   LSubscribedEvents.Add(LEventType);
 
@@ -293,11 +330,11 @@ var
 begin
   FCS.Acquire;
   try
-    if FTypesBySubscriber.TryGetValue(ASubscriber, LSubscribedTypes) then
+    if FTypesOfGivenSubscriber.TryGetValue(ASubscriber, LSubscribedTypes) then
     begin
       for LEventType in LSubscribedTypes do
         UnsubscribeByEventType(ASubscriber, LEventType);
-      FTypesBySubscriber.Remove(ASubscriber);
+      FTypesOfGivenSubscriber.Remove(ASubscriber);
     end;
     // else {
     // Log.w(TAG, "Subscriber to unregister was not registered before: " + subscriber.getClass());
@@ -314,14 +351,16 @@ var
   LSize, I: Integer;
   LSubscription: TSubscription;
 begin
-  LSubscriptions := FSubscriptionsByEventType.Items[AEventType];
+  LSubscriptions := FSubscriptionsOfGivenEventType.Items[AEventType];
   if (not Assigned(LSubscriptions)) or (LSubscriptions.Count < 1) then
     Exit;
   LSize := LSubscriptions.Count;
   for I := LSize - 1 downto 0 do
   begin
     LSubscription := LSubscriptions[I];
-    if (LSubscription.Subscriber.Equals(ASubscriber)) then
+    // Notes: In case the subscriber has been freed but it didn't unregister itself, calling
+    // LSubscription.Subscriber.Equals() will cause Access Violation, so we use '=' instead.
+    if LSubscription.Subscriber = ASubscriber then
     begin
       LSubscription.Active := false;
       LSubscriptions.Delete(I);

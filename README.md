@@ -47,12 +47,12 @@ TEventBus.GetDefault.RegisterSubscriber(self);
   TEventBus.GetDefault.post(LEvent);
 ```
 
-##Support
+## Support
 * DEB is a 100% ObjectPascal framework so it works on VCL and Firemonkey
 * It works with Delphi2010 and major
 
 ## License
-  Copyright 2016 Daniele Spinetti
+  Copyright 2016-2019 Daniele Spinetti
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.

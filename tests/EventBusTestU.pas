@@ -37,7 +37,11 @@ type
     [Test]
     procedure TestPostEntityWithChildObject;
     [Test]
-    procedure TestPostEntityWithItsSelfInChildObject;
+    procedure TestPostEntityWithItsSelfInChildObjectKO;
+    [Test]
+    procedure TestPostEntityWithItsSelfInChildObjectOkCustomCloningClass;
+    [Test]
+    procedure TestPostEntityWithCustomCloneEvent;
     [Test]
     procedure TestPostEntityWithObjectList;
     [Test]
@@ -238,7 +242,31 @@ begin
   end;
 end;
 
-procedure TEventBusTest.TestPostEntityWithItsSelfInChildObject;
+procedure TEventBusTest.TestPostEntityWithCustomCloneEvent;
+var
+  LPerson: TPerson;
+  LSubscriber: TPersonSubscriber;
+begin
+  LSubscriber := TPersonSubscriber.Create;
+  try
+    LSubscriber.ObjOwner := true;
+    TEventBus.GetDefault.RegisterSubscriber(LSubscriber);
+    LPerson := TPerson.Create;
+    LPerson.Firstname := 'Howard';
+    LPerson.Lastname := 'Stark';
+
+    TEventBus.GetDefault.OnCloneEvent := SimpleCustomClone;
+
+    TEventBus.GetDefault.Post(TDEBEvent<TPerson>.Create(LPerson));
+    Assert.AreEqual('HowardCustom', LSubscriber.Person.Firstname);
+    Assert.AreEqual('StarkCustom', LSubscriber.Person.Lastname);
+  finally
+    LSubscriber.Free;
+    TEventBus.GetDefault.OnCloneEvent := nil;
+  end;
+end;
+
+procedure TEventBusTest.TestPostEntityWithItsSelfInChildObjectKO;
 var
   LPerson: TPerson;
   LSubscriber: TPersonSubscriber;
@@ -265,6 +293,43 @@ begin
   finally
     LSubscriber.Free;
     LPerson.Free;
+  end;
+end;
+
+procedure TEventBusTest.TestPostEntityWithItsSelfInChildObjectOkCustomCloningClass;
+var
+  LPerson: TPerson;
+  LSubscriber: TPersonSubscriber;
+begin
+  LSubscriber := TPersonSubscriber.Create;
+  try
+    TEventBus.GetDefault.AddCustomClassCloning('EventBus.Commons.TDEBEvent<BOs.TPerson>', function(AObject: TObject):TObject
+    var
+      LEvent: TDEBEvent<TPerson>;
+    begin
+      LEvent:= TDEBEvent<TPerson>.Create;
+      LEvent.DataOwner := (AObject as TDEBEvent<TPerson>).DataOwner;
+      LEvent.Data := TPerson.Create;
+      LEvent.Data.Firstname := (AObject as TDEBEvent<TPerson>).Data.Firstname;
+      LEvent.Data.Lastname := (AObject as TDEBEvent<TPerson>).Data.Lastname;
+      LEvent.Data.Child := TPerson.Create;
+      LEvent.Data.Child.Firstname := (AObject as TDEBEvent<TPerson>).Data.Child.Firstname;
+      LEvent.Data.Child.Lastname := (AObject as TDEBEvent<TPerson>).Data.Child.Lastname;
+      Result := LEvent;
+    end);
+    LSubscriber.ObjOwner := true;
+    TEventBus.GetDefault.RegisterSubscriber(LSubscriber);
+    LPerson := TPerson.Create;
+    LPerson.Firstname := 'Howard';
+    LPerson.Lastname := 'Stark';
+    LPerson.Child := LPerson;
+    TEventBus.GetDefault.Post(TDEBEvent<TPerson>.Create(LPerson));
+    Assert.AreEqual('Howard', LSubscriber.Person.Firstname);
+    Assert.AreEqual('Howard', LSubscriber.Person.Child.Firstname);
+
+  finally
+    TEventBus.GetDefault.RemoveCustomClassCloning('EventBus.Commons.TDEBEvent<BOs.TPerson>');
+    LSubscriber.Free;
   end;
 end;
 
