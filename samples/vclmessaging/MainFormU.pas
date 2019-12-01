@@ -36,7 +36,7 @@ var
 begin
   Event := TCheckBoxEvent.Create();
   Event.Checked := CheckBox1.Checked;
-  TEventBus.GetDefault.Post(Event);
+  GlobalEventBus.Post(Event);
 end;
 
 procedure TfrmMain.Memo1Change(Sender: TObject);
@@ -45,7 +45,7 @@ var
 begin
   Event := TMemoChangeEvent.Create();
   Event.Text := Memo1.Lines.Text;
-  TEventBus.GetDefault.Post(Event);
+  GlobalEventBus.Post(Event);
 end;
 
 end.

@@ -27,7 +27,6 @@ implementation
 
 uses
     System.SysUtils,
-    EventBus.Commons,
     EventBus;
 
 { TBaseTest }

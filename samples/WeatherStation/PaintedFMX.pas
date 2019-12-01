@@ -6,7 +6,7 @@ uses
   System.SysUtils, System.Types, System.UITypes, System.Classes,
   System.Variants,
   FMX.Types, FMX.Controls, FMX.Forms, FMX.Graphics, FMX.Dialogs, FMX.Objects,
-  System.ImageList, FMX.ImgList, ModelU, EventBus.Commons;
+  System.ImageList, FMX.ImgList, ModelU, EventBus;
 
 type
   TPaintedForm = class(TForm)
@@ -27,15 +27,12 @@ var
 
 implementation
 
-uses
-  EventBus;
-
 {$R *.fmx}
 { TPaintedForm }
 
 procedure TPaintedForm.FormCreate(Sender: TObject);
 begin
-  TEventBus.GetDefault.RegisterSubscriber(Self);
+  GlobalEventBus.RegisterSubscriber(Self);
 end;
 
 procedure TPaintedForm.OnWeatherInfoEvent(aWeatherInfo: TWeatherInformation);

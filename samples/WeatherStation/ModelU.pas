@@ -56,7 +56,7 @@ begin
       while True do
       begin
         // simulate a sensor
-        TEventBus.GetDefault.Post(GetRandomWeatherInfo);
+        GlobalEventBus.Post(GetRandomWeatherInfo);
         TThread.Sleep(3000);
       end
     end);
@@ -86,4 +86,3 @@ begin
 end;
 
 end.
-

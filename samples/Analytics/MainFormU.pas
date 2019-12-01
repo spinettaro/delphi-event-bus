@@ -48,13 +48,13 @@ end;
 
 procedure TForm6.Button1Click(Sender: TObject);
 begin
-  TEventBus.GetDefault.Post(BuildAnalyticsEvent('Button1 Clicked'));
+  GlobalEventBus.Post(BuildAnalyticsEvent('Button1 Clicked'));
   ShowMessage('You clicked ' + Button1.Name);
 end;
 
 procedure TForm6.FormResize(Sender: TObject);
 begin
-  TEventBus.GetDefault.Post(BuildAnalyticsEvent('Analytics form changed size'));
+  GlobalEventBus.Post(BuildAnalyticsEvent('Analytics form changed size'));
 end;
 
 procedure TForm6.FormShow(Sender: TObject);
@@ -64,7 +64,7 @@ end;
 
 procedure TForm6.Memo1Change(Sender: TObject);
 begin
-  TEventBus.GetDefault.Post(BuildAnalyticsEvent('Memo1 Changed'));
+  GlobalEventBus.Post(BuildAnalyticsEvent('Memo1 Changed'));
 end;
 
 procedure TForm6.RadioGroup1Click(Sender: TObject);
@@ -72,7 +72,8 @@ var
   LChoice: string;
 begin
   LChoice := RadioGroup1.Items[RadioGroup1.ItemIndex];
-  TEventBus.GetDefault.Post(BuildAnalyticsEvent(LChoice + ' is actual favorite food '));
+  GlobalEventBus.Post(BuildAnalyticsEvent(LChoice +
+    ' is actual favorite food '));
 end;
 
 end.

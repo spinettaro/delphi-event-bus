@@ -19,7 +19,7 @@ unit EventBus.Subscribers;
 interface
 
 uses
-  System.RTTI, EventBus.Commons;
+  System.RTTI, EventBus;
 
 type
 

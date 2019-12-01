@@ -4,7 +4,7 @@ interface
 
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants,
-  System.Classes, Vcl.Graphics, EventBus.Commons,
+  System.Classes, Vcl.Graphics, EventBus,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, BOU;
 
 type
@@ -26,15 +26,12 @@ var
 
 implementation
 
-uses
-  EventBus;
-
 {$R *.dfm}
 
 procedure TFormLogger.FormCreate(Sender: TObject);
 begin
   Memo1.Lines.Clear;
-  TEventBus.GetDefault.RegisterSubscriber(self);
+  GlobalEventBus.RegisterSubscriber(self);
 end;
 
 function TFormLogger.GetFormattedAnalyticsEvent(AAnalyticsEvent
@@ -48,6 +45,7 @@ end;
 procedure TFormLogger.OnAnalyticsEvent(AAnalyticsEvent: TAnalyticsEvent);
 begin
   Memo1.Lines.Add(GetFormattedAnalyticsEvent(AAnalyticsEvent));
+  AAnalyticsEvent.Free;
 end;
 
 end.

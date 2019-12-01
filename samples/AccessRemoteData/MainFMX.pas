@@ -6,7 +6,7 @@ uses
   System.SysUtils, System.Types, System.UITypes, System.Classes,
   System.Variants, FMX.Types, FMX.Graphics, FMX.Controls, FMX.Forms,
   FMX.Dialogs, FMX.StdCtrls, FMX.Controls.Presentation, FMX.Layouts,
-  FMX.Objects, FMX.Edit, FMX.TabControl, BOsU, EventBus.Commons;
+  FMX.Objects, FMX.Edit, FMX.TabControl, BOsU, EventBus;
 
 type
   THeaderFooterForm = class(TForm)
@@ -41,7 +41,7 @@ var
 implementation
 
 uses
-  EventBus, ServicesU;
+  ServicesU;
 
 {$R *.fmx}
 
@@ -62,7 +62,7 @@ procedure THeaderFooterForm.FormCreate(Sender: TObject);
 begin
   TabControl1.ActiveTab := TabItem1;
   // register subscribers
-  TEventBus.GetDefault.RegisterSubscriber(Self);
+  GlobalEventBus.RegisterSubscriber(Self);
 end;
 
 procedure THeaderFooterForm.OnAfterLogin(AEvent: TOnLoginEvent);

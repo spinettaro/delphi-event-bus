@@ -4,7 +4,7 @@ interface
 
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants,
-  System.Classes, Vcl.Graphics, EventU, EventBus.Commons,
+  System.Classes, Vcl.Graphics, EventU, EventBus,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ExtCtrls;
 
 type
@@ -27,13 +27,13 @@ var
 implementation
 
 uses
-  EventBus, Vcl.GraphUtil;
+  Vcl.GraphUtil;
 
 {$R *.dfm}
 
 procedure TfrmThird.FormCreate(Sender: TObject);
 begin
-  TEventBus.GetDefault.RegisterSubscriber(self);
+  GlobalEventBus.RegisterSubscriber(self);
 end;
 
 procedure TfrmThird.OnMemoChange(AEvent: TMemoChangeEvent);

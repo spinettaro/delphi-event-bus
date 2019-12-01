@@ -3,7 +3,8 @@ unit BOsU;
 interface
 
 uses
-  EventBus.Subscribers, EventBus.Commons;
+
+  EventBus;
 
 type
 
@@ -34,7 +35,7 @@ type
 implementation
 
 uses
-  System.Classes, EventBus;
+  System.Classes;
 
 { TLoginDTO }
 

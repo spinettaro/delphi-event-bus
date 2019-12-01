@@ -5,7 +5,7 @@ interface
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants,
   System.Classes, Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs,
-  Vcl.StdCtrls, Vcl.ExtCtrls, EventU, EventBus.Commons;
+  Vcl.StdCtrls, Vcl.ExtCtrls, EventU, EventBus;
 
 type
   TfrmSecond = class(TForm)
@@ -31,16 +31,16 @@ var
 implementation
 
 uses
-  EventBus, RttiUtilsU, System.Rtti;
+  RttiUtilsU, System.Rtti;
 
 {$R *.dfm}
 
 procedure TfrmSecond.CheckBox2Click(Sender: TObject);
 begin
   if (CheckBox2.Checked) then
-    TEventBus.GetDefault.RegisterSubscriber(self)
+    GlobalEventBus.RegisterSubscriber(self)
   else
-    TEventBus.GetDefault.Unregister(self);
+    GlobalEventBus.Unregister(self);
 end;
 
 procedure TfrmSecond.OnCheckBoxChange(AEvent: TCheckBoxEvent);

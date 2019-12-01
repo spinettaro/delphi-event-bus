@@ -3,7 +3,7 @@ unit BOs;
 interface
 
 uses
-  EventBus.Commons, System.SyncObjs, System.Generics.Collections;
+  EventBus, System.SyncObjs, System.Generics.Collections;
 
 type
 
@@ -110,7 +110,7 @@ type
 implementation
 
 uses
-  System.Classes, EventBus;
+  System.Classes;
 
 { TBaseSubscriber }
 
@@ -122,7 +122,7 @@ end;
 
 destructor TBaseSubscriber.Destroy;
 begin
-  TEventBus.GetDefault.Unregister(Self);
+  GlobalEventBus.Unregister(Self);
   if Assigned(FLastEvent) then
     FLastEvent.Free;
   if Assigned(FEvent) then
@@ -210,7 +210,7 @@ end;
 destructor TPerson.Destroy;
 begin
   if Assigned(Child) then
-    if integer(self) <> integer(Child) then
+    if integer(Self) <> integer(Child) then
       Child.Free;
   inherited;
 end;
