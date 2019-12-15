@@ -72,7 +72,7 @@ uses
   RTTIUtilsU;
 
 var
-  FCS: TCriticalSection;
+  FMREWSync: TMultiReadExclusiveWriteSynchronizer;
 
   { TEventBus }
 
@@ -158,11 +158,11 @@ end;
 
 function TEventBus.IsRegistered(ASubscriber: TObject): Boolean;
 begin
-  FCS.Acquire;
+  FMREWSync.BeginRead;
   try
     Result := FTypesOfGivenSubscriber.ContainsKey(ASubscriber);
   finally
-    FCS.Release;
+    FMREWSync.EndRead;
   end;
 end;
 
@@ -174,7 +174,7 @@ var
   LEvent: TObject;
   LIsMainThread: Boolean;
 begin
-  FCS.Acquire;
+  FMREWSync.BeginRead;
   try
     try
       LIsMainThread := MainThreadID = TThread.CurrentThread.ThreadID;
@@ -202,7 +202,7 @@ begin
         AEvent.Free;
     end;
   finally
-    FCS.Release
+    FMREWSync.EndRead;
   end;
 end;
 
@@ -249,7 +249,7 @@ var
   LSubscriberMethods: TArray<TSubscriberMethod>;
   LSubscriberMethod: TSubscriberMethod;
 begin
-  FCS.Acquire;
+  FMREWSync.BeginWrite;
   try
     LSubscriberClass := ASubscriber.ClassType;
     LSubscriberMethods := TSubscribersFinder.FindSubscriberMethods
@@ -257,7 +257,7 @@ begin
     for LSubscriberMethod in LSubscriberMethods do
       Subscribe(ASubscriber, LSubscriberMethod);
   finally
-    FCS.Release;
+    FMREWSync.EndWrite;
   end;
 end;
 
@@ -304,7 +304,6 @@ begin
     FTypesOfGivenSubscriber.Add(ASubscriber, LSubscribedEvents);
   end;
   LSubscribedEvents.Add(LEventType);
-
 end;
 
 procedure TEventBus.Unregister(ASubscriber: TObject);
@@ -312,7 +311,7 @@ var
   LSubscribedTypes: TList<TClass>;
   LEventType: TClass;
 begin
-  FCS.Acquire;
+  FMREWSync.BeginWrite;
   try
     if FTypesOfGivenSubscriber.TryGetValue(ASubscriber, LSubscribedTypes) then
     begin
@@ -324,7 +323,7 @@ begin
     // Log.w(TAG, "Subscriber to unregister was not registered before: " + subscriber.getClass());
     // }
   finally
-    FCS.Release;
+    FMREWSync.EndWrite;
   end;
 end;
 
@@ -354,10 +353,10 @@ end;
 
 initialization
 
-FCS := TCriticalSection.Create;
+FMREWSync := TMultiReadExclusiveWriteSynchronizer.Create;
 
 finalization
 
-FCS.Free;
+FMREWSync.Free;
 
 end.
