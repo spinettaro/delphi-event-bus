@@ -1,5 +1,5 @@
 unit MainFMX;
-
+
 interface
 
 uses
@@ -46,11 +46,13 @@ uses
 {$R *.fmx}
 
 procedure THeaderFooterForm.Button1Click(Sender: TObject);
+var
+  lLoginDTO: TLoginDTO;
 begin
   AniIndicator1.Enabled := true;
   Button1.Enabled := false;
-  GetAccessRemoteDataProxyInstance.DoLogin(TLoginDTO.Create(Edit1.Text,
-    Edit2.Text));
+  lLoginDTO := TLoginDTO.Create(Edit1.Text, Edit2.Text);
+  GetAccessRemoteDataProxyInstance.DoLogin(lLoginDTO);
 end;
 
 procedure THeaderFooterForm.Button2Click(Sender: TObject);
@@ -75,3 +77,4 @@ begin
 end;
 
 end.
+

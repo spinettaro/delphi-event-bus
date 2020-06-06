@@ -30,7 +30,7 @@ object HeaderFooterForm: THeaderFooterForm
     Size.Height = 519.000000000000000000
     Size.PlatformDefault = False
     TabHeight = 49.000000000000000000
-    TabIndex = 1
+    TabIndex = 0
     TabOrder = 2
     TabPosition = None
     Sizes = (
@@ -42,7 +42,7 @@ object HeaderFooterForm: THeaderFooterForm
       CustomIcon = <
         item
         end>
-      IsSelected = False
+      IsSelected = True
       Size.Width = 8.000000000000000000
       Size.Height = 8.000000000000000000
       Size.PlatformDefault = False
@@ -62,7 +62,7 @@ object HeaderFooterForm: THeaderFooterForm
             Value = 9.785596288102472000
           end
           item
-            Value = 80.211974132343560000
+            Value = 80.211974132343550000
           end
           item
             Value = 10.002429579553980000
@@ -98,35 +98,35 @@ object HeaderFooterForm: THeaderFooterForm
             Value = 49.736522464674410000
           end
           item
-            Value = 6.282934691915696000
+            Value = 6.282934691915697000
           end
           item
-            Value = 6.282934691915696000
+            Value = 6.282934691915697000
           end
           item
-            Value = 6.282934691915696000
+            Value = 6.282934691915697000
           end
           item
-            Value = 6.282934691915696000
+            Value = 6.282934691915697000
           end
           item
-            Value = 6.282934691915696000
+            Value = 6.282934691915697000
           end
           item
-            Value = 6.282934691915696000
+            Value = 6.282934691915697000
           end
           item
-            Value = 6.282934691915696000
+            Value = 6.282934691915697000
           end
           item
-            Value = 6.282934691915696000
+            Value = 6.282934691915697000
           end>
         object Edit1: TEdit
           Touch.InteractiveGestures = [LongTap, DoubleTap]
           Align = Client
           TabOrder = 0
           Hint = 'Username'
-          Size.Width = 308.013977050781300000
+          Size.Width = 308.013977050781200000
           Size.Height = 32.000000000000000000
           Size.PlatformDefault = False
           TextPrompt = 'Username...'
@@ -136,15 +136,15 @@ object HeaderFooterForm: THeaderFooterForm
           Align = Client
           TabOrder = 1
           Password = True
-          Size.Width = 308.013977050781300000
+          Size.Width = 308.013977050781200000
           Size.Height = 32.000000000000000000
           Size.PlatformDefault = False
           TextPrompt = 'Password...'
         end
         object Button1: TButton
           Align = Client
-          Size.Width = 308.013977050781300000
-          Size.Height = 32.608428955078130000
+          Size.Width = 308.013977050781200000
+          Size.Height = 32.608428955078120000
           Size.PlatformDefault = False
           TabOrder = 2
           Text = 'Login'
@@ -152,13 +152,13 @@ object HeaderFooterForm: THeaderFooterForm
         end
         object AniIndicator1: TAniIndicator
           Align = Client
-          Size.Width = 308.013977050781300000
+          Size.Width = 308.013977050781200000
           Size.Height = 32.608459472656250000
           Size.PlatformDefault = False
         end
         object Text1: TText
           Align = Client
-          Size.Width = 308.013977050781300000
+          Size.Width = 308.013977050781200000
           Size.Height = 258.132537841796900000
           Size.PlatformDefault = False
           Stretch = True
@@ -171,7 +171,7 @@ object HeaderFooterForm: THeaderFooterForm
       CustomIcon = <
         item
         end>
-      IsSelected = True
+      IsSelected = False
       Size.Width = 8.000000000000000000
       Size.Height = 8.000000000000000000
       Size.PlatformDefault = False
@@ -191,7 +191,7 @@ object HeaderFooterForm: THeaderFooterForm
             Value = 9.785596288102472000
           end
           item
-            Value = 80.211974132343560000
+            Value = 80.211974132343550000
           end
           item
             Value = 10.002429579553980000
@@ -212,33 +212,33 @@ object HeaderFooterForm: THeaderFooterForm
             Value = 49.736522464674410000
           end
           item
-            Value = 6.282934691915696000
+            Value = 6.282934691915697000
           end
           item
-            Value = 6.282934691915696000
+            Value = 6.282934691915697000
           end
           item
-            Value = 6.282934691915696000
+            Value = 6.282934691915697000
           end
           item
-            Value = 6.282934691915696000
+            Value = 6.282934691915697000
           end
           item
-            Value = 6.282934691915696000
+            Value = 6.282934691915697000
           end
           item
-            Value = 6.282934691915696000
+            Value = 6.282934691915697000
           end
           item
-            Value = 6.282934691915696000
+            Value = 6.282934691915697000
           end
           item
-            Value = 6.282934691915696000
+            Value = 6.282934691915697000
           end>
         object Button2: TButton
           Align = Client
-          Size.Width = 308.013977050781300000
-          Size.Height = 32.608428955078130000
+          Size.Width = 308.013977050781200000
+          Size.Height = 32.608428955078120000
           Size.PlatformDefault = False
           TabOrder = 0
           Text = 'Logout'
@@ -246,7 +246,7 @@ object HeaderFooterForm: THeaderFooterForm
         end
         object Text2: TText
           Align = Client
-          Size.Width = 308.013977050781300000
+          Size.Width = 308.013977050781200000
           Size.Height = 258.132537841796900000
           Size.PlatformDefault = False
           Stretch = True
