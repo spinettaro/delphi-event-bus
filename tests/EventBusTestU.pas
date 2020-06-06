@@ -305,7 +305,7 @@ begin
   LSubscriber := TPersonSubscriber.Create;
   try
     GlobalEventBus.AddCustomClassCloning
-      ('EventBus.Commons.TDEBEvent<BOs.TPerson>',
+      ('EventBus.TDEBEvent<BOs.TPerson>',
       function(AObject: TObject): TObject
       var
         LEvent: TDEBEvent<TPerson>;
@@ -334,7 +334,7 @@ begin
 
   finally
     GlobalEventBus.RemoveCustomClassCloning
-      ('EventBus.Commons.TDEBEvent<BOs.TPerson>');
+      ('EventBus.TDEBEvent<BOs.TPerson>');
     LSubscriber.Free;
   end;
 end;
