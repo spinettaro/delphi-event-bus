@@ -39,12 +39,12 @@ end;
 
  * Register your subscriber:
 ```delphi
-TEventBus.GetDefault.RegisterSubscriber(self);
+GlobalEventBus.RegisterSubscriber(self);
 ```
 
 3.Post events:
 ```delphi
-  TEventBus.GetDefault.post(LEvent);
+GlobalEventBus.post(LEvent);
 ```
 
 ## Support
@@ -52,7 +52,7 @@ TEventBus.GetDefault.RegisterSubscriber(self);
 * It works with Delphi2010 and major
 
 ## License
-  Copyright 2016-2019 Daniele Spinetti
+  Copyright 2016-2020 Daniele Spinetti
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
