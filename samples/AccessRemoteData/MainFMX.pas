@@ -73,7 +73,6 @@ begin
   Button1.Enabled := true;
   Text2.Text := 'Welcome' + sLineBreak + Edit1.Text;
   TabControl1.SetActiveTabWithTransition(TabItem2, TTabTransition.Slide);
-  AEvent.Free;
 end;
 
 end.

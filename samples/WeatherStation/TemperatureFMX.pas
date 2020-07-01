@@ -13,6 +13,7 @@ type
     Label1: TLabel;
     Label2: TLabel;
     procedure FormCreate(Sender: TObject);
+    procedure FormDestroy(Sender: TObject);
   public
     [Subscribe(TThreadMode.Main)]
     procedure OnWeatherInfoEvent(aWeatherInfo: TWeatherInformation);
@@ -29,6 +30,12 @@ implementation
 procedure TTemperatureForm.FormCreate(Sender: TObject);
 begin
   GlobalEventBus.RegisterSubscriberForEvents(Self);
+  TWeatherModel.StartPolling;
+end;
+
+procedure TTemperatureForm.FormDestroy(Sender: TObject);
+begin
+  TWeatherModel.StopPolling;
 end;
 
 procedure TTemperatureForm.OnWeatherInfoEvent(aWeatherInfo

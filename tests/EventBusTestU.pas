@@ -38,6 +38,15 @@ type
     procedure TestPostOnMainThread;
 
     [Test]
+    procedure TestSimplePostAutomaticMM;
+    [Test]
+    procedure TestSimplePostOnBackgroundThreadAutomaticMM;
+    [Test]
+    procedure TestAsyncPostAutomaticMM;
+    [Test]
+    procedure TestPostOnMainThreadAutomaticMM;
+
+    [Test]
     procedure TestSimplePostChannel;
     [Test]
     procedure TestSimplePostChannelOnBackgroundThread;
@@ -92,6 +101,20 @@ begin
   Assert.AreEqual(LMsg, Subscriber.LastEvent.Data);
 end;
 
+procedure TEventBusTest.TestSimplePostAutomaticMM;
+var
+  LEvent: TEventBusEvent;
+  LMsg: string;
+begin
+  Subscriber.EventMM := TEventMM.mmAutomatic;
+  GlobalEventBus.RegisterSubscriberForEvents(Subscriber);
+  LEvent := TEventBusEvent.Create;
+  LMsg := 'TestSimplePost';
+  LEvent.Data := LMsg;
+  GlobalEventBus.Post(LEvent, '', TEventMM.mmAutomatic);
+  Assert.AreEqual(LMsg, Subscriber.LastEventMsg);
+end;
+
 procedure TEventBusTest.TestSimplePostChannel;
 var
   LMsg: string;
@@ -126,6 +149,24 @@ begin
     procedure
     begin
       GlobalEventBus.Post(LEvent);
+    end);
+  // attend for max 5 seconds
+  Assert.IsTrue(TWaitResult.wrSignaled = Subscriber.Event.WaitFor(5000),
+    'Timeout request');
+  Assert.AreNotEqual(MainThreadID, Subscriber.LastEventThreadID);
+end;
+
+procedure TEventBusTest.TestSimplePostOnBackgroundThreadAutomaticMM;
+var
+  LEvent: TEventBusEvent;
+begin
+  Subscriber.EventMM := TEventMM.mmAutomatic;
+  GlobalEventBus.RegisterSubscriberForEvents(Subscriber);
+  LEvent := TEventBusEvent.Create;
+  TTask.Run(
+    procedure
+    begin
+      GlobalEventBus.Post(LEvent, '', TEventMM.mmAutomatic);
     end);
   // attend for max 5 seconds
   Assert.IsTrue(TWaitResult.wrSignaled = Subscriber.Event.WaitFor(5000),
@@ -224,6 +265,25 @@ begin
   end;
 
 end;
+
+procedure TEventBusTest.TestAsyncPostAutomaticMM;
+var
+  LEvent: TAsyncEvent;
+  LMsg: string;
+begin
+  Subscriber.EventMM := TEventMM.mmAutomatic;
+  GlobalEventBus.RegisterSubscriberForEvents(Subscriber);
+  LEvent := TAsyncEvent.Create;
+  LMsg := 'TestAsyncPost';
+  LEvent.Data := LMsg;
+  GlobalEventBus.Post(LEvent, '', TEventMM.mmAutomatic);
+  // attend for max 5 seconds
+  Assert.IsTrue(TWaitResult.wrSignaled = Subscriber.Event.WaitFor(5000),
+    'Timeout request');
+  Assert.AreEqual(LMsg, Subscriber.LastEventMsg);
+  Assert.AreNotEqual(MainThreadID, Subscriber.LastEventThreadID);
+end;
+
 
 procedure TEventBusTest.TestAsyncPostChannel;
 var
@@ -532,6 +592,21 @@ begin
   LEvent.Data := LMsg;
   GlobalEventBus.Post(LEvent);
   Assert.AreEqual(LMsg, Subscriber.LastEvent.Data);
+  Assert.AreEqual(MainThreadID, Subscriber.LastEventThreadID);
+end;
+
+procedure TEventBusTest.TestPostOnMainThreadAutomaticMM;
+var
+  LEvent: TMainEvent;
+  LMsg: string;
+begin
+  Subscriber.EventMM := TEventMM.mmAutomatic;
+  GlobalEventBus.RegisterSubscriberForEvents(Subscriber);
+  LEvent := TMainEvent.Create;
+  LMsg := 'TestPostOnMainThread';
+  LEvent.Data := LMsg;
+  GlobalEventBus.Post(LEvent, '', TEventMM.mmAutomatic);
+  Assert.AreEqual(LMsg, Subscriber.LastEventMsg);
   Assert.AreEqual(MainThreadID, Subscriber.LastEventThreadID);
 end;
 

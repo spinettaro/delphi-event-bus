@@ -27,8 +27,11 @@ type
   end;
 
   TWeatherModel = class(TObject)
+  private
+    class var Stopped: Boolean;
   public
     class procedure StartPolling;
+    class procedure StopPolling;
   end;
 
 implementation
@@ -50,17 +53,23 @@ class procedure TWeatherModel.StartPolling;
 var
   LTask: ITask;
 begin
+  Stopped:= False;
   LTask := TTask.Create(
     procedure
     begin
-      while True do
+      while not Stopped do
       begin
         // simulate a sensor
-        GlobalEventBus.Post(GetRandomWeatherInfo);
+        GlobalEventBus.Post(GetRandomWeatherInfo, '', TEventMM.mmAutomatic);
         TThread.Sleep(3000);
       end
     end);
   LTask.Start;
+end;
+
+class procedure TWeatherModel.StopPolling;
+begin
+    Stopped:= True;
 end;
 
 { TWeatherInformation }

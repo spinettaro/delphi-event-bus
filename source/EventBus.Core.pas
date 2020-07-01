@@ -41,14 +41,14 @@ type
     procedure UnsubscribeByEventType(ASubscriber: TObject; AEventType: TClass);
     procedure UnsubscribeByChannel(ASubscriber: TObject; AChannel: String);
     procedure InvokeSubscriber(ASubscription: TSubscription;
-      AEvent: TObject); overload;
+      AEvent: TObject; AEventMM: TEventMM); overload;
     procedure InvokeSubscriber(ASubscription: TSubscription;
       AMessage: String); overload;
-    function GenerateTProc(ASubscription: TSubscription; AEvent: TObject)
+    function GenerateTProc(ASubscription: TSubscription; AEvent: TObject; AEventMM: TEventMM)
       : TProc; overload;
     function GenerateTProc(ASubscription: TSubscription; AMessage: String)
       : TProc; overload;
-    function GenerateThreadProc(ASubscription: TSubscription; AEvent: TObject)
+    function GenerateThreadProc(ASubscription: TSubscription; AEvent: TObject; AEventMM: TEventMM)
       : TThreadProcedure; overload;
     function GenerateThreadProc(ASubscription: TSubscription; AMessage: String)
       : TThreadProcedure; overload;
@@ -56,7 +56,7 @@ type
     procedure SetOnCloneEvent(const aCloneEvent: TCloneEventCallback);
     function CloneEvent(AEvent: TObject): TObject; virtual;
     procedure PostToSubscription(ASubscription: TSubscription; AEvent: TObject;
-      AIsMainThread: Boolean); virtual;
+      AIsMainThread: Boolean; AEventMM: TEventMM); virtual;
     procedure PostToChannel(ASubscription: TSubscription; AMessage: String;
       AIsMainThread: Boolean); virtual;
   public
@@ -69,7 +69,7 @@ type
     procedure UnregisterForEvents(ASubscriber: TObject); virtual;
     procedure UnregisterForChannels(ASubscriber: TObject); virtual;
     procedure Post(AEvent: TObject; const AContext: String = '';
-      AEventOwner: Boolean = true); overload; virtual;
+      AEventMM: TEventMM = mmManualAndFreeMainEvent); overload; virtual;
     procedure Post(const AChannel: String; const AMessage: String);
       overload; virtual;
     property TypesOfGivenSubscriber: TObjectDictionary < TObject,
@@ -139,7 +139,7 @@ begin
 end;
 
 function TEventBus.GenerateThreadProc(ASubscription: TSubscription;
-  AEvent: TObject): TThreadProcedure;
+  AEvent: TObject; AEventMM: TEventMM): TThreadProcedure;
 begin
   Result := procedure
     begin
@@ -148,6 +148,8 @@ begin
         ASubscription.SubscriberMethod.Method.Invoke(ASubscription.Subscriber,
           [AEvent]);
       end;
+      if (AEventMM = TEventMM.mmAutomatic) then
+        AEvent.Free;
     end;
 end;
 
@@ -178,7 +180,7 @@ begin
 end;
 
 function TEventBus.GenerateTProc(ASubscription: TSubscription;
-  AEvent: TObject): TProc;
+  AEvent: TObject; AEventMM: TEventMM): TProc;
 begin
   Result := procedure
     begin
@@ -187,15 +189,19 @@ begin
         ASubscription.SubscriberMethod.Method.Invoke(ASubscription.Subscriber,
           [AEvent]);
       end;
+      if (AEventMM = TEventMM.mmAutomatic) then
+          AEvent.Free;
     end;
 end;
 
 procedure TEventBus.InvokeSubscriber(ASubscription: TSubscription;
-  AEvent: TObject);
+  AEvent: TObject; AEventMM: TEventMM);
 begin
   try
     ASubscription.SubscriberMethod.Method.Invoke(ASubscription.Subscriber,
       [AEvent]);
+    if (AEventMM = TEventMM.mmAutomatic) then
+        AEvent.Free;
   except
     on E: Exception do
     begin
@@ -246,13 +252,14 @@ begin
 end;
 
 procedure TEventBus.Post(AEvent: TObject; const AContext: String = '';
-  AEventOwner: Boolean = true);
+  AEventMM: TEventMM = mmManualAndFreeMainEvent);
 var
   LSubscriptions: TObjectList<TSubscription>;
   LSubscription: TSubscription;
   LEvent: TObject;
   LIsMainThread: Boolean;
 begin
+  Assert(Assigned(AEvent), 'Event cannot be nil');
   FMREWSync.BeginRead;
   try
     try
@@ -270,14 +277,14 @@ begin
         if not LSubscription.Active then
           continue;
 
-        if ((not AContext.IsEmpty) and (LSubscription.Context <> AContext)) then
+        if ((LSubscription.Context <> AContext)) then
           continue;
 
         LEvent := CloneEvent(AEvent);
-        PostToSubscription(LSubscription, LEvent, LIsMainThread);
+        PostToSubscription(LSubscription, LEvent, LIsMainThread, AEventMM);
       end;
     finally
-      if (AEventOwner and Assigned(AEvent)) then
+      if (AEventMM in [mmAutomatic, mmManualAndFreeMainEvent]) then
         AEvent.Free;
     end;
   finally
@@ -322,7 +329,7 @@ begin
 end;
 
 procedure TEventBus.PostToSubscription(ASubscription: TSubscription;
-  AEvent: TObject; AIsMainThread: Boolean);
+  AEvent: TObject; AIsMainThread: Boolean; AEventMM: TEventMM);
 begin
 
   if not Assigned(ASubscription.Subscriber) then
@@ -330,27 +337,27 @@ begin
 
   case ASubscription.SubscriberMethod.ThreadMode of
     Posting:
-      InvokeSubscriber(ASubscription, AEvent);
+      InvokeSubscriber(ASubscription, AEvent, AEventMM);
     Main:
       if (AIsMainThread) then
-        InvokeSubscriber(ASubscription, AEvent)
+        InvokeSubscriber(ASubscription, AEvent, AEventMM)
       else
-        TThread.Queue(nil, GenerateThreadProc(ASubscription, AEvent));
+        TThread.Queue(nil, GenerateThreadProc(ASubscription, AEvent, AEventMM));
     Background:
       if (AIsMainThread) then
 {$IF CompilerVersion >= 28.0}
-        TTask.Run(GenerateTProc(ASubscription, AEvent))
+        TTask.Run(GenerateTProc(ASubscription, AEvent, AEventMM))
 {$ELSE}
         TThread.CreateAnonymousThread(GenerateTProc(ASubscription,
-          AEvent)).Start
+          AEvent, AEventMM)).Start
 {$ENDIF}
       else
-        InvokeSubscriber(ASubscription, AEvent);
+        InvokeSubscriber(ASubscription, AEvent, AEventMM);
     Async:
 {$IF CompilerVersion >= 28.0}
-      TTask.Run(GenerateTProc(ASubscription, AEvent));
+      TTask.Run(GenerateTProc(ASubscription, AEvent, AEventMM));
 {$ELSE}
-      TThread.CreateAnonymousThread(GenerateTProc(ASubscription, AEvent)).Start;
+      TThread.CreateAnonymousThread(GenerateTProc(ASubscription, AEvent, AEventMM)).Start;
 {$ENDIF}
   else
     raise Exception.Create('Unknown thread mode');

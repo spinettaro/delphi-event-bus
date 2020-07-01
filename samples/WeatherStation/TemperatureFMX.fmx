@@ -10,6 +10,7 @@ object TemperatureForm: TTemperatureForm
   FormFactor.Height = 480
   FormFactor.Devices = [Desktop]
   OnCreate = FormCreate
+  OnDestroy = FormDestroy
   DesignerMasterStyle = 0
   object Label1: TLabel
     Align = Top

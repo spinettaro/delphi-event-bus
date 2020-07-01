@@ -25,6 +25,9 @@ type
 
   TThreadMode = (Posting, Main, Async, Background);
 
+  // event memory management
+  TEventMM = (mmAutomatic, mmManual, mmManualAndFreeMainEvent);
+
   TCloneEventCallback = function(const AObject: TObject): TObject of object;
   TCloneEventMethod = TFunc<TObject, TObject>;
 
@@ -37,7 +40,7 @@ type
     procedure UnregisterForEvents(ASubscriber: TObject);
     procedure UnregisterForChannels(ASubscriber: TObject);
     procedure Post(AEvent: TObject; const AContext: String = '';
-      AEventOwner: Boolean = true); overload;
+      AEventMM: TEventMM = mmManualAndFreeMainEvent); overload;
     procedure Post(const AChannel: String; const aMessage: String); overload;
 
     procedure SetOnCloneEvent(const aCloneEvent: TCloneEventCallback);

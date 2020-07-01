@@ -12,12 +12,12 @@ uses
 {$R *.res}
 
 begin
+  ReportMemoryLeaksOnShutdown:= True;
   Application.Initialize;
   Application.CreateForm(TTemperatureForm, TemperatureForm);
   Application.CreateForm(TPressureForm, PressureForm);
   Application.CreateForm(THumidityForm, HumidityForm);
   Application.CreateForm(TPaintedForm, PaintedForm);
-  TWeatherModel.StartPolling;
   Application.Run;
 
 end.

@@ -45,7 +45,6 @@ end;
 procedure TFormLogger.OnAnalyticsEvent(AAnalyticsEvent: TAnalyticsEvent);
 begin
   Memo1.Lines.Add(GetFormattedAnalyticsEvent(AAnalyticsEvent));
-  AAnalyticsEvent.Free;
 end;
 
 end.

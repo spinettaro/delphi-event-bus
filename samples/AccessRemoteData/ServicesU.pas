@@ -37,7 +37,7 @@ begin
     begin
       // simulate an http request for 5 seconds
       TThread.Sleep(3000);
-      GlobalEventBus.Post(TOnLoginEvent.Create(true, 'Login ok'));
+      GlobalEventBus.Post(TOnLoginEvent.Create(true, 'Login ok'), '', TEventMM.mmAutomatic);
       aLoginDTO.Free;
     end);
 

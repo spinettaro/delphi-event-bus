@@ -52,6 +52,8 @@ type
     FLastEventThreadID: cardinal;
     FEvent: TEvent;
     FChannelMsg: String;
+    FEventMsg: String;
+    FEventMM: TEventMM;
     procedure SetLastEvent(const Value: TEventBusEvent);
     procedure SetLastEventThreadID(const Value: cardinal);
     procedure SetEvent(const Value: TEvent);
@@ -63,6 +65,8 @@ type
       write SetLastEventThreadID;
     property Event: TEvent read FEvent write SetEvent;
     property LastChannelMsg: String read FChannelMsg write FChannelMsg;
+    property LastEventMsg: String read FEventMsg write FEventMsg;
+    property EventMM: TEventMM read FEventMM write FEventMM;
   end;
 
   TSubscriber = class(TBaseSubscriber)
@@ -131,13 +135,14 @@ constructor TBaseSubscriber.Create;
 begin
   inherited Create;
   FEvent := TEvent.Create;
+  FEventMM:= TEventMM.mmManualAndFreeMainEvent;
 end;
 
 destructor TBaseSubscriber.Destroy;
 begin
   GlobalEventBus.UnregisterForEvents(Self);
   GlobalEventBus.UnregisterForChannels(Self);
-  if Assigned(FLastEvent) then
+  if Assigned(FLastEvent) and (FEventMM <> TEventMM.mmAutomatic) then
     FLastEvent.Free;
   if Assigned(FEvent) then
     FEvent.Free;
@@ -166,6 +171,7 @@ end;
 procedure TSubscriber.OnSimpleAsyncEvent(AEvent: TAsyncEvent);
 begin
   LastEvent := AEvent;
+  LastEventMsg:= AEvent.Data;
   LastEventThreadID := TThread.CurrentThread.ThreadID;
   Event.SetEvent;
 end;
@@ -186,6 +192,7 @@ end;
 procedure TSubscriber.OnSimpleEvent(AEvent: TEventBusEvent);
 begin
   LastEvent := AEvent;
+  LastEventMsg:= AEvent.Data;
   LastEventThreadID := TThread.CurrentThread.ThreadID;
   Event.SetEvent;
 end;
@@ -193,6 +200,7 @@ end;
 procedure TSubscriber.OnSimpleMainEvent(AEvent: TMainEvent);
 begin
   LastEvent := AEvent;
+  LastEventMsg:= AEvent.Data;
   LastEventThreadID := TThread.CurrentThread.ThreadID;
 end;
 
