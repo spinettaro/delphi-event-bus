@@ -64,7 +64,7 @@ procedure THeaderFooterForm.FormCreate(Sender: TObject);
 begin
   TabControl1.ActiveTab := TabItem1;
   // register subscribers
-  GlobalEventBus.RegisterSubscriber(Self);
+  GlobalEventBus.RegisterSubscriberForEvents(Self);
 end;
 
 procedure THeaderFooterForm.OnAfterLogin(AEvent: TOnLoginEvent);

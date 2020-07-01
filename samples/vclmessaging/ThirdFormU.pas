@@ -33,7 +33,7 @@ uses
 
 procedure TfrmThird.FormCreate(Sender: TObject);
 begin
-  GlobalEventBus.RegisterSubscriber(self);
+  GlobalEventBus.RegisterSubscriberForEvents(self);
 end;
 
 procedure TfrmThird.OnMemoChange(AEvent: TMemoChangeEvent);

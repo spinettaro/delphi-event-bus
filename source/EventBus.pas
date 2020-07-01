@@ -1,5 +1,5 @@
 { *******************************************************************************
-  Copyright 2016-2019 Daniele Spinetti
+  Copyright 2016-2020 Daniele Spinetti
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -30,11 +30,15 @@ type
 
   IEventBus = Interface
     ['{7BDF4536-F2BA-4FBA-B186-09E1EE6C7E35}']
-    procedure RegisterSubscriber(ASubscriber: TObject);
-    function IsRegistered(ASubscriber: TObject): Boolean;
-    procedure Unregister(ASubscriber: TObject);
+    procedure RegisterSubscriberForEvents(ASubscriber: TObject);
+    procedure RegisterSubscriberForChannels(ASubscriber: TObject);
+    function IsRegisteredForEvents(ASubscriber: TObject): Boolean;
+    function IsRegisteredForChannels(ASubscriber: TObject): Boolean;
+    procedure UnregisterForEvents(ASubscriber: TObject);
+    procedure UnregisterForChannels(ASubscriber: TObject);
     procedure Post(AEvent: TObject; const AContext: String = '';
-      AEventOwner: Boolean = true);
+      AEventOwner: Boolean = true); overload;
+    procedure Post(const AChannel: String; const aMessage: String); overload;
 
     procedure SetOnCloneEvent(const aCloneEvent: TCloneEventCallback);
     procedure AddCustomClassCloning(const AQualifiedClassName: String;
@@ -53,6 +57,17 @@ type
       const AContext: String = '');
     property ThreadMode: TThreadMode read FThreadMode;
     property Context: String read FContext;
+  end;
+
+  ChannelAttribute = class(TCustomAttribute)
+  private
+    FChannel: String;
+    FThreadMode: TThreadMode;
+  public
+    constructor Create(const AChannel: String;
+      AThreadMode: TThreadMode = TThreadMode.Posting);
+    property ThreadMode: TThreadMode read FThreadMode;
+    property Channel: String read FChannel;
   end;
 
   TDEBEvent<T> = class(TObject)
@@ -128,6 +143,16 @@ begin
   if not Assigned(FGlobalEventBus) then
     FGlobalEventBus := TEventBus.Create;
   Result := FGlobalEventBus;
+end;
+
+{ ChannelAttribute }
+
+constructor ChannelAttribute.Create(const AChannel: String;
+  AThreadMode: TThreadMode = TThreadMode.Posting);
+begin
+  FThreadMode := AThreadMode;
+  FChannel := AChannel;
+
 end;
 
 initialization

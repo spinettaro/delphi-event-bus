@@ -31,7 +31,7 @@ implementation
 procedure TFormLogger.FormCreate(Sender: TObject);
 begin
   Memo1.Lines.Clear;
-  GlobalEventBus.RegisterSubscriber(self);
+  GlobalEventBus.RegisterSubscriberForEvents(self);
 end;
 
 function TFormLogger.GetFormattedAnalyticsEvent(AAnalyticsEvent

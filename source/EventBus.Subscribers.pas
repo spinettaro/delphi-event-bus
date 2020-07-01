@@ -1,5 +1,5 @@
 { *******************************************************************************
-  Copyright 2016-2019 Daniele Spinetti
+  Copyright 2016-2020 Daniele Spinetti
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -69,7 +69,10 @@ type
   end;
 
   TSubscribersFinder = class(TObject)
-    class function FindSubscriberMethods(ASubscriberClass: TClass;
+  public
+    class function FindEventsSubscriberMethods(ASubscriberClass: TClass;
+      ARaiseExcIfEmpty: Boolean = false): TArray<TSubscriberMethod>;
+    class function FindChannelsSubcriberMethods(ASubscriberClass: TClass;
       ARaiseExcIfEmpty: Boolean = false): TArray<TSubscriberMethod>;
   end;
 
@@ -132,7 +135,45 @@ end;
 
 { TSubscribersFinder }
 
-class function TSubscribersFinder.FindSubscriberMethods(ASubscriberClass
+class function TSubscribersFinder.FindChannelsSubcriberMethods(ASubscriberClass
+  : TClass; ARaiseExcIfEmpty: Boolean): TArray<TSubscriberMethod>;
+var
+  LRttiType: TRttiType;
+  LChannelAttribute: ChannelAttribute;
+  LRttiMethods: TArray<System.RTTI.TRttiMethod>;
+  LMethod: TRttiMethod;
+  LParamsLength: Integer;
+  LSubMethod: TSubscriberMethod;
+begin
+  Result := [];
+  LRttiType := TRTTIUtils.ctx.GetType(ASubscriberClass);
+  LRttiMethods := LRttiType.GetMethods;
+  for LMethod in LRttiMethods do
+    if TRTTIUtils.HasAttribute<ChannelAttribute>(LMethod, LChannelAttribute)
+    then
+    begin
+      LParamsLength := Length(LMethod.GetParameters);
+      if ((LParamsLength <> 1) or (LMethod.GetParameters[0].ParamType.TypeKind
+        <> tkUString)) then
+        raise Exception.CreateFmt
+          ('Method  %s has Channel attribute but requires %d arguments. Methods must require a single argument of string type.',
+          [LMethod.Name, LParamsLength]);
+      LSubMethod := TSubscriberMethod.Create(LMethod, nil,
+        LChannelAttribute.ThreadMode, LChannelAttribute.Channel);
+{$IF CompilerVersion >= 28.0}
+      Result := Result + [LSubMethod];
+{$ELSE}
+      SetLength(Result, Length(Result) + 1);
+      Result[High(Result)] := LSubMethod;
+{$ENDIF}
+    end;
+  if (Length(Result) < 1) and ARaiseExcIfEmpty then
+    raise Exception.CreateFmt
+      ('The class %s and its super classes have no public methods with the Channel attribute',
+      [ASubscriberClass.QualifiedClassName]);
+end;
+
+class function TSubscribersFinder.FindEventsSubscriberMethods(ASubscriberClass
   : TClass; ARaiseExcIfEmpty: Boolean = false): TArray<TSubscriberMethod>;
 var
   LRttiType: TRttiType;
@@ -143,6 +184,7 @@ var
   LEventType: TClass;
   LSubMethod: TSubscriberMethod;
 begin
+  Result := [];
   LRttiType := TRTTIUtils.ctx.GetType(ASubscriberClass);
   LRttiMethods := LRttiType.GetMethods;
   for LMethod in LRttiMethods do
@@ -167,7 +209,7 @@ begin
     end;
   if (Length(Result) < 1) and ARaiseExcIfEmpty then
     raise Exception.CreateFmt
-      ('The class %s and its super classes have no public methods with the Subscribe attributes',
+      ('The class %s and its super classes have no public methods with the Subscribe attribute',
       [ASubscriberClass.QualifiedClassName]);
 end;
 

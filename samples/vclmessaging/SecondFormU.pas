@@ -38,9 +38,9 @@ uses
 procedure TfrmSecond.CheckBox2Click(Sender: TObject);
 begin
   if (CheckBox2.Checked) then
-    GlobalEventBus.RegisterSubscriber(self)
+    GlobalEventBus.RegisterSubscriberForEvents(self)
   else
-    GlobalEventBus.Unregister(self);
+    GlobalEventBus.UnregisterForEvents(self);
 end;
 
 procedure TfrmSecond.OnCheckBoxChange(AEvent: TCheckBoxEvent);

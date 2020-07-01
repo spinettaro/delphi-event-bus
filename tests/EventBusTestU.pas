@@ -1,5 +1,5 @@
 unit EventBusTestU;
-
+
 interface
 
 uses
@@ -11,13 +11,23 @@ type
   TEventBusTest = class(TBaseTest)
   public
     [Test]
-    procedure TestRegisterUnregister;
+    procedure TestRegisterUnregisterEvents;
     [Test]
-    procedure TestIsRegisteredTrueAfterRegister;
+    procedure TestIsRegisteredTrueAfterRegisterEvents;
     [Test]
-    procedure TestIsRegisteredFalseAfterUnregister;
+    procedure TestIsRegisteredFalseAfterUnregisterEvents;
     [Test]
-    procedure TestRegisterUnregisterMultipleSubscriber;
+    procedure TestRegisterUnregisterMultipleSubscriberEvents;
+
+    [Test]
+    procedure TestRegisterUnregisterChannels;
+    [Test]
+    procedure TestIsRegisteredTrueAfterRegisterChannels;
+    [Test]
+    procedure TestIsRegisteredFalseAfterUnregisterChannels;
+    [Test]
+    procedure TestRegisterUnregisterMultipleSubscriberChannels;
+
     [Test]
     procedure TestSimplePost;
     [Test]
@@ -26,6 +36,20 @@ type
     procedure TestAsyncPost;
     [Test]
     procedure TestPostOnMainThread;
+
+    [Test]
+    procedure TestSimplePostChannel;
+    [Test]
+    procedure TestSimplePostChannelOnBackgroundThread;
+    [Test]
+    procedure TestAsyncPostChannel;
+    [Test]
+    procedure TestPostChannelOnMainThread;
+    [Test]
+    procedure TestBackgroundPostChannel;
+    [Test]
+    procedure TestBackgroundsPostChannel;
+
     [Test]
     procedure TestPostContextOnMainThread;
     [Test]
@@ -34,6 +58,7 @@ type
     procedure TestBackgroundPost;
     [Test]
     procedure TestBackgroundsPost;
+
     [Test]
     procedure TestPostEntityWithChildObject;
     [Test]
@@ -59,7 +84,7 @@ var
   LEvent: TEventBusEvent;
   LMsg: string;
 begin
-  GlobalEventBus.RegisterSubscriber(Subscriber);
+  GlobalEventBus.RegisterSubscriberForEvents(Subscriber);
   LEvent := TEventBusEvent.Create;
   LMsg := 'TestSimplePost';
   LEvent.Data := LMsg;
@@ -67,11 +92,35 @@ begin
   Assert.AreEqual(LMsg, Subscriber.LastEvent.Data);
 end;
 
+procedure TEventBusTest.TestSimplePostChannel;
+var
+  LMsg: string;
+begin
+  GlobalEventBus.RegisterSubscriberForChannels(ChannelSubscriber);
+  LMsg := 'TestSimplePost';
+  GlobalEventBus.Post('test_channel', 'TestSimplePost');
+  Assert.AreEqual(LMsg, ChannelSubscriber.LastChannelMsg);
+end;
+
+procedure TEventBusTest.TestSimplePostChannelOnBackgroundThread;
+begin
+  GlobalEventBus.RegisterSubscriberForChannels(ChannelSubscriber);
+  TTask.Run(
+    procedure
+    begin
+      GlobalEventBus.Post('test_channel', 'TestSimplePost');
+    end);
+  // attend for max 5 seconds
+  Assert.IsTrue(TWaitResult.wrSignaled = ChannelSubscriber.Event.WaitFor(5000),
+    'Timeout request');
+  Assert.AreNotEqual(MainThreadID, ChannelSubscriber.LastEventThreadID);
+end;
+
 procedure TEventBusTest.TestSimplePostOnBackgroundThread;
 var
   LEvent: TEventBusEvent;
 begin
-  GlobalEventBus.RegisterSubscriber(Subscriber);
+  GlobalEventBus.RegisterSubscriberForEvents(Subscriber);
   LEvent := TEventBusEvent.Create;
   TTask.Run(
     procedure
@@ -89,7 +138,7 @@ var
   LRaisedException: Boolean;
 begin
   LRaisedException := false;
-  GlobalEventBus.RegisterSubscriber(Subscriber);
+  GlobalEventBus.RegisterSubscriberForEvents(Subscriber);
   try
     Subscriber.Free;
     Subscriber := nil;
@@ -101,14 +150,14 @@ begin
   Assert.IsFalse(LRaisedException);
 end;
 
-procedure TEventBusTest.TestRegisterUnregister;
+procedure TEventBusTest.TestRegisterUnregisterChannels;
 var
   LRaisedException: Boolean;
 begin
   LRaisedException := false;
-  GlobalEventBus.RegisterSubscriber(Subscriber);
+  GlobalEventBus.RegisterSubscriberForChannels(ChannelSubscriber);
   try
-    GlobalEventBus.Unregister(Subscriber);
+    GlobalEventBus.UnregisterForChannels(ChannelSubscriber);
   except
     on E: Exception do
       LRaisedException := true;
@@ -116,7 +165,43 @@ begin
   Assert.IsFalse(LRaisedException);
 end;
 
-procedure TEventBusTest.TestRegisterUnregisterMultipleSubscriber;
+procedure TEventBusTest.TestRegisterUnregisterEvents;
+var
+  LRaisedException: Boolean;
+begin
+  LRaisedException := false;
+  GlobalEventBus.RegisterSubscriberForEvents(Subscriber);
+  try
+    GlobalEventBus.UnregisterForEvents(Subscriber);
+  except
+    on E: Exception do
+      LRaisedException := true;
+  end;
+  Assert.IsFalse(LRaisedException);
+end;
+
+procedure TEventBusTest.TestRegisterUnregisterMultipleSubscriberChannels;
+var
+  LChannelSubscriber: TChannelSubscriber;
+  LMsg: string;
+begin
+  LChannelSubscriber := TChannelSubscriber.Create;
+  try
+    GlobalEventBus.RegisterSubscriberForChannels(ChannelSubscriber);
+    GlobalEventBus.RegisterSubscriberForChannels(LChannelSubscriber);
+    GlobalEventBus.UnregisterForChannels(ChannelSubscriber);
+    LMsg := 'TestSimplePost';
+    GlobalEventBus.Post('test_channel', LMsg);
+    Assert.IsFalse(GlobalEventBus.IsRegisteredForChannels(ChannelSubscriber));
+    Assert.IsTrue(GlobalEventBus.IsRegisteredForChannels(LChannelSubscriber));
+    Assert.AreEqual(LMsg, LChannelSubscriber.LastChannelMsg);
+  finally
+    LChannelSubscriber.Free;
+  end;
+
+end;
+
+procedure TEventBusTest.TestRegisterUnregisterMultipleSubscriberEvents;
 var
   LSubscriber: TSubscriberCopy;
   LEvent: TEventBusEvent;
@@ -124,15 +209,15 @@ var
 begin
   LSubscriber := TSubscriberCopy.Create;
   try
-    GlobalEventBus.RegisterSubscriber(Subscriber);
-    GlobalEventBus.RegisterSubscriber(LSubscriber);
-    GlobalEventBus.Unregister(Subscriber);
+    GlobalEventBus.RegisterSubscriberForEvents(Subscriber);
+    GlobalEventBus.RegisterSubscriberForEvents(LSubscriber);
+    GlobalEventBus.UnregisterForEvents(Subscriber);
     LEvent := TEventBusEvent.Create;
     LMsg := 'TestSimplePost';
     LEvent.Data := LMsg;
     GlobalEventBus.Post(LEvent);
-    Assert.IsFalse(GlobalEventBus.IsRegistered(Subscriber));
-    Assert.IsTrue(GlobalEventBus.IsRegistered(LSubscriber));
+    Assert.IsFalse(GlobalEventBus.IsRegisteredForEvents(Subscriber));
+    Assert.IsTrue(GlobalEventBus.IsRegisteredForEvents(LSubscriber));
     Assert.AreEqual(LMsg, LSubscriber.LastEvent.Data);
   finally
     LSubscriber.Free;
@@ -140,12 +225,26 @@ begin
 
 end;
 
+procedure TEventBusTest.TestAsyncPostChannel;
+var
+  LMsg: string;
+begin
+  GlobalEventBus.RegisterSubscriberForChannels(ChannelSubscriber);
+  LMsg := 'TestAsyncPost';
+  GlobalEventBus.Post('test_channel_async', LMsg);
+  // attend for max 5 seconds
+  Assert.IsTrue(TWaitResult.wrSignaled = ChannelSubscriber.Event.WaitFor(5000),
+    'Timeout request');
+  Assert.AreEqual(LMsg, ChannelSubscriber.LastChannelMsg);
+  Assert.AreNotEqual(MainThreadID, ChannelSubscriber.LastEventThreadID);
+end;
+
 procedure TEventBusTest.TestBackgroundPost;
 var
   LEvent: TBackgroundEvent;
   LMsg: string;
 begin
-  GlobalEventBus.RegisterSubscriber(Subscriber);
+  GlobalEventBus.RegisterSubscriberForEvents(Subscriber);
   LEvent := TBackgroundEvent.Create;
   LMsg := 'TestBackgroundPost';
   LEvent.Data := LMsg;
@@ -157,13 +256,27 @@ begin
   Assert.AreNotEqual(MainThreadID, Subscriber.LastEventThreadID);
 end;
 
+procedure TEventBusTest.TestBackgroundPostChannel;
+var
+  LMsg: string;
+begin
+  GlobalEventBus.RegisterSubscriberForChannels(ChannelSubscriber);
+  LMsg := 'TestBackgroundPost';
+  GlobalEventBus.Post('test_channel_bkg', LMSG);
+  // attend for max 5 seconds
+  Assert.IsTrue(TWaitResult.wrSignaled = ChannelSubscriber.Event.WaitFor(5000),
+    'Timeout request');
+  Assert.AreEqual(LMsg, ChannelSubscriber.LastChannelMsg);
+  Assert.AreNotEqual(MainThreadID, ChannelSubscriber.LastEventThreadID);
+end;
+
 procedure TEventBusTest.TestBackgroundsPost;
 var
   LEvent: TBackgroundEvent;
   LMsg: string;
   I: Integer;
 begin
-  GlobalEventBus.RegisterSubscriber(Subscriber);
+  GlobalEventBus.RegisterSubscriberForEvents(Subscriber);
   for I := 0 to 10 do
   begin
     LEvent := TBackgroundEvent.Create;
@@ -172,24 +285,66 @@ begin
     LEvent.Count := I;
     GlobalEventBus.Post(LEvent);
   end;
-  // attend for max 2 seconds
-  for I := 0 to 20 do
-    TThread.Sleep(100);
+  // attend for max 0.500 seconds
+  for I := 0 to 50 do
+    TThread.Sleep(10);
 
   Assert.AreEqual(10, TBackgroundEvent(Subscriber.LastEvent).Count);
 end;
 
-procedure TEventBusTest.TestIsRegisteredFalseAfterUnregister;
+procedure TEventBusTest.TestBackgroundsPostChannel;
+var
+  LMsg: string;
+  I: Integer;
 begin
-  GlobalEventBus.RegisterSubscriber(Subscriber);
-  Assert.IsTrue(GlobalEventBus.IsRegistered(Subscriber));
+  GlobalEventBus.RegisterSubscriberForChannels(ChannelSubscriber);
+  for I := 0 to 10 do
+  begin
+    LMsg := Format('TestBackgroundPost%d',[I]);
+    GlobalEventBus.Post('test_channel_bkg', LMSG);
+  end;
+  // attend for max 0.5 seconds
+  for I := 0 to 50 do
+    TThread.Sleep(10);
+
+  Assert.AreEqual(LMsg, ChannelSubscriber.LastChannelMsg);
 end;
 
-procedure TEventBusTest.TestIsRegisteredTrueAfterRegister;
+procedure TEventBusTest.TestIsRegisteredFalseAfterUnregisterChannels;
 begin
-  GlobalEventBus.RegisterSubscriber(Subscriber);
-  GlobalEventBus.Unregister(Subscriber);
-  Assert.IsFalse(GlobalEventBus.IsRegistered(Subscriber));
+  GlobalEventBus.RegisterSubscriberForChannels(ChannelSubscriber);
+  Assert.IsTrue(GlobalEventBus.IsRegisteredForChannels(ChannelSubscriber));
+end;
+
+procedure TEventBusTest.TestIsRegisteredFalseAfterUnregisterEvents;
+begin
+  GlobalEventBus.RegisterSubscriberForEvents(Subscriber);
+  Assert.IsTrue(GlobalEventBus.IsRegisteredForEvents(Subscriber));
+end;
+
+procedure TEventBusTest.TestIsRegisteredTrueAfterRegisterChannels;
+begin
+  GlobalEventBus.RegisterSubscriberForChannels(ChannelSubscriber);
+  GlobalEventBus.UnregisterForChannels(ChannelSubscriber);
+  Assert.IsFalse(GlobalEventBus.IsRegisteredForChannels(ChannelSubscriber));
+end;
+
+procedure TEventBusTest.TestIsRegisteredTrueAfterRegisterEvents;
+begin
+  GlobalEventBus.RegisterSubscriberForEvents(Subscriber);
+  GlobalEventBus.UnregisterForEvents(Subscriber);
+  Assert.IsFalse(GlobalEventBus.IsRegisteredForEvents(Subscriber));
+end;
+
+procedure TEventBusTest.TestPostChannelOnMainThread;
+var
+  LMsg: string;
+begin
+  GlobalEventBus.RegisterSubscriberForChannels(ChannelSubscriber);
+  LMsg := 'TestPostOnMainThread';
+  GlobalEventBus.Post('test_channel', LMsg);
+  Assert.AreEqual(LMsg, ChannelSubscriber.LastChannelMsg);
+  Assert.AreEqual(MainThreadID, ChannelSubscriber.LastEventThreadID);
 end;
 
 procedure TEventBusTest.TestPostContextKOOnMainThread;
@@ -197,7 +352,7 @@ var
   LEvent: TMainEvent;
   LMsg: string;
 begin
-  GlobalEventBus.RegisterSubscriber(Subscriber);
+  GlobalEventBus.RegisterSubscriberForEvents(Subscriber);
   LEvent := TMainEvent.Create;
   LMsg := 'TestPostOnMainThread';
   LEvent.Data := LMsg;
@@ -210,7 +365,7 @@ var
   LEvent: TMainEvent;
   LMsg: string;
 begin
-  GlobalEventBus.RegisterSubscriber(Subscriber);
+  GlobalEventBus.RegisterSubscriberForEvents(Subscriber);
   LEvent := TMainEvent.Create;
   LMsg := 'TestPostOnMainThread';
   LEvent.Data := LMsg;
@@ -227,7 +382,7 @@ begin
   LSubscriber := TPersonSubscriber.Create;
   try
     LSubscriber.ObjOwner := true;
-    GlobalEventBus.RegisterSubscriber(LSubscriber);
+    GlobalEventBus.RegisterSubscriberForEvents(LSubscriber);
     LPerson := TPerson.Create;
     LPerson.Firstname := 'Howard';
     LPerson.Lastname := 'Stark';
@@ -250,7 +405,7 @@ begin
   LSubscriber := TPersonSubscriber.Create;
   try
     LSubscriber.ObjOwner := true;
-    GlobalEventBus.RegisterSubscriber(LSubscriber);
+    GlobalEventBus.RegisterSubscriberForEvents(LSubscriber);
     LPerson := TPerson.Create;
     LPerson.Firstname := 'Howard';
     LPerson.Lastname := 'Stark';
@@ -274,7 +429,7 @@ begin
   LSubscriber := TPersonSubscriber.Create;
   try
     LSubscriber.ObjOwner := true;
-    GlobalEventBus.RegisterSubscriber(LSubscriber);
+    GlobalEventBus.RegisterSubscriberForEvents(LSubscriber);
     LPerson := TPerson.Create;
     LPerson.Firstname := 'Howard';
     LPerson.Lastname := 'Stark';
@@ -304,8 +459,7 @@ var
 begin
   LSubscriber := TPersonSubscriber.Create;
   try
-    GlobalEventBus.AddCustomClassCloning
-      ('EventBus.TDEBEvent<BOs.TPerson>',
+    GlobalEventBus.AddCustomClassCloning('EventBus.TDEBEvent<BOs.TPerson>',
       function(AObject: TObject): TObject
       var
         LEvent: TDEBEvent<TPerson>;
@@ -323,7 +477,7 @@ begin
         Result := LEvent;
       end);
     LSubscriber.ObjOwner := true;
-    GlobalEventBus.RegisterSubscriber(LSubscriber);
+    GlobalEventBus.RegisterSubscriberForEvents(LSubscriber);
     LPerson := TPerson.Create;
     LPerson.Firstname := 'Howard';
     LPerson.Lastname := 'Stark';
@@ -333,8 +487,7 @@ begin
     Assert.AreEqual('Howard', LSubscriber.Person.Child.Firstname);
 
   finally
-    GlobalEventBus.RemoveCustomClassCloning
-      ('EventBus.TDEBEvent<BOs.TPerson>');
+    GlobalEventBus.RemoveCustomClassCloning('EventBus.TDEBEvent<BOs.TPerson>');
     LSubscriber.Free;
   end;
 end;
@@ -347,7 +500,7 @@ var
 begin
   LSubscriber := TPersonListSubscriber.Create;
   try
-    GlobalEventBus.RegisterSubscriber(LSubscriber);
+    GlobalEventBus.RegisterSubscriberForEvents(LSubscriber);
     LList := TObjectList<TPerson>.Create;
     LPerson := TPerson.Create;
     LPerson.Firstname := 'Howard';
@@ -373,7 +526,7 @@ var
   LEvent: TMainEvent;
   LMsg: string;
 begin
-  GlobalEventBus.RegisterSubscriber(Subscriber);
+  GlobalEventBus.RegisterSubscriberForEvents(Subscriber);
   LEvent := TMainEvent.Create;
   LMsg := 'TestPostOnMainThread';
   LEvent.Data := LMsg;
@@ -387,7 +540,7 @@ var
   LEvent: TAsyncEvent;
   LMsg: string;
 begin
-  GlobalEventBus.RegisterSubscriber(Subscriber);
+  GlobalEventBus.RegisterSubscriberForEvents(Subscriber);
   LEvent := TAsyncEvent.Create;
   LMsg := 'TestAsyncPost';
   LEvent.Data := LMsg;
@@ -404,3 +557,4 @@ initialization
 TDUnitX.RegisterTestFixture(TEventBusTest);
 
 end.
+

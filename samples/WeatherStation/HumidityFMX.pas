@@ -31,7 +31,7 @@ implementation
 
 procedure THumidityForm.FormCreate(Sender: TObject);
 begin
-  GlobalEventBus.RegisterSubscriber(Self);
+  GlobalEventBus.RegisterSubscriberForEvents(Self);
 end;
 
 procedure THumidityForm.OnWeatherInfoEvent(aWeatherInfo: TWeatherInformation);

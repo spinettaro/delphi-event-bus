@@ -32,7 +32,7 @@ implementation
 
 procedure TPaintedForm.FormCreate(Sender: TObject);
 begin
-  GlobalEventBus.RegisterSubscriber(Self);
+  GlobalEventBus.RegisterSubscriberForEvents(Self);
 end;
 
 procedure TPaintedForm.OnWeatherInfoEvent(aWeatherInfo: TWeatherInformation);

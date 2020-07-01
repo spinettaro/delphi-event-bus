@@ -31,7 +31,7 @@ implementation
 
 procedure TPressureForm.FormCreate(Sender: TObject);
 begin
-  GlobalEventBus.RegisterSubscriber(Self);
+  GlobalEventBus.RegisterSubscriberForEvents(Self);
 end;
 
 procedure TPressureForm.OnWeatherInfoEvent(aWeatherInfo: TWeatherInformation);

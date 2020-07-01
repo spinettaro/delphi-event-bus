@@ -1,5 +1,5 @@
 unit BOs;
-
+
 interface
 
 uses
@@ -51,6 +51,7 @@ type
     FLastEvent: TEventBusEvent;
     FLastEventThreadID: cardinal;
     FEvent: TEvent;
+    FChannelMsg: String;
     procedure SetLastEvent(const Value: TEventBusEvent);
     procedure SetLastEventThreadID(const Value: cardinal);
     procedure SetEvent(const Value: TEvent);
@@ -61,6 +62,7 @@ type
     property LastEventThreadID: cardinal read FLastEventThreadID
       write SetLastEventThreadID;
     property Event: TEvent read FEvent write SetEvent;
+    property LastChannelMsg: String read FChannelMsg write FChannelMsg;
   end;
 
   TSubscriber = class(TBaseSubscriber)
@@ -74,6 +76,17 @@ type
     procedure OnSimpleBackgroundEvent(AEvent: TBackgroundEvent);
     [Subscribe(TThreadMode.Main, 'TestCtx')]
     procedure OnSimpleContextEvent(AEvent: TMainEvent);
+  end;
+
+  TChannelSubscriber = class(TBaseSubscriber)
+    [Channel('test_channel')]
+    procedure OnSimpleChannel(AMsg: String);
+    [Channel('test_channel_async', TThreadMode.Async)]
+    procedure OnSimpleAsyncChannel(AMsg: String);
+    [Channel('test_channel_main', TThreadMode.Main)]
+    procedure OnSimpleMainChannel(AMsg: String);
+    [Channel('test_channel_bkg', TThreadMode.Background)]
+    procedure OnSimpleBackgroundChannel(AMsg: String);
   end;
 
   TSubscriberCopy = class(TBaseSubscriber)
@@ -122,7 +135,8 @@ end;
 
 destructor TBaseSubscriber.Destroy;
 begin
-  GlobalEventBus.Unregister(Self);
+  GlobalEventBus.UnregisterForEvents(Self);
+  GlobalEventBus.UnregisterForChannels(Self);
   if Assigned(FLastEvent) then
     FLastEvent.Free;
   if Assigned(FEvent) then
@@ -288,4 +302,35 @@ begin
   FPersonList := Value;
 end;
 
+{ TChannelSubscriber }
+
+procedure TChannelSubscriber.OnSimpleAsyncChannel(AMsg: String);
+begin
+  LastChannelMsg := AMsg;
+  LastEventThreadID := TThread.CurrentThread.ThreadID;
+  Event.SetEvent;
+end;
+
+procedure TChannelSubscriber.OnSimpleBackgroundChannel(AMsg: String);
+begin
+  LastChannelMsg := AMsg;
+  LastEventThreadID := TThread.CurrentThread.ThreadID;
+  Event.SetEvent;
+end;
+
+procedure TChannelSubscriber.OnSimpleChannel(AMsg: String);
+begin
+  LastChannelMsg := AMsg;
+  LastEventThreadID := TThread.CurrentThread.ThreadID;
+  Event.SetEvent;
+end;
+
+procedure TChannelSubscriber.OnSimpleMainChannel(AMsg: String);
+begin
+  LastChannelMsg := AMsg;
+  LastEventThreadID := TThread.CurrentThread.ThreadID;
+  Event.SetEvent;
+end;
+
 end.
+
