@@ -18,7 +18,7 @@ type
   public
     { Public declarations }
     [Subscribe(TThreadMode.Main)]
-    procedure OnWeatherInfoEvent(aWeatherInfo: TWeatherInformation);
+    procedure OnWeatherInfoEvent(aWeatherInfo: IWeatherInformation);
   end;
 
 var
@@ -34,7 +34,7 @@ begin
   GlobalEventBus.RegisterSubscriberForEvents(Self);
 end;
 
-procedure TPressureForm.OnWeatherInfoEvent(aWeatherInfo: TWeatherInformation);
+procedure TPressureForm.OnWeatherInfoEvent(aWeatherInfo: IWeatherInformation);
 begin
   Label2.Text := Format(' %d ', [Trunc(aWeatherInfo.Pressure)]);
 end;

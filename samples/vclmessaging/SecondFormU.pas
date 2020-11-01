@@ -20,9 +20,9 @@ type
   public
     { Public declarations }
     [Subscribe]
-    procedure OnMemoChange(AEvent: TMemoChangeEvent);
+    procedure OnMemoChange(AEvent: IMemoChangeEvent);
     [Subscribe]
-    procedure OnCheckBoxChange(AEvent: TCheckBoxEvent);
+    procedure OnCheckBoxChange(AEvent: ICheckBoxEvent);
   end;
 
 var
@@ -31,7 +31,7 @@ var
 implementation
 
 uses
-  RttiUtilsU, System.Rtti;
+  System.Rtti;
 
 {$R *.dfm}
 
@@ -43,16 +43,14 @@ begin
     GlobalEventBus.UnregisterForEvents(self);
 end;
 
-procedure TfrmSecond.OnCheckBoxChange(AEvent: TCheckBoxEvent);
+procedure TfrmSecond.OnCheckBoxChange(AEvent: ICheckBoxEvent);
 begin
   CheckBox1.Checked := AEvent.Checked;
-  AEvent.Free;
 end;
 
-procedure TfrmSecond.OnMemoChange(AEvent: TMemoChangeEvent);
+procedure TfrmSecond.OnMemoChange(AEvent: IMemoChangeEvent);
 begin
   MemoObserver.Lines.Text := AEvent.Text;
-  AEvent.Free;
 end;
 
 end.

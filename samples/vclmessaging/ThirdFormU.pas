@@ -18,7 +18,7 @@ type
   public
     { Public declarations }
     [Subscribe]
-    procedure OnMemoChange(AEvent: TMemoChangeEvent);
+    procedure OnMemoChange(AEvent: IMemoChangeEvent);
   end;
 
 var
@@ -36,11 +36,10 @@ begin
   GlobalEventBus.RegisterSubscriberForEvents(self);
 end;
 
-procedure TfrmThird.OnMemoChange(AEvent: TMemoChangeEvent);
+procedure TfrmThird.OnMemoChange(AEvent: IMemoChangeEvent);
 begin
   FMessage := AEvent.Text;
   PaintBox1.Repaint;
-  AEvent.Free;
 end;
 
 procedure TfrmThird.PaintBox1Paint(Sender: TObject);

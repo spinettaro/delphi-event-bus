@@ -32,18 +32,18 @@ uses
 
 procedure TfrmMain.CheckBox1Click(Sender: TObject);
 var
-  Event: TCheckBoxEvent;
+  Event: ICheckBoxEvent;
 begin
-  Event := TCheckBoxEvent.Create();
+  Event := GetCheckBoxEvent;
   Event.Checked := CheckBox1.Checked;
   GlobalEventBus.Post(Event);
 end;
 
 procedure TfrmMain.Memo1Change(Sender: TObject);
 var
-  Event: TMemoChangeEvent;
+  Event: IMemoChangeEvent;
 begin
-  Event := TMemoChangeEvent.Create();
+  Event := GetMemoEvent;
   Event.Text := Memo1.Lines.Text;
   GlobalEventBus.Post(Event);
 end;

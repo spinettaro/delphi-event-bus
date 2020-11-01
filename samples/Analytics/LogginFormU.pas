@@ -14,11 +14,11 @@ type
   private
     { Private declarations }
     function GetFormattedAnalyticsEvent(AAnalyticsEvent
-      : TAnalyticsEvent): string;
+      : IAnalyticsEvent): string;
   public
     { Public declarations }
     [Subscribe]
-    procedure OnAnalyticsEvent(AAnalyticsEvent: TAnalyticsEvent);
+    procedure OnAnalyticsEvent(AAnalyticsEvent: IAnalyticsEvent);
   end;
 
 var
@@ -35,14 +35,14 @@ begin
 end;
 
 function TFormLogger.GetFormattedAnalyticsEvent(AAnalyticsEvent
-  : TAnalyticsEvent): string;
+  : IAnalyticsEvent): string;
 begin
   Result := Format('User %s - %s - at %s ',
     [AAnalyticsEvent.Who, AAnalyticsEvent.What,
     DateTimeToStr(AAnalyticsEvent.When)]);
 end;
 
-procedure TFormLogger.OnAnalyticsEvent(AAnalyticsEvent: TAnalyticsEvent);
+procedure TFormLogger.OnAnalyticsEvent(AAnalyticsEvent: IAnalyticsEvent);
 begin
   Memo1.Lines.Add(GetFormattedAnalyticsEvent(AAnalyticsEvent));
 end;

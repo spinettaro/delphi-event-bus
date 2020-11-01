@@ -32,7 +32,7 @@ type
   public
     { Public declarations }
     [Subscribe(TThreadMode.Main)]
-    procedure OnAfterLogin(AEvent: TOnLoginEvent);
+    procedure OnAfterLogin(AEvent: IOnLoginEvent);
   end;
 
 var
@@ -67,7 +67,7 @@ begin
   GlobalEventBus.RegisterSubscriberForEvents(Self);
 end;
 
-procedure THeaderFooterForm.OnAfterLogin(AEvent: TOnLoginEvent);
+procedure THeaderFooterForm.OnAfterLogin(AEvent: IOnLoginEvent);
 begin
   AniIndicator1.Enabled := false;
   Button1.Enabled := true;

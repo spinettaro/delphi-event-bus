@@ -25,20 +25,20 @@ type
 
   TSubscriberMethod = class(TObject)
   private
-    FEventType: TClass;
+    FEventType: String;
     FThreadMode: TThreadMode;
     FMethod: TRttiMethod;
     FContext: string;
-    procedure SetEventType(const Value: TClass);
+    procedure SetEventType(const Value: String);
     procedure SetMethod(const Value: TRttiMethod);
     procedure SetThreadMode(const Value: TThreadMode);
     procedure SetContext(const Value: String);
   public
-    constructor Create(ARttiMethod: TRttiMethod; AEventType: TClass;
+    constructor Create(ARttiMethod: TRttiMethod; AEventType: String;
       AThreadMode: TThreadMode; const AContext: String = '';
       APriority: Integer = 1);
     destructor Destroy; override;
-    property EventType: TClass read FEventType write SetEventType;
+    property EventType: String read FEventType write SetEventType;
     property Method: TRttiMethod read FMethod write SetMethod;
     property ThreadMode: TThreadMode read FThreadMode write SetThreadMode;
     property Context: String read FContext write SetContext;
@@ -79,12 +79,12 @@ type
 implementation
 
 uses
-  RTTIUtilsU, System.SysUtils, System.TypInfo;
+  System.SysUtils, System.TypInfo, EventBus.Helpers;
 
 { TSubscriberMethod }
 
 constructor TSubscriberMethod.Create(ARttiMethod: TRttiMethod;
-  AEventType: TClass; AThreadMode: TThreadMode; const AContext: String = '';
+  AEventType: String; AThreadMode: TThreadMode; const AContext: String = '';
   APriority: Integer = 1);
 begin
   FMethod := ARttiMethod;
@@ -113,12 +113,13 @@ begin
     exit(false);
 end;
 
+
 procedure TSubscriberMethod.SetContext(const Value: String);
 begin
   FContext := Value;
 end;
 
-procedure TSubscriberMethod.SetEventType(const Value: TClass);
+procedure TSubscriberMethod.SetEventType(const Value: String);
 begin
   FEventType := Value;
 end;
@@ -158,7 +159,7 @@ begin
         raise Exception.CreateFmt
           ('Method  %s has Channel attribute but requires %d arguments. Methods must require a single argument of string type.',
           [LMethod.Name, LParamsLength]);
-      LSubMethod := TSubscriberMethod.Create(LMethod, nil,
+      LSubMethod := TSubscriberMethod.Create(LMethod, '',
         LChannelAttribute.ThreadMode, LChannelAttribute.Channel);
 {$IF CompilerVersion >= 28.0}
       Result := Result + [LSubMethod];
@@ -181,7 +182,7 @@ var
   LRttiMethods: TArray<System.RTTI.TRttiMethod>;
   LMethod: TRttiMethod;
   LParamsLength: Integer;
-  LEventType: TClass;
+  LEventType: String;
   LSubMethod: TSubscriberMethod;
 begin
   Result := [];
@@ -196,8 +197,10 @@ begin
         raise Exception.CreateFmt
           ('Method  %s has Subscribe attribute but requires %d arguments. Methods must require a single argument.',
           [LMethod.Name, LParamsLength]);
-      LEventType := LMethod.GetParameters[0].ParamType.Handle.TypeData.
-        ClassType;
+      if (LMethod.GetParameters[0].ParamType.TypeKind <> TTypeKind.tkInterface) then
+        raise Exception.CreateFmt
+          ('Method  %s has Subscribe attribute but requires the Event argument is NOT an interface. The Event must be an Interface.', [LMethod.Name]);
+      LEventType := LMethod.GetParameters[0].ParamType.QualifiedName;
       LSubMethod := TSubscriberMethod.Create(LMethod, LEventType,
         LSubscribeAttribute.ThreadMode, LSubscribeAttribute.Context);
 {$IF CompilerVersion >= 28.0}

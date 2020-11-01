@@ -25,12 +25,6 @@ type
 
   TThreadMode = (Posting, Main, Async, Background);
 
-  // event memory management
-  TEventMM = (mmAutomatic, mmManual, mmManualAndFreeMainEvent);
-
-  TCloneEventCallback = function(const AObject: TObject): TObject of object;
-  TCloneEventMethod = TFunc<TObject, TObject>;
-
   IEventBus = Interface
     ['{7BDF4536-F2BA-4FBA-B186-09E1EE6C7E35}']
     procedure RegisterSubscriberForEvents(ASubscriber: TObject);
@@ -39,16 +33,9 @@ type
     function IsRegisteredForChannels(ASubscriber: TObject): Boolean;
     procedure UnregisterForEvents(ASubscriber: TObject);
     procedure UnregisterForChannels(ASubscriber: TObject);
-    procedure Post(AEvent: TObject; const AContext: String = '';
-      AEventMM: TEventMM = mmManualAndFreeMainEvent); overload;
+    procedure Post(AEvent: IInterface; const AContext: String = ''); overload;
     procedure Post(const AChannel: String; const aMessage: String); overload;
 
-    procedure SetOnCloneEvent(const aCloneEvent: TCloneEventCallback);
-    procedure AddCustomClassCloning(const AQualifiedClassName: String;
-      const aCloneEvent: TCloneEventMethod);
-    procedure RemoveCustomClassCloning(const AQualifiedClassName: String);
-
-    property OnCloneEvent: TCloneEventCallback write SetOnCloneEvent;
   end;
 
   SubscribeAttribute = class(TCustomAttribute)
@@ -73,12 +60,26 @@ type
     property Channel: String read FChannel;
   end;
 
-  TDEBEvent<T> = class(TObject)
+  IDEBEvent<T> = interface(IInterface)
+      ['{AFDFF9C9-46D8-4663-9535-2BBB1396587C}']
+    procedure SetData(const Value: T);
+    procedure SetDataOwner(const Value: Boolean);
+
+    function GetDataOwner: Boolean;
+    function GetData:      T;
+
+    property DataOwner: Boolean read GetDataOwner write SetDataOwner;
+    property Data: T read GetData write SetData;
+  end;
+
+  TDEBEvent<T> = class(TInterfacedObject, IDEBEvent<T>)
   private
     FDataOwner: Boolean;
     FData: T;
     procedure SetData(const Value: T);
     procedure SetDataOwner(const Value: Boolean);
+    function GetDataOwner: Boolean;
+    function GetData:      T;
   public
     constructor Create; overload;
     constructor Create(AData: T); overload;
@@ -92,7 +93,7 @@ function GlobalEventBus: IEventBus;
 implementation
 
 uses
-  EventBus.Core, RTTIUtilsU, System.Rtti;
+  EventBus.Core, System.Rtti;
 
 var
   FGlobalEventBus: IEventBus;
@@ -129,6 +130,16 @@ begin
   if (LValue.IsObject) and DataOwner then
     LValue.AsObject.Free;
   inherited;
+end;
+
+function TDEBEvent<T>.GetData: T;
+begin
+  Result:= FData;
+end;
+
+function TDEBEvent<T>.GetDataOwner: Boolean;
+begin
+  Result:= FDataOwner;
 end;
 
 procedure TDEBEvent<T>.SetData(const Value: T);
