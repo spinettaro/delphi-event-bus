@@ -25,7 +25,7 @@ uses
 
 {$IFDEF TESTINSIGHT}
 TestInsight.DUnitX.RunRegisteredTests;
-exit;
+Exit;
 {$ENDIF}
 
 

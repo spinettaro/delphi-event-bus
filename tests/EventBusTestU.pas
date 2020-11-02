@@ -72,8 +72,14 @@ type
 
 implementation
 
-uses EventBus, BOs, System.SyncObjs, System.SysUtils, System.Threading,
-  System.Classes, System.Generics.Collections;
+uses
+  System.Classes,
+  System.Generics.Collections,
+  System.SyncObjs,
+  System.SysUtils,
+  System.Threading,
+  BOs,
+  EventBus;
 
 procedure TEventBusTest.TestSimplePost;
 var
@@ -84,6 +90,7 @@ begin
   LEvent := TEventBusEvent.Create;
   LMsg := 'TestSimplePost';
   LEvent.Data := LMsg;
+
   GlobalEventBus.Post(LEvent);
   Assert.AreEqual(LMsg, Subscriber.LastEvent.Data);
 end;
@@ -101,14 +108,15 @@ end;
 procedure TEventBusTest.TestSimplePostChannelOnBackgroundThread;
 begin
   GlobalEventBus.RegisterSubscriberForChannels(ChannelSubscriber);
+
   TTask.Run(
     procedure
     begin
       GlobalEventBus.Post('test_channel', 'TestSimplePost');
     end);
+
   // attend for max 5 seconds
-  Assert.IsTrue(TWaitResult.wrSignaled = ChannelSubscriber.Event.WaitFor(5000),
-    'Timeout request');
+  Assert.IsTrue(TWaitResult.wrSignaled = ChannelSubscriber.Event.WaitFor(5000), 'Timeout request');
   Assert.AreNotEqual(MainThreadID, ChannelSubscriber.LastEventThreadID);
 end;
 
@@ -118,14 +126,15 @@ var
 begin
   GlobalEventBus.RegisterSubscriberForEvents(Subscriber);
   LEvent := TEventBusEvent.Create;
+
   TTask.Run(
     procedure
     begin
       GlobalEventBus.Post(LEvent);
     end);
+
   // attend for max 5 seconds
-  Assert.IsTrue(TWaitResult.wrSignaled = Subscriber.Event.WaitFor(5000),
-    'Timeout request');
+  Assert.IsTrue(TWaitResult.wrSignaled = Subscriber.Event.WaitFor(5000), 'Timeout request');
   Assert.AreNotEqual(MainThreadID, Subscriber.LastEventThreadID);
 end;
 
@@ -133,16 +142,18 @@ procedure TEventBusTest.TestRegisterAndFree;
 var
   LRaisedException: Boolean;
 begin
-  LRaisedException := false;
+  LRaisedException := False;
   GlobalEventBus.RegisterSubscriberForEvents(Subscriber);
+
   try
     Subscriber.Free;
     Subscriber := nil;
     GlobalEventBus.Post(TEventBusEvent.Create);
   except
     on E: Exception do
-      LRaisedException := true;
+      LRaisedException := True;
   end;
+
   Assert.IsFalse(LRaisedException);
 end;
 
@@ -150,14 +161,16 @@ procedure TEventBusTest.TestRegisterUnregisterChannels;
 var
   LRaisedException: Boolean;
 begin
-  LRaisedException := false;
+  LRaisedException := False;
   GlobalEventBus.RegisterSubscriberForChannels(ChannelSubscriber);
+
   try
     GlobalEventBus.UnregisterForChannels(ChannelSubscriber);
   except
     on E: Exception do
-      LRaisedException := true;
+      LRaisedException := True;
   end;
+
   Assert.IsFalse(LRaisedException);
 end;
 
@@ -165,14 +178,16 @@ procedure TEventBusTest.TestRegisterUnregisterEvents;
 var
   LRaisedException: Boolean;
 begin
-  LRaisedException := false;
+  LRaisedException := False;
   GlobalEventBus.RegisterSubscriberForEvents(Subscriber);
+
   try
     GlobalEventBus.UnregisterForEvents(Subscriber);
   except
     on E: Exception do
-      LRaisedException := true;
+      LRaisedException := True;
   end;
+
   Assert.IsFalse(LRaisedException);
 end;
 
@@ -194,7 +209,6 @@ begin
   finally
     LChannelSubscriber.Free;
   end;
-
 end;
 
 procedure TEventBusTest.TestRegisterUnregisterMultipleSubscriberEvents;
@@ -218,7 +232,6 @@ begin
   finally
     LSubscriber.Free;
   end;
-
 end;
 
 procedure TEventBusTest.TestAsyncPostChannel;
@@ -229,8 +242,7 @@ begin
   LMsg := 'TestAsyncPost';
   GlobalEventBus.Post('test_channel_async', LMsg);
   // attend for max 5 seconds
-  Assert.IsTrue(TWaitResult.wrSignaled = ChannelSubscriber.Event.WaitFor(5000),
-    'Timeout request');
+  Assert.IsTrue(TWaitResult.wrSignaled = ChannelSubscriber.Event.WaitFor(5000), 'Timeout request');
   Assert.AreEqual(LMsg, ChannelSubscriber.LastChannelMsg);
   Assert.AreNotEqual(MainThreadID, ChannelSubscriber.LastEventThreadID);
 end;
@@ -246,8 +258,7 @@ begin
   LEvent.Data := LMsg;
   GlobalEventBus.Post(LEvent);
   // attend for max 5 seconds
-  Assert.IsTrue(TWaitResult.wrSignaled = Subscriber.Event.WaitFor(5000),
-    'Timeout request');
+  Assert.IsTrue(TWaitResult.wrSignaled = Subscriber.Event.WaitFor(5000), 'Timeout request');
   Assert.AreEqual(LMsg, Subscriber.LastEvent.Data);
   Assert.AreNotEqual(MainThreadID, Subscriber.LastEventThreadID);
 end;
@@ -260,8 +271,7 @@ begin
   LMsg := 'TestBackgroundPost';
   GlobalEventBus.Post('test_channel_bkg', LMSG);
   // attend for max 5 seconds
-  Assert.IsTrue(TWaitResult.wrSignaled = ChannelSubscriber.Event.WaitFor(5000),
-    'Timeout request');
+  Assert.IsTrue(TWaitResult.wrSignaled = ChannelSubscriber.Event.WaitFor(5000), 'Timeout request');
   Assert.AreEqual(LMsg, ChannelSubscriber.LastChannelMsg);
   Assert.AreNotEqual(MainThreadID, ChannelSubscriber.LastEventThreadID);
 end;
@@ -273,6 +283,7 @@ var
   I: Integer;
 begin
   GlobalEventBus.RegisterSubscriberForEvents(Subscriber);
+
   for I := 0 to 10 do
   begin
     LEvent := TBackgroundEvent.Create;
@@ -282,6 +293,7 @@ begin
     GlobalEventBus.Post(LEvent);
   end;
   // attend for max 0.500 seconds
+
   for I := 0 to 50 do
     TThread.Sleep(10);
 
@@ -294,11 +306,13 @@ var
   I: Integer;
 begin
   GlobalEventBus.RegisterSubscriberForChannels(ChannelSubscriber);
+
   for I := 0 to 10 do
   begin
     LMsg := Format('TestBackgroundPost%d',[I]);
     GlobalEventBus.Post('test_channel_bkg', LMSG);
   end;
+
   // attend for max 0.5 seconds
   for I := 0 to 50 do
     TThread.Sleep(10);
@@ -374,11 +388,11 @@ procedure TEventBusTest.TestPostEntityWithChildObject;
 var
   LPerson: TPerson;
   LSubscriber: TPersonSubscriber;
-  lEvent: IDEBEvent<TPerson>;
+  LEvent: IDEBEvent<TPerson>;
 begin
   LSubscriber := TPersonSubscriber.Create;
   try
-    LSubscriber.ObjOwner := true;
+    LSubscriber.OwnsObject:= True;
     GlobalEventBus.RegisterSubscriberForEvents(LSubscriber);
     LPerson := TPerson.Create;
     LPerson.Firstname := 'Howard';
@@ -386,8 +400,8 @@ begin
     LPerson.Child := TPerson.Create;
     LPerson.Child.Firstname := 'Tony';
     LPerson.Child.Lastname := 'Stark';
-    lEvent:= TDEBEvent<TPerson>.Create(LPerson);
-    GlobalEventBus.Post( lEvent);
+    LEvent:= TDEBEvent<TPerson>.Create(LPerson);
+    GlobalEventBus.Post( LEvent);
     Assert.AreEqual('Howard', LSubscriber.Person.Firstname);
     Assert.AreEqual('Tony', LSubscriber.Person.Child.Firstname);
   finally
@@ -399,18 +413,18 @@ procedure TEventBusTest.TestPostEntityWithItsSelfInChildObject;
 var
   LPerson: TPerson;
   LSubscriber: TPersonSubscriber;
-  lEvent: IDEBEvent<TPerson>;
+  LEvent: IDEBEvent<TPerson>;
 begin
   LSubscriber := TPersonSubscriber.Create;
   try
-    LSubscriber.ObjOwner := true;
+    LSubscriber.OwnsObject := True;
     GlobalEventBus.RegisterSubscriberForEvents(LSubscriber);
     LPerson := TPerson.Create;
     LPerson.Firstname := 'Howard';
     LPerson.Lastname := 'Stark';
     LPerson.Child := LPerson;
-    lEvent:= TDEBEvent<TPerson>.Create(LPerson);
-    GlobalEventBus.Post(lEvent);
+    LEvent:= TDEBEvent<TPerson>.Create(LPerson);
+    GlobalEventBus.Post(LEvent);
     Assert.AreEqual('Howard', LSubscriber.Person.Firstname);
     Assert.AreEqual('Howard', LSubscriber.Person.Child.Firstname);
   finally
@@ -471,15 +485,13 @@ begin
   LEvent.Data := LMsg;
   GlobalEventBus.Post(LEvent);
   // attend for max 5 seconds
-  Assert.IsTrue(TWaitResult.wrSignaled = Subscriber.Event.WaitFor(5000),
-    'Timeout request');
+  Assert.IsTrue(TWaitResult.wrSignaled = Subscriber.Event.WaitFor(5000), 'Timeout request');
   Assert.AreEqual(LMsg, Subscriber.LastEvent.Data);
   Assert.AreNotEqual(MainThreadID, Subscriber.LastEventThreadID);
 end;
 
 initialization
-
-TDUnitX.RegisterTestFixture(TEventBusTest);
+  TDUnitX.RegisterTestFixture(TEventBusTest);
 
 end.
 
