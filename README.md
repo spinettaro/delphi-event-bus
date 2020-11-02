@@ -21,7 +21,7 @@ It was inspired by EventBus framework for the Android platform.
 1.Define events:
 
 ```delphi
-TEvent = class(TObject)
+IEvent = inteface
 // additional information here
 end;
 ```
@@ -31,7 +31,7 @@ end;
  * Declare your subscribing method:
 ```delphi
 [Subscribe]
-procedure OnEvent(AEvent: TAnyTypeOfEvent);
+procedure OnEvent(AEvent: IAnyTypeOfEvent);
 begin
   // manage the event 	
 end;
@@ -50,6 +50,20 @@ GlobalEventBus.post(LEvent);
 ## Support
 * DEB is a 100% ObjectPascal framework so it works on VCL and Firemonkey
 * It works with Delphi2010 and major
+
+## Release Notes
+
+### DEB 2.0
+
+* NEW! Added new Interface based mechanism to declare and handle events!
+* NEW! Added channels for simple string-based events
+* NEW! Removed internal CloneEvent because now events are interface based! 
+
+#### Breaking Changes
+
+* A subscriber method can only have 1 parameter that is an IInterface or descendants
+* EventBus.Post method can accept only an interface as parameter now
+
 
 ## License
   Copyright 2016-2020 Daniele Spinetti
