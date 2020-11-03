@@ -1,5 +1,5 @@
 unit BOs;
-
+
 interface
 
 uses
@@ -39,37 +39,44 @@ type
 
   IBackgroundEvent = Interface(IEventBusEvent)
   ['{E70B43F0-7F68-47B9-AFF3-5878A0B1A88D}']
-    procedure SetCount(const Value: Integer);
-    function GetCount: Integer;
-    property Count: Integer read GetCount write SetCount;
+    procedure SetSequenceID(const Value: Integer);
+    function GetSequenceID: Integer;
+    property SequenceID: Integer read GetSequenceID write SetSequenceID;
   end;
 
   TBackgroundEvent = class(TDEBEvent<string>, IBackgroundEvent)
   private
-    FCount: Integer;
-    function GetCount: Integer;
-    procedure SetCount(const Value: Integer);
+    FSequenceID: Integer;
+    function GetSequenceID: Integer;
+    procedure SetSequenceID(const Value: Integer);
   public
-    property Count: Integer read GetCount write SetCount;
+    property SequenceID: Integer read GetSequenceID write SetSequenceID;
+  public
   end;
 
   TBaseSubscriber = class(TObject)
   private
     FChannelMsg: string;
-    FEvent: TEvent;
+    FEvent: TEvent; // Wrapper of Win32 SetEvent with automic Set/Reset, no need for thread protection.
+    FCount: Integer;
     FEventMsg: string;
     FLastEvent: IEventBusEvent;
     FLastEventThreadID: Cardinal;
-    procedure SetEvent(const Value: TEvent);
+    procedure SetLastChannelMsg(const Value: string);
     procedure SetLastEvent(const Value: IEventBusEvent);
+    procedure SetLastEventMsg(const Value: string);
     procedure SetLastEventThreadID(const Value: Cardinal);
   public
     constructor Create;
     destructor Destroy; override;
-    property Event: TEvent read FEvent write SetEvent;
-    property LastChannelMsg: string read FChannelMsg write FChannelMsg;
+
+    procedure IncrementCount;
+
+    property Event: TEvent read FEvent; // Readonly is good enough
+    property Count: Integer read FCount;
     property LastEvent: IEventBusEvent read FLastEvent write SetLastEvent;
-    property LastEventMsg: string read FEventMsg write FEventMsg;
+    property LastChannelMsg: string read FChannelMsg write SetLastChannelMsg;
+    property LastEventMsg: string read FEventMsg write SetLastEventMsg;
     property LastEventThreadID: Cardinal read FLastEventThreadID write SetLastEventThreadID;
   end;
 
@@ -146,34 +153,49 @@ constructor TBaseSubscriber.Create;
 begin
   inherited Create;
   FEvent := TEvent.Create;
+  FCount := 0;
 end;
 
 destructor TBaseSubscriber.Destroy;
 begin
   GlobalEventBus.UnregisterForEvents(Self);
   GlobalEventBus.UnregisterForChannels(Self);
-
-  if Assigned(FEvent) then
-    FEvent.Free;
-
+  FEvent.Free;
   inherited;
 end;
 
-procedure TBaseSubscriber.SetEvent(const Value: TEvent);
+procedure TBaseSubscriber.IncrementCount;
 begin
-  FEvent := Value;
+  AtomicIncrement(FCount);
 end;
 
 procedure TBaseSubscriber.SetLastEvent(const Value: IEventBusEvent);
 begin
+  TMonitor.Enter(Self); // Need to protect from multithread write (for the Background/Async events testing)
   FLastEvent := Value;
+  TMonitor.Exit(Self);
 end;
 
 procedure TBaseSubscriber.SetLastEventThreadID(const Value: Cardinal);
 begin
+  TMonitor.Enter(Self); // Need to protect from multithread write (for the Background/Async events testing)
   FLastEventThreadID := Value;
+  TMonitor.Exit(Self);
 end;
 
+procedure TBaseSubscriber.SetLastChannelMsg(const Value: string);
+begin
+  TMonitor.Enter(Self);
+  FChannelMsg := Value;
+  TMonitor.Exit(Self);
+end;
+
+procedure TBaseSubscriber.SetLastEventMsg(const Value: string);
+begin
+  TMonitor.Enter(Self);
+  FEventMsg := Value;
+  TMonitor.Exit(Self);
+end;
 
 procedure TSubscriber.OnSimpleAsyncEvent(AEvent: IAsyncEvent);
 begin
@@ -187,6 +209,7 @@ procedure TSubscriber.OnSimpleBackgroundEvent(AEvent: IBackgroundEvent);
 begin
   LastEvent := AEvent;
   LastEventThreadID := TThread.CurrentThread.ThreadID;
+  IncrementCount;
   Event.SetEvent;
 end;
 
@@ -211,16 +234,15 @@ begin
   LastEventThreadID := TThread.CurrentThread.ThreadID;
 end;
 
-function TBackgroundEvent.GetCount: Integer;
+function TBackgroundEvent.GetSequenceID: Integer;
 begin
-  Result:= FCount;
+  Result:= FSequenceID;
 end;
 
-procedure TBackgroundEvent.SetCount(const Value: Integer);
+procedure TBackgroundEvent.SetSequenceID(const Value: Integer);
 begin
-  FCount := Value;
+  FSequenceID := Value;
 end;
-
 
 procedure TSubscriberCopy.OnSimpleEvent(AEvent: IEventBusEvent);
 begin
@@ -252,7 +274,6 @@ procedure TPerson.SetLastname(const Value: string);
 begin
   FLastname := Value;
 end;
-
 
 constructor TPersonSubscriber.Create;
 begin
@@ -328,4 +349,4 @@ begin
 end;
 
 end.
-
+
