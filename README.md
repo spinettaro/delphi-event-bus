@@ -64,9 +64,9 @@ const MY_CHANNEL = 'MYCHANNEL'
  * Declare your subscribing method:
 ```delphi
 [Channel(MY_CHANNEL)]
-procedure OnEvent(aMsg: String);
+procedure OnMessage(aMsg: String);
 begin
-  // manage the event 	
+  // manage the message 	
 end;
 ```
 
