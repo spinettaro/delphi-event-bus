@@ -43,7 +43,7 @@ end;
 
  * Register your subscriber:
 ```delphi
-GlobalEventBus.RegisterSubscriberForEvents(self);
+GlobalEventBus.RegisterSubscriberForEvents(Self);
 ```
 
 3.Post events:
@@ -64,7 +64,7 @@ const MY_CHANNEL = 'MYCHANNEL'
  * Declare your subscribing method:
 ```delphi
 [Channel(MY_CHANNEL)]
-procedure OnMessage(aMsg: String);
+procedure OnMessage(AMsg: string);
 begin
   // manage the message 	
 end;
@@ -72,7 +72,7 @@ end;
 
  * Register your subscriber:
 ```delphi
-GlobalEventBus.RegisterSubscriberForChannels(self);
+GlobalEventBus.RegisterSubscriberForChannels(Self);
 ```
 
 3.Post event on channel:
