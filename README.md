@@ -18,6 +18,9 @@ It was inspired by EventBus framework for the Android platform.
 * __Thread Safe__
 
 ## Show me the code
+
+### Events
+
 1.Define events:
 
 ```delphi
@@ -40,13 +43,46 @@ end;
 
  * Register your subscriber:
 ```delphi
-GlobalEventBus.RegisterSubscriber(self);
+GlobalEventBus.RegisterSubscriberForEvents(self);
 ```
 
 3.Post events:
 ```delphi
 GlobalEventBus.post(LEvent);
 ```
+
+### Channels
+
+1.Define channel:
+
+```delphi
+const MY_CHANNEL = 'MYCHANNEL'
+```
+
+2.Prepare subscribers:
+
+ * Declare your subscribing method:
+```delphi
+[Channel(MY_CHANNEL)]
+procedure OnMessage(aMsg: String);
+begin
+  // manage the message 	
+end;
+```
+
+ * Register your subscriber:
+```delphi
+GlobalEventBus.RegisterSubscriberForChannels(self);
+```
+
+3.Post event on channel:
+```delphi
+GlobalEventBus.post(MY_CHANNEL, 'My Message');
+```
+
+
+
+---
 
 ## Support
 * DEB is a 100% ObjectPascal framework so it works on VCL and Firemonkey
