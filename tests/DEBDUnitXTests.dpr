@@ -28,10 +28,7 @@ TestInsight.DUnitX.RunRegisteredTests;
 Exit;
 {$ENDIF}
 
-
-
 {$IFDEF CONSOLE_TESTRUNNER}
-
 procedure MainConsole();
 var
   runner: ITestRunner;

@@ -284,20 +284,20 @@ var
 begin
   GlobalEventBus.RegisterSubscriberForEvents(Subscriber);
 
-  for I := 0 to 10 do
+  for I := 1 to 100 do // Use 100, instead of 10 to TEST
   begin
     LEvent := TBackgroundEvent.Create;
     LMsg := 'TestBackgroundPost';
     LEvent.Data := LMsg;
-    LEvent.Count := I;
+    LEvent.SequenceID := I;
     GlobalEventBus.Post(LEvent);
   end;
   // attend for max 0.500 seconds
 
-  for I := 0 to 50 do
+  for I := 0 to 500 do
     TThread.Sleep(10);
 
-  Assert.AreEqual(10, IBackgroundEvent(Subscriber.LastEvent).Count);
+  Assert.AreEqual(100, Subscriber.Count);
 end;
 
 procedure TEventBusTest.TestBackgroundsPostChannel;

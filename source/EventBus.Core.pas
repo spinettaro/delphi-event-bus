@@ -130,7 +130,7 @@ function TEventBus.GenerateTProc(ASubscription: TSubscription; AEvent: IInterfac
 begin
   Result := procedure
     begin
-        InvokeSubscriber(ASubscription, AEvent);
+      InvokeSubscriber(ASubscription, AEvent);
     end;
 end;
 
@@ -234,9 +234,9 @@ begin
 
   try
     LIsMainThread := MainThreadID = TThread.CurrentThread.ThreadID;
-    LType:= TInterfaceHelper.GetQualifiedName( AEvent);
+    LType:= TInterfaceHelper.GetQualifiedName(AEvent);
 
-    FSubscriptionsOfGivenEventType.TryGetValue( LType, LSubscriptions);
+    FSubscriptionsOfGivenEventType.TryGetValue(LType, LSubscriptions);
 
     if (not Assigned(LSubscriptions)) then
       Exit;
