@@ -17,8 +17,8 @@ type
     { Private declarations }
   public
     { Public declarations }
-    [Subscribe]
-    procedure OnMemoChange(AEvent: IMemoChangeEvent);
+    [Channel('MemoChange')]
+    procedure OnMemoChange(aMsg: String);
   end;
 
 var
@@ -33,12 +33,12 @@ uses
 
 procedure TfrmThird.FormCreate(Sender: TObject);
 begin
-  GlobalEventBus.RegisterSubscriberForEvents(self);
+  GlobalEventBus.RegisterSubscriberForChannels(self);
 end;
 
-procedure TfrmThird.OnMemoChange(AEvent: IMemoChangeEvent);
+procedure TfrmThird.OnMemoChange(aMsg: String);
 begin
-  FMessage := AEvent.Text;
+  FMessage := aMsg;
   PaintBox1.Repaint;
 end;
 

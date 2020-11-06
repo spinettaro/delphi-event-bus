@@ -6,7 +6,7 @@ uses
   System.SysUtils, System.Types, System.UITypes, System.Classes,
   System.Variants, FMX.Types, FMX.Graphics, FMX.Controls, FMX.Forms,
   FMX.Dialogs, FMX.StdCtrls, FMX.Controls.Presentation, FMX.Layouts,
-  FMX.Objects, FMX.Edit, FMX.TabControl, BOsU, EventBus;
+  FMX.Objects, FMX.Edit, FMX.TabControl, BOsU, EventBus, ServicesU;
 
 type
   THeaderFooterForm = class(TForm)
@@ -29,6 +29,7 @@ type
     procedure Button2Click(Sender: TObject);
   private
     { Private declarations }
+    fRemoteDataContext: IRemoteDataContext;
   public
     { Public declarations }
     [Subscribe(TThreadMode.Main)]
@@ -40,9 +41,6 @@ var
 
 implementation
 
-uses
-  ServicesU;
-
 {$R *.fmx}
 
 procedure THeaderFooterForm.Button1Click(Sender: TObject);
@@ -52,7 +50,7 @@ begin
   AniIndicator1.Enabled := true;
   Button1.Enabled := false;
   lLoginDTO := TLoginDTO.Create(Edit1.Text, Edit2.Text);
-  GetAccessRemoteDataProxyInstance.DoLogin(lLoginDTO);
+  fRemoteDataContext.Login(lLoginDTO);
 end;
 
 procedure THeaderFooterForm.Button2Click(Sender: TObject);
@@ -63,6 +61,7 @@ end;
 procedure THeaderFooterForm.FormCreate(Sender: TObject);
 begin
   TabControl1.ActiveTab := TabItem1;
+  fRemoteDataContext:= CreateRemoteDataContext;
   // register subscribers
   GlobalEventBus.RegisterSubscriberForEvents(Self);
 end;

@@ -46,6 +46,7 @@ begin
   Event := GetMemoEvent;
   Event.Text := Memo1.Lines.Text;
   GlobalEventBus.Post(Event);
+  GlobalEventBus.Post('MemoChange', Memo1.Lines.Text);
 end;
 
 end.
