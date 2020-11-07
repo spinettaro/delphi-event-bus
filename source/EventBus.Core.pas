@@ -19,17 +19,38 @@ unit EventBus.Core;
 interface
 
 uses
-  Generics.Collections,
+  EventBus;
+
+type
+  TEventBusFactory = class
+  strict private
+    class var FGlobalEventBus: IEventBus;
+    class constructor Create;
+  public
+    function CreateEventBus: IEventBus;
+    class property GlobalEventBus: IEventBus read FGlobalEventBus;
+  end;
+
+implementation
+
+uses
   System.Classes,
-  System.SyncObjs,
+  System.Generics.Collections,
+  System.Rtti,
   System.SysUtils,
-  EventBus,
+{$IF CompilerVersion >= 28.0}
+  System.Threading,
+{$ENDIF}
+  EventBus.Helpers,
   EventBus.Subscribers;
 
 type
-
   TEventBus = class(TInterfacedObject, IEventBus)
-  private
+  strict private
+    class var  FMultiReadExclusiveWriteSync: TMultiReadExclusiveWriteSynchronizer;
+    class constructor Create;
+    class destructor Destroy;
+  strict private
     FChannelsOfGivenSubscriber: TObjectDictionary<TObject, TList<string>>;
     FSubscriptionsOfGivenChannel: TObjectDictionary<string, TObjectList<TSubscription>>;
     FSubscriptionsOfGivenEventType: TObjectDictionary<string, TObjectList<TSubscription>>;
@@ -67,22 +88,7 @@ type
 
     procedure RegisterSubscriberForEvents(ASubscriber: TObject); virtual;
     procedure UnregisterForEvents(ASubscriber: TObject); virtual;
-
-    property SubscriptionsOfGivenEventType: TObjectDictionary<string, TObjectList <TSubscription>> read FSubscriptionsOfGivenEventType;
-    property TypesOfGivenSubscriber: TObjectDictionary<TObject, TList<string>> read FTypesOfGivenSubscriber;
   end;
-
-implementation
-
-uses
-  System.Rtti,
-{$IF CompilerVersion >= 28.0}
-  System.Threading,
-{$ENDIF}
-  EventBus.Helpers;
-
-var
-  MREWSync: TMultiReadExclusiveWriteSynchronizer;
 
 constructor TEventBus.Create;
 begin
@@ -93,6 +99,11 @@ begin
   FChannelsOfGivenSubscriber := TObjectDictionary<TObject, TList<string>>.Create([doOwnsValues]);
 end;
 
+class constructor TEventBus.Create;
+begin
+  FMultiReadExclusiveWriteSync := TMultiReadExclusiveWriteSynchronizer.Create;
+end;
+
 destructor TEventBus.Destroy;
 begin
   FreeAndNil(FSubscriptionsOfGivenEventType);
@@ -100,6 +111,11 @@ begin
   FreeAndNil(FSubscriptionsOfGivenChannel);
   FreeAndNil(FChannelsOfGivenSubscriber);
   inherited;
+end;
+
+class destructor TEventBus.Destroy;
+begin
+  FMultiReadExclusiveWriteSync.Free;
 end;
 
 function TEventBus.GenerateThreadProc(ASubscription: TSubscription; AMessage: string): TThreadProcedure;
@@ -175,21 +191,21 @@ end;
 
 function TEventBus.IsRegisteredForChannels(ASubscriber: TObject): Boolean;
 begin
-  MREWSync.BeginRead;
+  FMultiReadExclusiveWriteSync.BeginRead;
   try
     Result := FChannelsOfGivenSubscriber.ContainsKey(ASubscriber);
   finally
-    MREWSync.EndRead;
+    FMultiReadExclusiveWriteSync.EndRead;
   end;
 end;
 
 function TEventBus.IsRegisteredForEvents(ASubscriber: TObject): Boolean;
 begin
-  MREWSync.BeginRead;
+  FMultiReadExclusiveWriteSync.BeginRead;
   try
     Result := FTypesOfGivenSubscriber.ContainsKey(ASubscriber);
   finally
-    MREWSync.EndRead;
+    FMultiReadExclusiveWriteSync.EndRead;
   end;
 end;
 
@@ -199,7 +215,7 @@ var
   LSubscription: TSubscription;
   LIsMainThread: Boolean;
 begin
-  MREWSync.BeginRead;
+  FMultiReadExclusiveWriteSync.BeginRead;
   try
     LIsMainThread := MainThreadID = TThread.CurrentThread.ThreadID;
     FSubscriptionsOfGivenChannel.TryGetValue(AChannel, LSubscriptions);
@@ -210,27 +226,25 @@ begin
     for LSubscription in LSubscriptions do
     begin
       if not LSubscription.Active then
-        continue;
-
+        Continue;
       if (LSubscription.Context <> AChannel) then
-        continue;
-
+        Continue;
       PostToChannel(LSubscription, AMessage, LIsMainThread);
     end;
   finally
-    MREWSync.EndRead;
+    FMultiReadExclusiveWriteSync.EndRead;
   end;
 end;
 
 procedure TEventBus.Post(AEvent: IInterface; const AContext: string = '');
 var
-  LSubscriptions: TObjectList<TSubscription>;
-  LSubscription: TSubscription;
   LIsMainThread: Boolean;
+  LSubscription: TSubscription;
+  LSubscriptions: TObjectList<TSubscription>;
   LType: string;
 begin
   Assert(Assigned(AEvent), 'Event cannot be nil');
-  MREWSync.BeginRead;
+  FMultiReadExclusiveWriteSync.BeginRead;
 
   try
     LIsMainThread := MainThreadID = TThread.CurrentThread.ThreadID;
@@ -244,14 +258,12 @@ begin
     for LSubscription in LSubscriptions do begin
       if not LSubscription.Active then
         Continue;
-
       if ((LSubscription.Context <> AContext)) then
         Continue;
-
       PostToSubscription(LSubscription, AEvent, LIsMainThread);
     end;
   finally
-    MREWSync.EndRead;
+    FMultiReadExclusiveWriteSync.EndRead;
   end;
 end;
 
@@ -270,19 +282,19 @@ begin
         TThread.Queue(nil, GenerateThreadProc(ASubscription, AMessage));
     Background:
       if (AIsMainThread) then
-{$IF CompilerVersion >= 28.0}
+        {$IF CompilerVersion >= 28.0}
         TTask.Run(GenerateTProc(ASubscription, AMessage))
-{$ELSE}
+        {$ELSE}
         TThread.CreateAnonymousThread(GenerateTProc(ASubscription, AMessage)).Start
-{$ENDIF}
+        {$ENDIF}
       else
         InvokeSubscriber(ASubscription, AMessage);
     Async:
-{$IF CompilerVersion >= 28.0}
+      {$IF CompilerVersion >= 28.0}
       TTask.Run(GenerateTProc(ASubscription, AMessage));
-{$ELSE}
+      {$ELSE}
       TThread.CreateAnonymousThread(GenerateTProc(ASubscription, AMessage)).Start;
-{$ENDIF}
+      {$ENDIF}
   else
     raise Exception.Create('Unknown thread mode');
   end;
@@ -303,19 +315,19 @@ begin
         TThread.Queue(nil, GenerateThreadProc(ASubscription, AEvent));
     Background:
       if (AIsMainThread) then
-{$IF CompilerVersion >= 28.0}
+        {$IF CompilerVersion >= 28.0}
         TTask.Run(GenerateTProc(ASubscription, AEvent))
-{$ELSE}
+        {$ELSE}
         TThread.CreateAnonymousThread(GenerateTProc(ASubscription, AEvent)).Start
-{$ENDIF}
+        {$ENDIF}
       else
         InvokeSubscriber(ASubscription, AEvent);
     Async:
-{$IF CompilerVersion >= 28.0}
+      {$IF CompilerVersion >= 28.0}
       TTask.Run(GenerateTProc(ASubscription, AEvent));
-{$ELSE}
+      {$ELSE}
       TThread.CreateAnonymousThread(GenerateTProc(ASubscription, AEvent)).Start;
-{$ENDIF}
+      {$ENDIF}
   else
     raise Exception.Create('Unknown thread mode');
   end;
@@ -327,14 +339,14 @@ var
   LSubscriberMethods: TArray<TSubscriberMethod>;
   LSubscriberMethod: TSubscriberMethod;
 begin
-  MREWSync.BeginWrite;
+  FMultiReadExclusiveWriteSync.BeginWrite;
 
   try
     LSubscriberClass := ASubscriber.ClassType;
     LSubscriberMethods := TSubscribersFinder.FindChannelsSubcriberMethods(LSubscriberClass, True);
     for LSubscriberMethod in LSubscriberMethods do SubscribeChannel(ASubscriber, LSubscriberMethod);
   finally
-    MREWSync.EndWrite;
+    FMultiReadExclusiveWriteSync.EndWrite;
   end;
 end;
 
@@ -344,13 +356,13 @@ var
   LSubscriberMethods: TArray<TSubscriberMethod>;
   LSubscriberMethod: TSubscriberMethod;
 begin
-  MREWSync.BeginWrite;
+  FMultiReadExclusiveWriteSync.BeginWrite;
   try
     LSubscriberClass := ASubscriber.ClassType;
     LSubscriberMethods := TSubscribersFinder.FindEventsSubscriberMethods(LSubscriberClass, True);
     for LSubscriberMethod in LSubscriberMethods do SubscribeEvent(ASubscriber, LSubscriberMethod);
   finally
-    MREWSync.EndWrite;
+    FMultiReadExclusiveWriteSync.EndWrite;
   end;
 end;
 
@@ -399,7 +411,7 @@ begin
   end else begin
     LSubscriptions := FSubscriptionsOfGivenEventType.Items[LEventType];
     if (LSubscriptions.Contains(LNewSubscription)) then
-      raise Exception.CreateFmt('Subscriber %s already registered to event %s',  [ASubscriber.ClassName, LEventType]);
+      raise Exception.CreateFmt('Subscriber %s already registered to event %s', [ASubscriber.ClassName, LEventType]);
   end;
 
   LSubscriptions.Add(LNewSubscription);
@@ -417,14 +429,14 @@ var
   LSubscribedChannelTypes: TList<string>;
   LChannel: string;
 begin
-  MREWSync.BeginWrite;
+  FMultiReadExclusiveWriteSync.BeginWrite;
   try
     if FChannelsOfGivenSubscriber.TryGetValue(ASubscriber, LSubscribedChannelTypes) then begin
       for LChannel in LSubscribedChannelTypes do UnsubscribeByChannel(ASubscriber, LChannel);
       FChannelsOfGivenSubscriber.Remove(ASubscriber);
     end;
   finally
-    MREWSync.EndWrite;
+    FMultiReadExclusiveWriteSync.EndWrite;
   end;
 end;
 
@@ -433,14 +445,14 @@ var
   LSubscribedTypes: TList<string>;
   LEventType: string;
 begin
-  MREWSync.BeginWrite;
+  FMultiReadExclusiveWriteSync.BeginWrite;
   try
     if FTypesOfGivenSubscriber.TryGetValue(ASubscriber, LSubscribedTypes) then begin
       for LEventType in LSubscribedTypes do UnsubscribeByEventType(ASubscriber, LEventType);
       FTypesOfGivenSubscriber.Remove(ASubscriber);
     end;
   finally
-    MREWSync.EndWrite;
+    FMultiReadExclusiveWriteSync.EndWrite;
   end;
 end;
 
@@ -458,10 +470,10 @@ begin
   LSize := LSubscriptions.Count;
   for I := LSize - 1 downto 0 do begin
     LSubscription := LSubscriptions[I];
-    // Notes: In case the subscriber has been freed but it didn't unregister itself, calling
+    // Notes: In case the subscriber has been freed without unregistering itself, calling
     // LSubscription.Subscriber.Equals() will cause Access Violation, so we use '=' instead.
     if LSubscription.Subscriber = ASubscriber then begin
-      LSubscription.Active := false;
+      LSubscription.Active := False;
       LSubscriptions.Delete(I);
     end;
   end;
@@ -481,19 +493,23 @@ begin
   LSize := LSubscriptions.Count;
   for I := LSize - 1 downto 0 do begin
     LSubscription := LSubscriptions[I];
-    // Notes: In case the subscriber has been freed but it didn't unregister itself, calling
+    // Notes: In case the subscriber has been freed without unregistering itself, calling
     // LSubscription.Subscriber.Equals() will cause Access Violation, so we use '=' instead.
     if LSubscription.Subscriber = ASubscriber then begin
-      LSubscription.Active := false;
+      LSubscription.Active := False;
       LSubscriptions.Delete(I);
     end;
   end;
 end;
 
-initialization
-  MREWSync := TMultiReadExclusiveWriteSynchronizer.Create;
+class constructor TEventBusFactory.Create;
+begin
+  FGlobalEventBus := TEventBus.Create;
+end;
 
-finalization
-  MREWSync.Free;
+function TEventBusFactory.CreateEventBus: IEventBus;
+begin
+  Result := TEventBus.Create;
+end;
 
 end.

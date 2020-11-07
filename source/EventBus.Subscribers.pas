@@ -19,20 +19,19 @@ unit EventBus.Subscribers;
 interface
 
 uses
-  System.RTTI, EventBus;
+  System.Rtti, EventBus;
 
 type
-
   TSubscriberMethod = class(TObject)
   private
     FContext: string;
     FEventType: string;
     FMethod: TRttiMethod;
     FThreadMode: TThreadMode;
-    procedure SetContext(const Value: string);
-    procedure SetEventType(const Value: string);
-    procedure SetMethod(const Value: TRttiMethod);
-    procedure SetThreadMode(const Value: TThreadMode);
+    procedure SetContext(const AValue: string);
+    procedure SetEventType(const AValue: string);
+    procedure SetMethod(const AValue: TRttiMethod);
+    procedure SetThreadMode(const AValue: TThreadMode);
   public
     constructor Create(
       ARttiMethod: TRttiMethod;
@@ -43,7 +42,7 @@ type
     );
 
     destructor Destroy; override;
-    function Equals(Obj: TObject): Boolean; override;
+    function Equals(AObject: TObject): Boolean; override;
 
     property Context: string read FContext write SetContext;
     property EventType: string read FEventType write SetEventType;
@@ -57,14 +56,14 @@ type
     FSubscriber: TObject;
     FSubscriberMethod: TSubscriberMethod;
     function GetActive: Boolean;
-    procedure SetActive(const Value: Boolean);
+    procedure SetActive(const AValue: Boolean);
     function GetContext: string;
-    procedure SetSubscriber(const Value: TObject);
-    procedure SetSubscriberMethod(const Value: TSubscriberMethod);
+    procedure SetSubscriber(const AValue: TObject);
+    procedure SetSubscriberMethod(const AValue: TSubscriberMethod);
   public
     constructor Create(ASubscriber: TObject; ASubscriberMethod: TSubscriberMethod);
     destructor Destroy; override;
-    function Equals(Obj: TObject): Boolean; override;
+    function Equals(AObject: TObject): Boolean; override;
 
     property Active: Boolean read GetActive write SetActive;
     property Context: string read GetContext;
@@ -104,59 +103,57 @@ begin
   inherited;
 end;
 
-function TSubscriberMethod.Equals(Obj: TObject): Boolean;
+function TSubscriberMethod.Equals(AObject: TObject): Boolean;
 var
   LOtherSubscriberMethod: TSubscriberMethod;
 begin
-  if (inherited Equals(Obj)) then begin
+  if (inherited Equals(AObject)) then begin
     Exit(True)
   end else begin
-    if (Obj is TSubscriberMethod) then begin
-      LOtherSubscriberMethod := TSubscriberMethod(Obj);
-      exit(LOtherSubscriberMethod.Method.Tostring = Method.Tostring);
+    if (AObject is TSubscriberMethod) then begin
+      LOtherSubscriberMethod := TSubscriberMethod(AObject);
+      Exit(LOtherSubscriberMethod.Method.Tostring = Method.Tostring);
     end else begin
       Exit(False);
     end;
   end;
 end;
 
-procedure TSubscriberMethod.SetContext(const Value: string);
+procedure TSubscriberMethod.SetContext(const AValue: string);
 begin
-  FContext := Value;
+  FContext := AValue;
 end;
 
-procedure TSubscriberMethod.SetEventType(const Value: string);
+procedure TSubscriberMethod.SetEventType(const AValue: string);
 begin
-  FEventType := Value;
+  FEventType := AValue;
 end;
 
-procedure TSubscriberMethod.SetMethod(const Value: TRttiMethod);
+procedure TSubscriberMethod.SetMethod(const AValue: TRttiMethod);
 begin
-  FMethod := Value;
+  FMethod := AValue;
 end;
 
-procedure TSubscriberMethod.SetThreadMode(const Value: TThreadMode);
+procedure TSubscriberMethod.SetThreadMode(const AValue: TThreadMode);
 begin
-  FThreadMode := Value;
+  FThreadMode := AValue;
 end;
 
-
-class function TSubscribersFinder.FindChannelsSubcriberMethods(ASubscriberClass: TClass;
-  ARaiseExcIfEmpty: Boolean): TArray<TSubscriberMethod>;
+class function TSubscribersFinder.FindChannelsSubcriberMethods(ASubscriberClass: TClass; ARaiseExcIfEmpty: Boolean): TArray<TSubscriberMethod>;
 var
   LChannelAttribute: ChannelAttribute;
   LMethod: TRttiMethod;
   LParamsLength: Integer;
-  LRttiMethods: TArray<System.RTTI.TRttiMethod>;
+  LRttiMethods: TArray<System.Rtti.TRttiMethod>;
   LRttiType: TRttiType;
   LSubMethod: TSubscriberMethod;
 begin
   Result := [];
-  LRttiType := TRTTIUtils.Ctx.GetType(ASubscriberClass);
+  LRttiType := TRttiUtils.Ctx.GetType(ASubscriberClass);
   LRttiMethods := LRttiType.GetMethods;
 
   for LMethod in LRttiMethods do begin
-    if TRTTIUtils.HasAttribute<ChannelAttribute>(LMethod, LChannelAttribute) then begin
+    if TRttiUtils.HasAttribute<ChannelAttribute>(LMethod, LChannelAttribute) then begin
       LParamsLength := Length(LMethod.GetParameters);
 
       if ((LParamsLength <> 1) or (LMethod.GetParameters[0].ParamType.TypeKind <> tkUstring)) then
@@ -180,23 +177,22 @@ begin
       [ASubscriberClass.QualifiedClassName]);
 end;
 
-class function TSubscribersFinder.FindEventsSubscriberMethods(ASubscriberClass: TClass;
-  ARaiseExcIfEmpty: Boolean = False): TArray<TSubscriberMethod>;
+class function TSubscribersFinder.FindEventsSubscriberMethods(ASubscriberClass: TClass; ARaiseExcIfEmpty: Boolean = False): TArray<TSubscriberMethod>;
 var
   LEventType: string;
   LMethod: TRttiMethod;
   LParamsLength: Integer;
-  LRttiMethods: TArray<System.RTTI.TRttiMethod>;
+  LRttiMethods: TArray<System.Rtti.TRttiMethod>;
   LRttiType: TRttiType;
   LSubMethod: TSubscriberMethod;
   LSubscribeAttribute: SubscribeAttribute;
 begin
   Result := [];
-  LRttiType := TRTTIUtils.Ctx.GetType(ASubscriberClass);
+  LRttiType := TRttiUtils.Ctx.GetType(ASubscriberClass);
   LRttiMethods := LRttiType.GetMethods;
 
   for LMethod in LRttiMethods do begin
-    if TRTTIUtils.HasAttribute<SubscribeAttribute>(LMethod, LSubscribeAttribute) then begin
+    if TRttiUtils.HasAttribute<SubscribeAttribute>(LMethod, LSubscribeAttribute) then begin
       LParamsLength := Length(LMethod.GetParameters);
 
       if (LParamsLength <> 1) then
@@ -236,18 +232,16 @@ end;
 
 destructor TSubscription.Destroy;
 begin
-  if Assigned(FSubscriberMethod) then
-    FreeAndNil(FSubscriberMethod);
-
+  if Assigned(FSubscriberMethod) then FreeAndNil(FSubscriberMethod);
   inherited;
 end;
 
-function TSubscription.Equals(Obj: TObject): Boolean;
+function TSubscription.Equals(AObject: TObject): Boolean;
 var
   LOtherSubscription: TSubscription;
 begin
-  if (Obj is TSubscription) then begin
-    LOtherSubscription := TSubscription(Obj);
+  if (AObject is TSubscription) then begin
+    LOtherSubscription := TSubscription(AObject);
     Exit((Subscriber = LOtherSubscription.Subscriber) and (SubscriberMethod.Equals(LOtherSubscription.SubscriberMethod)));
   end else begin
     Exit(False);
@@ -256,21 +250,21 @@ end;
 
 function TSubscription.GetActive: Boolean;
 begin
-  TMonitor.Enter(self);
+  TMonitor.Enter(Self);
   try
     Result := FActive;
   finally
-    TMonitor.exit(self);
+    TMonitor.Exit(Self);
   end;
 end;
 
-procedure TSubscription.SetActive(const Value: Boolean);
+procedure TSubscription.SetActive(const AValue: Boolean);
 begin
-  TMonitor.Enter(self);
+  TMonitor.Enter(Self);
   try
-    FActive := Value;
+    FActive := AValue;
   finally
-    TMonitor.exit(self);
+    TMonitor.Exit(Self);
   end;
 end;
 
@@ -279,14 +273,14 @@ begin
   Result := SubscriberMethod.Context;
 end;
 
-procedure TSubscription.SetSubscriber(const Value: TObject);
+procedure TSubscription.SetSubscriber(const AValue: TObject);
 begin
-  FSubscriber := Value;
+  FSubscriber := AValue;
 end;
 
-procedure TSubscription.SetSubscriberMethod(const Value: TSubscriberMethod);
+procedure TSubscription.SetSubscriberMethod(const AValue: TSubscriberMethod);
 begin
-  FSubscriberMethod := Value;
+  FSubscriberMethod := AValue;
 end;
 
 end.

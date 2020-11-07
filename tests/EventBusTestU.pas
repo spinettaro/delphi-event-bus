@@ -150,8 +150,7 @@ begin
     Subscriber := nil;
     GlobalEventBus.Post(TEventBusEvent.Create);
   except
-    on E: Exception do
-      LRaisedException := True;
+    on E: Exception do LRaisedException := True;
   end;
 
   Assert.IsFalse(LRaisedException);
@@ -167,8 +166,7 @@ begin
   try
     GlobalEventBus.UnregisterForChannels(ChannelSubscriber);
   except
-    on E: Exception do
-      LRaisedException := True;
+    on E: Exception do LRaisedException := True;
   end;
 
   Assert.IsFalse(LRaisedException);
@@ -184,8 +182,7 @@ begin
   try
     GlobalEventBus.UnregisterForEvents(Subscriber);
   except
-    on E: Exception do
-      LRaisedException := True;
+    on E: Exception do LRaisedException := True;
   end;
 
   Assert.IsFalse(LRaisedException);
@@ -284,20 +281,16 @@ var
 begin
   GlobalEventBus.RegisterSubscriberForEvents(Subscriber);
 
-  for I := 1 to 100 do // Use 100, instead of 10 to TEST
-  begin
+  for I := 1 to 10 do begin
     LEvent := TBackgroundEvent.Create;
     LMsg := 'TestBackgroundPost';
     LEvent.Data := LMsg;
     LEvent.SequenceID := I;
     GlobalEventBus.Post(LEvent);
   end;
-  // attend for max 0.500 seconds
 
-  for I := 0 to 500 do
-    TThread.Sleep(10);
-
-  Assert.AreEqual(100, Subscriber.Count);
+  for I := 0 to 50 do TThread.Sleep(10);
+  Assert.AreEqual(10, Subscriber.Count);
 end;
 
 procedure TEventBusTest.TestBackgroundsPostChannel;
@@ -307,17 +300,13 @@ var
 begin
   GlobalEventBus.RegisterSubscriberForChannels(ChannelSubscriber);
 
-  for I := 0 to 10 do
-  begin
+  for I := 1 to 10 do begin
     LMsg := Format('TestBackgroundPost%d',[I]);
-    GlobalEventBus.Post('test_channel_bkg', LMSG);
+    GlobalEventBus.Post('test_channel_bkg', LMsg);
   end;
 
-  // attend for max 0.5 seconds
-  for I := 0 to 50 do
-    TThread.Sleep(10);
-
-  Assert.AreEqual(LMsg, ChannelSubscriber.LastChannelMsg);
+  for I := 0 to 50 do TThread.Sleep(10);
+  Assert.AreEqual(10, ChannelSubscriber.Count);
 end;
 
 procedure TEventBusTest.TestIsRegisteredFalseAfterUnregisterChannels;

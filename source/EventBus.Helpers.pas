@@ -9,42 +9,40 @@ uses
   System.TypInfo;
 
 type
-
   TRttiUtils = class sealed
   public
     class var Ctx: TRttiContext;
-    class function HasAttribute<T: class>(ARTTIMember: TRttiMember; out AAttribute: T): Boolean; overload;
-    class function HasAttribute<T: class>(ARTTIMember: TRttiType; out AAttribute: T): Boolean; overload;
+    class function HasAttribute<T: class>(ARttiMember: TRttiMember; out AAttribute: T): Boolean; overload;
+    class function HasAttribute<T: class>(ARttiMember: TRttiType; out AAttribute: T): Boolean; overload;
   end;
 
   // This code is taken from Stefan Glienke from
   // https://stackoverflow.com/questions/39584234/how-to-obtain-rtti-from-an-interface-reference-in-delphi
   TInterfaceHelper = record
-  strict private
-  type
+  strict private type
     TInterfaceTypes = TDictionary<TGUID, TRttiInterfaceType>;
-
+  strict private
     class var FInterfaceTypes: TInterfaceTypes;
     class var FCached: Boolean;
     class var FCaching: Boolean;
-    class procedure WaitIfCaching; static;
-    class procedure CacheIfNotCachedAndWaitFinish; static;
     class constructor Create;
     class destructor Destroy;
+    class procedure CacheIfNotCachedAndWaitFinish; static;
+    class procedure WaitIfCaching; static;
   public
     // Refresh cached RTTI in a background thread  (eg. when new package is loaded)
     class procedure RefreshCache; static;
 
     // Get RTTI from interface
     class function GetType(AIntf: IInterface): TRttiInterfaceType; overload; static;
-    class function GetType(AGUID: TGUID): TRttiInterfaceType; overload; static;
+    class function GetType(AGuid: TGUID): TRttiInterfaceType; overload; static;
     class function GetType(AIntfInTValue: TValue): TRttiInterfaceType; overload; static;
 
     // Get type name from interface
     class function GetTypeName(AIntf: IInterface): string; overload; static;
-    class function GetTypeName(AGUID: TGUID): string; overload; static;
+    class function GetTypeName(AGuid: TGUID): string; overload; static;
     class function GetQualifiedName(AIntf: IInterface): string; overload; static;
-    class function GetQualifiedName(AGUID: TGUID): string; overload; static;
+    class function GetQualifiedName(AGuid: TGUID): string; overload; static;
 
     // Get methods
     class function GetMethods(AIntf: IInterface): TArray<TRttiMethod>; static;
@@ -58,12 +56,9 @@ type
 implementation
 
 uses
-  System.Classes,
-  System.SyncObjs,
-  DUnitX.Utils; // For TObjectHelper.GetField
+  System.Classes, System.SyncObjs, DUnitX.Utils;
 
 { TInterfaceHelper }
-
 class function TInterfaceHelper.GetType(AIntf: IInterface): TRttiInterfaceType;
 var
   LImplObj: TObject;
@@ -153,29 +148,29 @@ begin
     Result := LType.GetMethods;
 end;
 
-class function TInterfaceHelper.GetQualifiedName(AGUID: TGUID): string;
+class function TInterfaceHelper.GetQualifiedName(AGuid: TGUID): string;
 var
   LType: TRttiInterfaceType;
 begin
   Result := string.Empty;
-  LType := GetType(AGUID);
+  LType := GetType(AGuid);
 
   if Assigned(LType) then
     Result := LType.QualifiedName;
 end;
 
-class function TInterfaceHelper.GetType(AGUID: TGUID): TRttiInterfaceType;
+class function TInterfaceHelper.GetType(AGuid: TGUID): TRttiInterfaceType;
 begin
   CacheIfNotCachedAndWaitFinish;
-  Result := FInterfaceTypes.Items[AGUID];
+  Result := FInterfaceTypes.Items[AGuid];
 end;
 
-class function TInterfaceHelper.GetTypeName(AGUID: TGUID): string;
+class function TInterfaceHelper.GetTypeName(AGuid: TGUID): string;
 var
   LType: TRttiInterfaceType;
 begin
   Result := string.Empty;
-  LType := GetType(AGUID);
+  LType := GetType(AGuid);
 
   if Assigned(LType) then
     Result := LType.Name;
@@ -256,13 +251,14 @@ end;
 
 class procedure TInterfaceHelper.WaitIfCaching;
 begin
-  if FCaching then
+  if FCaching then begin
     TSpinWait.SpinUntil(
       function: Boolean
       begin
         Result := FCached;
       end
     );
+  end;
 end;
 
 class procedure TInterfaceHelper.CacheIfNotCachedAndWaitFinish;
@@ -290,14 +286,14 @@ begin
     Result := LType as TRttiInterfaceType;
 end;
 
-class function TRttiUtils.HasAttribute<T>(ARTTIMember: TRttiType; out AAttribute: T): Boolean;
+class function TRttiUtils.HasAttribute<T>(ARttiMember: TRttiType; out AAttribute: T): Boolean;
 var
   LAttrs: TArray<TCustomAttribute>;
   LAttr: TCustomAttribute;
 begin
   AAttribute := nil;
   Result := False;
-  LAttrs := ARTTIMember.GetAttributes;
+  LAttrs := ARttiMember.GetAttributes;
 
   for LAttr in LAttrs do begin
     if LAttr is T then begin

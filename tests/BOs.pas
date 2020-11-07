@@ -3,7 +3,7 @@ unit BOs;
 interface
 
 uses
-  System.SyncObjs, System.Generics.Collections, EventBus;
+  System.Generics.Collections, System.SyncObjs, EventBus;
 
 type
   TPerson = class(TObject)
@@ -11,14 +11,14 @@ type
     FChild: TPerson;
     FFirstname: string;
     FLastname: string;
-    procedure SetChild(const Value: TPerson);
-    procedure SetFirstname(const Value: string);
-    procedure SetLastname(const Value: string);
+    procedure Set_Child(const AValue: TPerson);
+    procedure Set_Firstname(const AValue: string);
+    procedure Set_Lastname(const AValue: string);
   public
     destructor Destroy; override;
-    property Child: TPerson read FChild write SetChild;
-    property Firstname: string read FFirstname write SetFirstname;
-    property Lastname: string read FLastname write SetLastname;
+    property Child: TPerson read FChild write Set_Child;
+    property Firstname: string read FFirstname write Set_Firstname;
+    property Lastname: string read FLastname write Set_Lastname;
   end;
 
   IEventBusEvent = IDEBEvent<string>;
@@ -39,33 +39,33 @@ type
 
   IBackgroundEvent = Interface(IEventBusEvent)
   ['{E70B43F0-7F68-47B9-AFF3-5878A0B1A88D}']
-    procedure SetSequenceID(const Value: Integer);
-    function GetSequenceID: Integer;
-    property SequenceID: Integer read GetSequenceID write SetSequenceID;
+    procedure Set_SequenceID(const AValue: Integer);
+    function Get_SequenceID: Integer;
+    property SequenceID: Integer read Get_SequenceID write Set_SequenceID;
   end;
 
   TBackgroundEvent = class(TDEBEvent<string>, IBackgroundEvent)
   private
     FSequenceID: Integer;
-    function GetSequenceID: Integer;
-    procedure SetSequenceID(const Value: Integer);
+    function Get_SequenceID: Integer;
+    procedure Set_SequenceID(const AValue: Integer);
   public
-    property SequenceID: Integer read GetSequenceID write SetSequenceID;
+    property SequenceID: Integer read Get_SequenceID write Set_SequenceID;
   public
   end;
 
   TBaseSubscriber = class(TObject)
   private
     FChannelMsg: string;
-    FEvent: TEvent; // Wrapper of Win32 SetEvent with automic Set/Reset, no need for thread protection.
+    FEvent: TEvent; // Wrapper of Win32 Set_Event with automic Set_/Reset, no need for thread protection.
     FCount: Integer;
     FEventMsg: string;
     FLastEvent: IEventBusEvent;
     FLastEventThreadID: Cardinal;
-    procedure SetLastChannelMsg(const Value: string);
-    procedure SetLastEvent(const Value: IEventBusEvent);
-    procedure SetLastEventMsg(const Value: string);
-    procedure SetLastEventThreadID(const Value: Cardinal);
+    procedure Set_LastChannelMsg(const AValue: string);
+    procedure Set_LastEvent(const AValue: IEventBusEvent);
+    procedure Set_LastEventMsg(const AValue: string);
+    procedure Set_LastEventThreadID(const AValue: Cardinal);
   public
     constructor Create;
     destructor Destroy; override;
@@ -74,10 +74,10 @@ type
 
     property Event: TEvent read FEvent; // Readonly is good enough
     property Count: Integer read FCount;
-    property LastEvent: IEventBusEvent read FLastEvent write SetLastEvent;
-    property LastChannelMsg: string read FChannelMsg write SetLastChannelMsg;
-    property LastEventMsg: string read FEventMsg write SetLastEventMsg;
-    property LastEventThreadID: Cardinal read FLastEventThreadID write SetLastEventThreadID;
+    property LastEvent: IEventBusEvent read FLastEvent write Set_LastEvent;
+    property LastChannelMsg: string read FChannelMsg write Set_LastChannelMsg;
+    property LastEventMsg: string read FEventMsg write Set_LastEventMsg;
+    property LastEventThreadID: Cardinal read FLastEventThreadID write Set_LastEventThreadID;
   end;
 
   TSubscriber = class(TBaseSubscriber)
@@ -120,8 +120,8 @@ type
   private
     FPerson: TPerson;
     FOwnsObject: Boolean;
-    procedure SetOwnsObject(const Value: Boolean);
-    procedure SetPerson(const Value: TPerson);
+    procedure Set_OwnsObject(const AValue: Boolean);
+    procedure Set_Person(const AValue: TPerson);
   public
     constructor Create;
     destructor Destroy; override;
@@ -129,19 +129,19 @@ type
     [Subscribe]
     procedure OnPersonEvent(AEvent: IDEBEvent<TPerson>);
 
-    property OwnsObject: Boolean read FOwnsObject write SetOwnsObject;
-    property Person: TPerson read FPerson write SetPerson;
+    property OwnsObject: Boolean read FOwnsObject write Set_OwnsObject;
+    property Person: TPerson read FPerson write Set_Person;
   end;
 
   TPersonListSubscriber = class(TBaseSubscriber)
   private
     FPersonList: TObjectList<TPerson>;
-    procedure SetPersonList(const Value: TObjectList<TPerson>);
+    procedure Set_PersonList(const AValue: TObjectList<TPerson>);
   public
     [Subscribe]
     procedure OnPersonListEvent(AEvent: IDEBEvent<TObjectList<TPerson>>);
 
-    property PersonList: TObjectList<TPerson> read FPersonList write SetPersonList;
+    property PersonList: TObjectList<TPerson> read FPersonList write Set_PersonList;
   end;
 
 implementation
@@ -169,31 +169,31 @@ begin
   AtomicIncrement(FCount);
 end;
 
-procedure TBaseSubscriber.SetLastEvent(const Value: IEventBusEvent);
+procedure TBaseSubscriber.Set_LastEvent(const AValue: IEventBusEvent);
 begin
   TMonitor.Enter(Self); // Need to protect from multithread write (for the Background/Async events testing)
-  FLastEvent := Value;
+  FLastEvent := AValue;
   TMonitor.Exit(Self);
 end;
 
-procedure TBaseSubscriber.SetLastEventThreadID(const Value: Cardinal);
+procedure TBaseSubscriber.Set_LastEventThreadID(const AValue: Cardinal);
 begin
   TMonitor.Enter(Self); // Need to protect from multithread write (for the Background/Async events testing)
-  FLastEventThreadID := Value;
+  FLastEventThreadID := AValue;
   TMonitor.Exit(Self);
 end;
 
-procedure TBaseSubscriber.SetLastChannelMsg(const Value: string);
+procedure TBaseSubscriber.Set_LastChannelMsg(const AValue: string);
 begin
   TMonitor.Enter(Self);
-  FChannelMsg := Value;
+  FChannelMsg := AValue;
   TMonitor.Exit(Self);
 end;
 
-procedure TBaseSubscriber.SetLastEventMsg(const Value: string);
+procedure TBaseSubscriber.Set_LastEventMsg(const AValue: string);
 begin
   TMonitor.Enter(Self);
-  FEventMsg := Value;
+  FEventMsg := AValue;
   TMonitor.Exit(Self);
 end;
 
@@ -234,14 +234,14 @@ begin
   LastEventThreadID := TThread.CurrentThread.ThreadID;
 end;
 
-function TBackgroundEvent.GetSequenceID: Integer;
+function TBackgroundEvent.Get_SequenceID: Integer;
 begin
   Result:= FSequenceID;
 end;
 
-procedure TBackgroundEvent.SetSequenceID(const Value: Integer);
+procedure TBackgroundEvent.Set_SequenceID(const AValue: Integer);
 begin
-  FSequenceID := Value;
+  FSequenceID := AValue;
 end;
 
 procedure TSubscriberCopy.OnSimpleEvent(AEvent: IEventBusEvent);
@@ -254,25 +254,23 @@ end;
 destructor TPerson.Destroy;
 begin
   if Assigned(Child) then
-    if Integer(Self) <> Integer(Child) then
-      Child.Free;
-
+    if Integer(Self) <> Integer(Child) then Child.Free;
   inherited;
 end;
 
-procedure TPerson.SetChild(const Value: TPerson);
+procedure TPerson.Set_Child(const AValue: TPerson);
 begin
-  FChild := Value;
+  FChild := AValue;
 end;
 
-procedure TPerson.SetFirstname(const Value: string);
+procedure TPerson.Set_Firstname(const AValue: string);
 begin
-  FFirstname := Value;
+  FFirstname := AValue;
 end;
 
-procedure TPerson.SetLastname(const Value: string);
+procedure TPerson.Set_Lastname(const AValue: string);
 begin
-  FLastname := Value;
+  FLastname := AValue;
 end;
 
 constructor TPersonSubscriber.Create;
@@ -297,14 +295,14 @@ begin
   Event.SetEvent;
 end;
 
-procedure TPersonSubscriber.SetOwnsObject(const Value: Boolean);
+procedure TPersonSubscriber.Set_OwnsObject(const AValue: Boolean);
 begin
-  FOwnsObject := Value;
+  FOwnsObject := AValue;
 end;
 
-procedure TPersonSubscriber.SetPerson(const Value: TPerson);
+procedure TPersonSubscriber.Set_Person(const AValue: TPerson);
 begin
-  FPerson := Value;
+  FPerson := AValue;
 end;
 
 procedure TPersonListSubscriber.OnPersonListEvent(AEvent: IDEBEvent<TObjectList<TPerson>>);
@@ -315,9 +313,9 @@ begin
   Event.SetEvent;
 end;
 
-procedure TPersonListSubscriber.SetPersonList(const Value: TObjectList<TPerson>);
+procedure TPersonListSubscriber.Set_PersonList(const AValue: TObjectList<TPerson>);
 begin
-  FPersonList := Value;
+  FPersonList := AValue;
 end;
 
 procedure TChannelSubscriber.OnSimpleAsyncChannel(AMsg: string);
@@ -330,6 +328,7 @@ end;
 procedure TChannelSubscriber.OnSimpleBackgroundChannel(AMsg: string);
 begin
   LastChannelMsg := AMsg;
+  IncrementCount;
   LastEventThreadID := TThread.CurrentThread.ThreadID;
   Event.SetEvent;
 end;
