@@ -178,20 +178,23 @@ type
     ///   IEventBus.Post is called.
     /// </summary>
     Posting,
+    
     /// <summary>
     ///   The subscriber method will be invoked in the main thread.
     /// </summary>
     Main,
+    
     /// <summary>
-    ///   The subscriber method will be invoked in a different thread than the
-    ///   posting thread where IEventBus.Post is called.
+    ///   The subscriber method will be invoked asynchronously in a new thread
+    ///   other than the posting thread.
     /// </summary>
     Async,
+    
     /// <summary>
-    ///   If the posting thread is the main thread, then the subscriber method
-    ///   will be invoked in a newly spawned background thread. Otherwise, the
-    ///   subscriber method will be invoked in the same posting thread (which is
-    ///   not the main thread).
+    ///   If the posting thread is the main thread, the subscriber method will
+    ///   be invoked asynchronously in a new thread other than the posting
+    ///   thread. If the posting thread is NOT the main thread, the subscriber
+    ///   method will be invoked synchronously in the same posting thread.
     /// </summary>
     Background
   );
@@ -219,6 +222,7 @@ type
     ///   Thread mode of the subscriber method.
     /// </summary>
     property ThreadMode: TThreadMode read FThreadMode;
+
     /// <summary>
     ///   Context of the subscriber method.
     /// </summary>
