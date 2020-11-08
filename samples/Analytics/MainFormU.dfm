@@ -75,8 +75,8 @@ object Form6: TForm6
         ReadOnly = False
       end>
     ScopeMappings = <>
-    Left = 472
-    Top = 24
+    Left = 392
+    Top = 8
   end
   object BindingsList1: TBindingsList
     Methods = <>

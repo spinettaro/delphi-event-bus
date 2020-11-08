@@ -22,7 +22,7 @@ type
   end;
 
 var
-  frmThird: TfrmThird;
+  FrmThird: TfrmThird;
 
 implementation
 
@@ -47,13 +47,11 @@ var
   R: TRect;
 begin
   R := ClientRect;
-  GradientFillCanvas(PaintBox1.Canvas, clRed, clWhite, R,
-    TGradientDirection.gdVertical);
+  GradientFillCanvas(PaintBox1.Canvas, clRed, clWhite, R, TGradientDirection.gdVertical);
   InflateRect(R, -5, -5);
   PaintBox1.Canvas.Brush.Style := bsClear;
   PaintBox1.Canvas.Font.Size := 18;
-  PaintBox1.Canvas.TextRect(R, FMessage, [TTextFormats.tfWordBreak,
-    TTextFormats.tfCenter]);
+  PaintBox1.Canvas.TextRect(R, FMessage, [TTextFormats.tfWordBreak, TTextFormats.tfCenter]);
 end;
 
 end.

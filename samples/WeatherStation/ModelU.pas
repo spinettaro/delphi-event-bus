@@ -6,7 +6,6 @@ uses
   System.SysUtils;
 
 type
-
   TWeatherType = (Sunny = 0, Cloudy = 1, Rainy = 2);
 
   IWeatherInformation = interface
@@ -27,7 +26,7 @@ type
 
   TWeatherModel = class(TObject)
   private
-    class var Stopped: Boolean;
+    class var FStopped: Boolean;
   public
     class procedure StartPolling;
     class procedure StopPolling;
@@ -39,7 +38,6 @@ uses
   System.Threading, EventBus, System.Classes;
 
 type
-
   TWeatherInformation = class(TInterfacedObject, IWeatherInformation)
   private
     FHumidity: Integer;
@@ -73,26 +71,23 @@ end;
 { TWeatherModel }
 
 class procedure TWeatherModel.StartPolling;
-var
-  LTask: ITask;
 begin
-  Stopped:= False;
-  LTask := TTask.Create(
+  FStopped:= False;
+  TTask.Create(
     procedure
     begin
-      while not Stopped do
-      begin
+      while not FStopped do begin
         // simulate a sensor
         GlobalEventBus.Post(GetRandomWeatherInfo, '');
         TThread.Sleep(3000);
       end
-    end);
-  LTask.Start;
+    end
+  ).Start;
 end;
 
 class procedure TWeatherModel.StopPolling;
 begin
-    Stopped:= True;
+  FStopped:= True;
 end;
 
 { TWeatherInformation }

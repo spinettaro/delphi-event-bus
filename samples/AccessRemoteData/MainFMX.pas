@@ -10,26 +10,26 @@ uses
 
 type
   THeaderFooterForm = class(TForm)
-    Header: TToolBar;
-    HeaderLabel: TLabel;
-    GridPanelLayout1: TGridPanelLayout;
+    AniIndicator1: TAniIndicator;
+    Button1: TButton;
+    Button2: TButton;
     Edit1: TEdit;
     Edit2: TEdit;
-    Button1: TButton;
-    AniIndicator1: TAniIndicator;
+    GridPanelLayout1: TGridPanelLayout;
+    GridPanelLayout2: TGridPanelLayout;
+    Header: TToolBar;
+    HeaderLabel: TLabel;
     TabControl1: TTabControl;
-    Text1: TText;
     TabItem1: TTabItem;
     TabItem2: TTabItem;
-    GridPanelLayout2: TGridPanelLayout;
-    Button2: TButton;
+    Text1: TText;
     Text2: TText;
     procedure Button1Click(Sender: TObject);
-    procedure FormCreate(Sender: TObject);
     procedure Button2Click(Sender: TObject);
+    procedure FormCreate(Sender: TObject);
   private
     { Private declarations }
-    fRemoteDataContext: IRemoteDataContext;
+    FRemoteDataContext: IRemoteDataContext;
   public
     { Public declarations }
     [Subscribe(TThreadMode.Main)]
@@ -45,12 +45,12 @@ implementation
 
 procedure THeaderFooterForm.Button1Click(Sender: TObject);
 var
-  lLoginDTO: TLoginDTO;
+  LLoginDTO: TLoginDTO;
 begin
   AniIndicator1.Enabled := true;
   Button1.Enabled := false;
-  lLoginDTO := TLoginDTO.Create(Edit1.Text, Edit2.Text);
-  fRemoteDataContext.Login(lLoginDTO);
+  LLoginDTO := TLoginDTO.Create(Edit1.Text, Edit2.Text);
+  FRemoteDataContext.Login(LLoginDTO);
 end;
 
 procedure THeaderFooterForm.Button2Click(Sender: TObject);
@@ -61,7 +61,7 @@ end;
 procedure THeaderFooterForm.FormCreate(Sender: TObject);
 begin
   TabControl1.ActiveTab := TabItem1;
-  fRemoteDataContext:= CreateRemoteDataContext;
+  FRemoteDataContext:= CreateRemoteDataContext;
   // register subscribers
   GlobalEventBus.RegisterSubscriberForEvents(Self);
 end;
@@ -75,4 +75,3 @@ begin
 end;
 
 end.
-

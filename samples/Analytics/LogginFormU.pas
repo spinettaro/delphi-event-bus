@@ -13,8 +13,7 @@ type
     procedure FormCreate(Sender: TObject);
   private
     { Private declarations }
-    function GetFormattedAnalyticsEvent(AAnalyticsEvent
-      : IAnalyticsEvent): string;
+    function GetFormattedAnalyticsEvent(AAnalyticsEvent: IAnalyticsEvent): string;
   public
     { Public declarations }
     [Subscribe]
@@ -31,15 +30,12 @@ implementation
 procedure TFormLogger.FormCreate(Sender: TObject);
 begin
   Memo1.Lines.Clear;
-  GlobalEventBus.RegisterSubscriberForEvents(self);
+  GlobalEventBus.RegisterSubscriberForEvents(Self);
 end;
 
-function TFormLogger.GetFormattedAnalyticsEvent(AAnalyticsEvent
-  : IAnalyticsEvent): string;
+function TFormLogger.GetFormattedAnalyticsEvent(AAnalyticsEvent: IAnalyticsEvent): string;
 begin
-  Result := Format('User %s - %s - at %s ',
-    [AAnalyticsEvent.Who, AAnalyticsEvent.What,
-    DateTimeToStr(AAnalyticsEvent.When)]);
+  Result := Format('User %s - %s - at %s ', [AAnalyticsEvent.Who, AAnalyticsEvent.What, DateTimeToStr(AAnalyticsEvent.When)]);
 end;
 
 procedure TFormLogger.OnAnalyticsEvent(AAnalyticsEvent: IAnalyticsEvent);

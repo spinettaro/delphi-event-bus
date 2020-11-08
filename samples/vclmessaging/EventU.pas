@@ -3,16 +3,15 @@ unit EventU;
 interface
 
 type
-
   IMemoChangeEvent = interface
-      ['{DCFE64D2-9BA8-4949-9BB1-F5CD672E51A2}']
+  ['{DCFE64D2-9BA8-4949-9BB1-F5CD672E51A2}']
     procedure SetText(const Value: string);
     function GetText: String;
     property Text: string read GetText write SetText;
   end;
 
   ICheckBoxEvent = interface
-      ['{2212C465-BD01-4E0E-8468-12FB5DCCA33A}']
+  ['{2212C465-BD01-4E0E-8468-12FB5DCCA33A}']
     procedure SetChecked(const Value: boolean);
     function GetChecked: Boolean;
     property Checked: boolean read GetChecked write SetChecked;
@@ -24,7 +23,6 @@ type
 implementation
 
 type
-
   TMemoChangeEvent = class(TInterfacedObject, IMemoChangeEvent)
   private
     FText: string;
@@ -69,12 +67,12 @@ end;
 
 function GetMemoEvent: IMemoChangeEvent;
 begin
-    Result:= TMemoChangeEvent.Create;
+  Result:= TMemoChangeEvent.Create;
 end;
 
 function GetCheckBoxEvent: ICheckBoxEvent;
 begin
-    Result:= TCheckBoxEvent.Create;
+  Result:= TCheckBoxEvent.Create;
 end;
 
 end.

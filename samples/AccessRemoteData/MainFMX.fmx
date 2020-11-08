@@ -8,7 +8,7 @@ object HeaderFooterForm: THeaderFooterForm
   FormFactor.Height = 900
   FormFactor.Devices = [Desktop]
   OnCreate = FormCreate
-  DesignerMasterStyle = 3
+  DesignerMasterStyle = 0
   object Header: TToolBar
     Size.Width = 384.000000000000000000
     Size.Height = 48.000000000000000000
@@ -98,28 +98,28 @@ object HeaderFooterForm: THeaderFooterForm
             Value = 49.736522464674410000
           end
           item
-            Value = 6.282934691915697000
+            Value = 6.282934691915696000
           end
           item
-            Value = 6.282934691915697000
+            Value = 6.282934691915696000
           end
           item
-            Value = 6.282934691915697000
+            Value = 6.282934691915696000
           end
           item
-            Value = 6.282934691915697000
+            Value = 6.282934691915696000
           end
           item
-            Value = 6.282934691915697000
+            Value = 6.282934691915696000
           end
           item
-            Value = 6.282934691915697000
+            Value = 6.282934691915696000
           end
           item
-            Value = 6.282934691915697000
+            Value = 6.282934691915696000
           end
           item
-            Value = 6.282934691915697000
+            Value = 6.282934691915696000
           end>
         object Edit1: TEdit
           Touch.InteractiveGestures = [LongTap, DoubleTap]
@@ -127,7 +127,7 @@ object HeaderFooterForm: THeaderFooterForm
           TabOrder = 0
           Hint = 'Username'
           Size.Width = 308.013977050781300000
-          Size.Height = 32.000000000000000000
+          Size.Height = 32.608428955078130000
           Size.PlatformDefault = False
           TextPrompt = 'Username...'
         end
@@ -137,7 +137,7 @@ object HeaderFooterForm: THeaderFooterForm
           TabOrder = 1
           Password = True
           Size.Width = 308.013977050781300000
-          Size.Height = 32.000000000000000000
+          Size.Height = 32.608428955078130000
           Size.PlatformDefault = False
           TextPrompt = 'Password...'
         end
@@ -212,28 +212,28 @@ object HeaderFooterForm: THeaderFooterForm
             Value = 49.736522464674410000
           end
           item
-            Value = 6.282934691915697000
+            Value = 6.282934691915696000
           end
           item
-            Value = 6.282934691915697000
+            Value = 6.282934691915696000
           end
           item
-            Value = 6.282934691915697000
+            Value = 6.282934691915696000
           end
           item
-            Value = 6.282934691915697000
+            Value = 6.282934691915696000
           end
           item
-            Value = 6.282934691915697000
+            Value = 6.282934691915696000
           end
           item
-            Value = 6.282934691915697000
+            Value = 6.282934691915696000
           end
           item
-            Value = 6.282934691915697000
+            Value = 6.282934691915696000
           end
           item
-            Value = 6.282934691915697000
+            Value = 6.282934691915696000
           end>
         object Button2: TButton
           Align = Client

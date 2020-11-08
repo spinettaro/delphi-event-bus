@@ -72,8 +72,7 @@ var
   LChoice: string;
 begin
   LChoice := RadioGroup1.Items[RadioGroup1.ItemIndex];
-  GlobalEventBus.Post(BuildAnalyticsEvent(LChoice +
-    ' is actual favorite food '), '');
+  GlobalEventBus.Post(BuildAnalyticsEvent(LChoice + ' is actual favorite food '), '');
 end;
 
 end.
