@@ -6,17 +6,16 @@ uses
   DUnitX.TestFramework, BOs;
 
 type
-
   [TestFixture]
   TBaseTest = class(TObject)
   private
     FSubscriber: TSubscriber;
     FChannelSubscriber: TChannelSubscriber;
-    procedure SetSubscriber(const Value: TSubscriber);
+    procedure Set_Subscriber(const Value: TSubscriber);
   protected
     function SimpleCustomClone(const AObject: TObject): TObject;
   public
-    property Subscriber: TSubscriber read FSubscriber write SetSubscriber;
+    property Subscriber: TSubscriber read FSubscriber write Set_Subscriber;
     property ChannelSubscriber: TChannelSubscriber read FChannelSubscriber write FChannelSubscriber;
 
     [Setup]
@@ -29,10 +28,9 @@ type
 implementation
 
 uses
-  System.SysUtils,
-  EventBus;
+  System.SysUtils, EventBus;
 
-procedure TBaseTest.SetSubscriber(const Value: TSubscriber);
+procedure TBaseTest.Set_Subscriber(const Value: TSubscriber);
 begin
   FSubscriber := Value;
 end;

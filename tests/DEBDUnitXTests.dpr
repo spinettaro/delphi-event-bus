@@ -7,21 +7,25 @@ program DEBDUnitXTests;
 
 uses
   SysUtils,
-{$IFDEF GUI_TESTRUNNER}
+  {$IFDEF GUI_TESTRUNNER}
   Vcl.Forms,
   DUnitX.Loggers.GUI.Vcl,
-{$ENDIF }
-{$IFDEF TESTINSIGHT}
+  {$ENDIF }
+  {$IFDEF TESTINSIGHT}
   TestInsight.DUnitX,
-{$ENDIF }
-{$IFDEF CONSOLE_TESTRUNNER}
+  {$ENDIF }
+  {$IFDEF CONSOLE_TESTRUNNER}
   DUnitX.Loggers.Console,
-{$ENDIF }
+  {$ENDIF }
   DUnitX.Loggers.Xml.NUnit,
   DUnitX.TestFramework,
   EventBusTestU in 'EventBusTestU.pas',
   BOs in 'BOs.pas',
-  BaseTestU in 'BaseTestU.pas';
+  BaseTestU in 'BaseTestU.pas',
+  EventBus in '..\source\EventBus.pas',
+  EventBus.Helpers in '..\source\EventBus.Helpers.pas',
+  EventBus.Subscribers in '..\source\EventBus.Subscribers.pas',
+  EventBus.Core in '..\source\EventBus.Core.pas';
 
 {$IFDEF TESTINSIGHT}
 TestInsight.DUnitX.RunRegisteredTests;
