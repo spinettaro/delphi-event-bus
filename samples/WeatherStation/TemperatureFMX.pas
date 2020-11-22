@@ -16,7 +16,7 @@ type
     procedure FormDestroy(Sender: TObject);
   public
     [Subscribe(TThreadMode.Main)]
-    procedure OnWeatherInfoEvent(aWeatherInfo: IWeatherInformation);
+    procedure OnWeatherInfoEvent(AWeatherInfo: IWeatherInformation);
   end;
 
 var
@@ -38,9 +38,9 @@ begin
   TWeatherModel.StopPolling;
 end;
 
-procedure TTemperatureForm.OnWeatherInfoEvent(aWeatherInfo: IWeatherInformation);
+procedure TTemperatureForm.OnWeatherInfoEvent(AWeatherInfo: IWeatherInformation);
 begin
-  Label2.Text := Format('%d °C', [aWeatherInfo.Temperature]);
+  Label2.Text := Format('%d °C', [AWeatherInfo.Temperature]);
 end;
 
 end.

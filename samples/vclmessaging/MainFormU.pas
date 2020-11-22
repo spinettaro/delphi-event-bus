@@ -21,7 +21,7 @@ type
   end;
 
 var
-  frmMain: TfrmMain;
+  FrmMain: TfrmMain;
 
 implementation
 
@@ -32,20 +32,20 @@ uses
 
 procedure TfrmMain.CheckBox1Click(Sender: TObject);
 var
-  Event: ICheckBoxEvent;
+  LEvent: ICheckBoxEvent;
 begin
-  Event := GetCheckBoxEvent;
-  Event.Checked := CheckBox1.Checked;
-  GlobalEventBus.Post(Event);
+  LEvent := GetCheckBoxEvent;
+  LEvent.Checked := CheckBox1.Checked;
+  GlobalEventBus.Post(LEvent);
 end;
 
 procedure TfrmMain.Memo1Change(Sender: TObject);
 var
-  Event: IMemoChangeEvent;
+  LEvent: IMemoChangeEvent;
 begin
-  Event := GetMemoEvent;
-  Event.Text := Memo1.Lines.Text;
-  GlobalEventBus.Post(Event);
+  LEvent := GetMemoEvent;
+  LEvent.Text := Memo1.Lines.Text;
+  GlobalEventBus.Post(LEvent);
   GlobalEventBus.Post('MemoChange', Memo1.Lines.Text);
 end;
 

@@ -14,5 +14,4 @@ begin
   Application.Initialize;
   Application.CreateForm(THeaderFooterForm, HeaderFooterForm);
   Application.Run;
-
 end.

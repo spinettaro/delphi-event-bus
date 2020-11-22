@@ -3,17 +3,15 @@ unit BOsU;
 interface
 
 uses
-
   EventBus;
 
 type
-
   TLoginDTO = class(TObject)
   private
     FPassword: string;
     FUsername: string;
-    procedure SetPassword(const Value: string);
-    procedure SetUsername(const Value: string);
+    procedure SetPassword(const AValue: string);
+    procedure SetUsername(const AValue: string);
   public
     constructor Create(AUsername: string; APwd: string);
     property Username: string read FUsername write SetUsername;
@@ -21,36 +19,34 @@ type
   end;
 
   IOnLoginEvent = interface
-      ['{E3C9633D-86CA-488F-A452-29DAB206C92A}']
-    procedure SetMsg(const Value: string);
-    procedure SetSuccess(const Value: boolean);
-    function GetMsg: String;
+  ['{E3C9633D-86CA-488F-A452-29DAB206C92A}']
+    procedure SetMsg(const AValue: string);
+    procedure SetSuccess(const AValue: Boolean);
+    function GetMsg: string;
     function GetSuccess: Boolean;
-    property Success: boolean read GetSuccess write SetSuccess;
+    property Success: Boolean read GetSuccess write SetSuccess;
     property Msg: string read GetMsg write SetMsg;
   end;
 
-  function CreateOnLoginEvent(ASuccess: boolean; AMsg: string): IOnLoginEvent;
+  function CreateOnLoginEvent(ASuccess: Boolean; AMsg: string): IOnLoginEvent;
 
 implementation
 
 uses
   System.Classes;
 
-
 type
-
-    TOnLoginEvent = class(TInterfacedObject, IOnLoginEvent)
+  TOnLoginEvent = class(TInterfacedObject, IOnLoginEvent)
   private
-    FSuccess: boolean;
+    FSuccess: Boolean;
     FMsg: string;
-    procedure SetMsg(const Value: string);
-    procedure SetSuccess(const Value: boolean);
-    function GetMsg: String;
+    procedure SetMsg(const AValue: string);
+    procedure SetSuccess(const AValue: Boolean);
+    function GetMsg: string;
     function GetSuccess: Boolean;
   public
-    constructor Create(ASuccess: boolean; AMsg: string);
-    property Success: boolean read GetSuccess write SetSuccess;
+    constructor Create(ASuccess: Boolean; AMsg: string);
+    property Success: Boolean read GetSuccess write SetSuccess;
     property Msg: string read GetMsg write SetMsg;
   end;
 
@@ -62,26 +58,26 @@ begin
   FUsername := AUsername;
 end;
 
-procedure TLoginDTO.SetPassword(const Value: string);
+procedure TLoginDTO.SetPassword(const AValue: string);
 begin
-  FPassword := Value;
+  FPassword := AValue;
 end;
 
-procedure TLoginDTO.SetUsername(const Value: string);
+procedure TLoginDTO.SetUsername(const AValue: string);
 begin
-  FUsername := Value;
+  FUsername := AValue;
 end;
 
 { TOnLoginEvent }
 
-constructor TOnLoginEvent.Create(ASuccess: boolean; AMsg: string);
+constructor TOnLoginEvent.Create(ASuccess: Boolean; AMsg: string);
 begin
   inherited Create;
   FSuccess := ASuccess;
   FMsg := AMsg;
 end;
 
-function TOnLoginEvent.GetMsg: String;
+function TOnLoginEvent.GetMsg: string;
 begin
   Result:= FMsg;
 end;
@@ -91,19 +87,19 @@ begin
   Result:= FSuccess;
 end;
 
-procedure TOnLoginEvent.SetMsg(const Value: string);
+procedure TOnLoginEvent.SetMsg(const AValue: string);
 begin
-  FMsg := Value;
+  FMsg := AValue;
 end;
 
-procedure TOnLoginEvent.SetSuccess(const Value: boolean);
+procedure TOnLoginEvent.SetSuccess(const AValue: Boolean);
 begin
-  FSuccess := Value;
+  FSuccess := AValue;
 end;
 
-function CreateOnLoginEvent(ASuccess: boolean; AMsg: string): IOnLoginEvent;
+function CreateOnLoginEvent(ASuccess: Boolean; AMsg: string): IOnLoginEvent;
 begin
-  Result:= TOnLoginEvent.Create( ASuccess, AMsg);
+  Result:= TOnLoginEvent.Create(ASuccess, AMsg);
 end;
 
 end.

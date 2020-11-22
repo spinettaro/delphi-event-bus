@@ -26,21 +26,18 @@ type
   end;
 
 var
-  frmSecond: TfrmSecond;
+  FrmSecond: TfrmSecond;
 
 implementation
-
-uses
-  System.Rtti;
 
 {$R *.dfm}
 
 procedure TfrmSecond.CheckBox2Click(Sender: TObject);
 begin
   if (CheckBox2.Checked) then
-    GlobalEventBus.RegisterSubscriberForEvents(self)
+    GlobalEventBus.RegisterSubscriberForEvents(Self)
   else
-    GlobalEventBus.UnregisterForEvents(self);
+    GlobalEventBus.UnregisterForEvents(Self);
 end;
 
 procedure TfrmSecond.OnCheckBoxChange(AEvent: ICheckBoxEvent);
