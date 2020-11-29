@@ -20,7 +20,7 @@ type
   ///   Provides interface type helper.
   /// </summary>
   /// <remarks>
-  ///   TInterfaceHelper borrows the code from the anwer to this StackOverflow question:
+  ///   TInterfaceHelper borrows the code from the answer to this StackOverflow question:
   ///   <see href="https://stackoverflow.com/questions/39584234/how-to-obtain-rtti-from-an-interface-reference-in-delphi" />
   /// </remarks>
   TInterfaceHelper = record
