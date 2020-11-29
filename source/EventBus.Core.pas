@@ -47,32 +47,29 @@ uses
 type
   TEventBus = class(TInterfacedObject, IEventBus)
   strict private
-    class var  FMultiReadExclusiveWriteSync: TMultiReadExclusiveWriteSynchronizer;
-    class constructor Create;
-    class destructor Destroy;
-  strict private
     FChannelsOfGivenSubscriber: TObjectDictionary<TObject, TList<string>>;
+    FMultiReadExclusiveWriteSync: TMultiReadExclusiveWriteSynchronizer;
     FSubscriptionsOfGivenChannel: TObjectDictionary<string, TObjectList<TSubscription>>;
     FSubscriptionsOfGivenEventType: TObjectDictionary<string, TObjectList<TSubscription>>;
     FTypesOfGivenSubscriber: TObjectDictionary<TObject, TList<string>>;
 
-    function GenerateThreadProc(ASubscription: TSubscription; AMessage: string): TThreadProcedure; overload;
-    function GenerateThreadProc(ASubscription: TSubscription; AEvent: IInterface): TThreadProcedure; overload;
+    function GenerateThreadProc(ASubscription: TSubscription; const AMessage: string): TThreadProcedure; overload;
+    function GenerateThreadProc(ASubscription: TSubscription; const AEvent: IInterface): TThreadProcedure; overload;
 
-    function GenerateTProc(ASubscription: TSubscription; AMessage: string): TProc; overload;
-    function GenerateTProc(ASubscription: TSubscription; AEvent: IInterface): TProc; overload;
+    function GenerateTProc(ASubscription: TSubscription; const AMessage: string): TProc; overload;
+    function GenerateTProc(ASubscription: TSubscription; const AEvent: IInterface): TProc; overload;
 
-    procedure InvokeSubscriber(ASubscription: TSubscription; AMessage: string); overload;
-    procedure InvokeSubscriber(ASubscription: TSubscription; AEvent: IInterface); overload;
+    procedure InvokeSubscriber(ASubscription: TSubscription; const AMessage: string); overload;
+    procedure InvokeSubscriber(ASubscription: TSubscription; const AEvent: IInterface); overload;
 
     procedure SubscribeChannel(ASubscriber: TObject; ASubscriberMethod: TSubscriberMethod);
-    procedure UnsubscribeByChannel(ASubscriber: TObject; AChannel: string);
+    procedure UnsubscribeByChannel(ASubscriber: TObject; const AChannel: string);
 
     procedure SubscribeEvent(ASubscriber: TObject; ASubscriberMethod: TSubscriberMethod);
-    procedure UnsubscribeByEventType(ASubscriber: TObject; AEventType: string);
+    procedure UnsubscribeByEventType(ASubscriber: TObject; const AEventType: string);
   protected
-    procedure PostToChannel(ASubscription: TSubscription; AMessage: string; AIsMainThread: Boolean); virtual;
-    procedure PostToSubscription(ASubscription: TSubscription; AEvent: IInterface; AIsMainThread: Boolean); virtual;
+    procedure PostToChannel(ASubscription: TSubscription; const AMessage: string; AIsMainThread: Boolean); virtual;
+    procedure PostToSubscription(ASubscription: TSubscription; const AEvent: IInterface; AIsMainThread: Boolean); virtual;
   public
     constructor Create; virtual;
     destructor Destroy; override;
@@ -81,7 +78,7 @@ type
     function IsRegisteredForEvents(ASubscriber: TObject): Boolean;
 
     procedure Post(const AChannel: string; const AMessage: string); overload; virtual;
-    procedure Post(AEvent: IInterface; const AContext: string = ''); overload; virtual;
+    procedure Post(const AEvent: IInterface; const AContext: string = ''); overload; virtual;
 
     procedure RegisterSubscriberForChannels(ASubscriber: TObject); virtual;
     procedure UnregisterForChannels(ASubscriber: TObject); virtual;
@@ -97,10 +94,6 @@ begin
   FTypesOfGivenSubscriber := TObjectDictionary<TObject, TList<string>>.Create([doOwnsValues]);
   FSubscriptionsOfGivenChannel := TObjectDictionary<string, TObjectList<TSubscription>>.Create([doOwnsValues]);
   FChannelsOfGivenSubscriber := TObjectDictionary<TObject, TList<string>>.Create([doOwnsValues]);
-end;
-
-class constructor TEventBus.Create;
-begin
   FMultiReadExclusiveWriteSync := TMultiReadExclusiveWriteSynchronizer.Create;
 end;
 
@@ -110,15 +103,11 @@ begin
   FreeAndNil(FTypesOfGivenSubscriber);
   FreeAndNil(FSubscriptionsOfGivenChannel);
   FreeAndNil(FChannelsOfGivenSubscriber);
+  FMultiReadExclusiveWriteSync.Free;
   inherited;
 end;
 
-class destructor TEventBus.Destroy;
-begin
-  FMultiReadExclusiveWriteSync.Free;
-end;
-
-function TEventBus.GenerateThreadProc(ASubscription: TSubscription; AMessage: string): TThreadProcedure;
+function TEventBus.GenerateThreadProc(ASubscription: TSubscription; const AMessage: string): TThreadProcedure;
 begin
   Result := procedure
     begin
@@ -126,7 +115,7 @@ begin
     end;
 end;
 
-function TEventBus.GenerateThreadProc(ASubscription: TSubscription; AEvent: IInterface): TThreadProcedure;
+function TEventBus.GenerateThreadProc(ASubscription: TSubscription; const AEvent: IInterface): TThreadProcedure;
 begin
   Result := procedure
     begin
@@ -134,7 +123,7 @@ begin
     end;
 end;
 
-function TEventBus.GenerateTProc(ASubscription: TSubscription; AMessage: string): TProc;
+function TEventBus.GenerateTProc(ASubscription: TSubscription; const AMessage: string): TProc;
 begin
   Result := procedure
     begin
@@ -142,7 +131,7 @@ begin
     end;
 end;
 
-function TEventBus.GenerateTProc(ASubscription: TSubscription; AEvent: IInterface): TProc;
+function TEventBus.GenerateTProc(ASubscription: TSubscription; const AEvent: IInterface): TProc;
 begin
   Result := procedure
     begin
@@ -150,7 +139,7 @@ begin
     end;
 end;
 
-procedure TEventBus.InvokeSubscriber(ASubscription: TSubscription; AMessage: string);
+procedure TEventBus.InvokeSubscriber(ASubscription: TSubscription; const AMessage: string);
 begin
   try
     ASubscription.SubscriberMethod.Method.Invoke(ASubscription.Subscriber, [AMessage]);
@@ -168,7 +157,7 @@ begin
   end;
 end;
 
-procedure TEventBus.InvokeSubscriber(ASubscription: TSubscription; AEvent: IInterface);
+procedure TEventBus.InvokeSubscriber(ASubscription: TSubscription; const AEvent: IInterface);
 begin
   try
     if not ASubscription.Active then
@@ -236,7 +225,7 @@ begin
   end;
 end;
 
-procedure TEventBus.Post(AEvent: IInterface; const AContext: string = '');
+procedure TEventBus.Post(const AEvent: IInterface; const AContext: string = '');
 var
   LIsMainThread: Boolean;
   LSubscription: TSubscription;
@@ -267,7 +256,7 @@ begin
   end;
 end;
 
-procedure TEventBus.PostToChannel(ASubscription: TSubscription; AMessage: string; AIsMainThread: Boolean);
+procedure TEventBus.PostToChannel(ASubscription: TSubscription; const AMessage: string; AIsMainThread: Boolean);
 begin
   if not Assigned(ASubscription.Subscriber) then
     Exit;
@@ -300,7 +289,7 @@ begin
   end;
 end;
 
-procedure TEventBus.PostToSubscription(ASubscription: TSubscription; AEvent: IInterface; AIsMainThread: Boolean);
+procedure TEventBus.PostToSubscription(ASubscription: TSubscription; const AEvent: IInterface; AIsMainThread: Boolean);
 begin
   if not Assigned(ASubscription.Subscriber) then
     Exit;
@@ -456,7 +445,7 @@ begin
   end;
 end;
 
-procedure TEventBus.UnsubscribeByChannel(ASubscriber: TObject; AChannel: string);
+procedure TEventBus.UnsubscribeByChannel(ASubscriber: TObject; const AChannel: string);
 var
   LSubscriptions: TObjectList<TSubscription>;
   LSize, I: Integer;
@@ -479,7 +468,7 @@ begin
   end;
 end;
 
-procedure TEventBus.UnsubscribeByEventType(ASubscriber: TObject; AEventType: string);
+procedure TEventBus.UnsubscribeByEventType(ASubscriber: TObject; const AEventType: string);
 var
   LSubscriptions: TObjectList<TSubscription>;
   LSize, I: Integer;
