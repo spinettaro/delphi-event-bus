@@ -23,14 +23,12 @@ uses
 
 type
   /// <summary>
-  ///   Encapsulates the subscriber method, exposing relevant information as
-  ///   properties, including its rtti information, <i>Context</i>, associated <i>
-  ///   Event Type</i>, and designated <i>Thread Mode.</i>
+  ///   Encapsulates subscriber method as an object with relevant properties.
   /// </summary>
   /// <remarks>
-  ///   TSubscriberMethod.EventType is the same as the qualified name of the method's one
-  ///   and only one event argument that is of interface type. It renders a
-  ///   string-typed key to uniquely identify the event.
+  ///   TSubscriberMethod.EventType is represented by the qualified name of type of the method's
+  ///   event argument. The type of the event argument must be a descendant of interface type. EventType
+  ///   can uniquely identify the type of the event.
   /// </remarks>
   TSubscriberMethod = class sealed(TObject)
   strict private
@@ -41,19 +39,19 @@ type
     FThreadMode: TThreadMode;
   public
     /// <param name="ARttiMethod">
-    ///   Rtti information about the subject method
+    ///   Rtti information about the subject method.
     /// </param>
     /// <param name="AEventType">
-    ///   Event type of the method
+    ///   Event type of the method.
     /// </param>
     /// <param name="AThreadMode">
-    ///   Designated thread mode
+    ///   Designated thread mode.
     /// </param>
     /// <param name="AContext">
-    ///   Context of the method
+    ///   Context of the method.
     /// </param>
     /// <param name="APriority">
-    ///   Dispatch priority of the method
+    ///   Dispatching priority of the method.
     /// </param>
     constructor Create(ARttiMethod: TRttiMethod; const AEventType: string; AThreadMode: TThreadMode;
       const AContext: string = ''; APriority: Integer = 1);
@@ -81,7 +79,7 @@ type
     /// </summary>
     property Method: TRttiMethod read FMethod;
     /// <summary>
-    ///   Dispatch priority of the subscriber method. Currently just a place
+    ///   Dispatching priority of the subscriber method. Currently just a place
     ///   holder with no impact on actual event dispatching.
     /// </summary>
     property Priority: Integer read FPriority;
@@ -92,8 +90,7 @@ type
   end;
 
   /// <summary>
-  ///   Encapsulates the subscriber method and its associated subscriber
-  ///   object.
+  ///   Encapsulates the subscriber method and its owner subscriber object.
   /// </summary>
   TSubscription = class sealed(TObject)
   private
@@ -113,7 +110,7 @@ type
     destructor Destroy; override;
 
     /// <summary>
-    ///   Checks if two subscription objects are equal. Returns True when both
+    ///   Checks if two subscriptions are equal. Returns True when both
     ///   having the same subscriber object and the same subscriber method.
     /// </summary>
     function Equals(AObject: TObject): Boolean; override;

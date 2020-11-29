@@ -68,6 +68,12 @@ type
     [Test]
     procedure TestRegisterAndFree;
 
+    [Test]
+    procedure TestEmptySubscriber;
+    [Test]
+    procedure TestInvalidArgTypeSubscriber;
+    [Test]
+    procedure TestInvalidArgNumberSubscriber;
   end;
 
 implementation
@@ -477,6 +483,88 @@ begin
   Assert.IsTrue(TWaitResult.wrSignaled = Subscriber.Event.WaitFor(5000), 'Timeout request');
   Assert.AreEqual(LMsg, Subscriber.LastEvent.Data);
   Assert.AreNotEqual(MainThreadID, Subscriber.LastEventThreadID);
+end;
+
+
+procedure TEventBusTest.TestEmptySubscriber;
+var
+  LSubscriber: TEmptySubscriber;
+begin
+  LSubscriber := TEmptySubscriber.Create;
+
+  Assert.WillRaise(
+    procedure begin
+      GlobalEventBus.RegisterSubscriberForEvents(LSubscriber);
+    end
+    ,
+    EObjectHasNoSubscriberMethods
+    ,
+    'Empty subscriber methods for Events');
+
+  Assert.WillRaise(
+    procedure begin
+      GlobalEventBus.RegisterSubscriberForChannels(LSubscriber);
+    end
+    ,
+    EObjectHasNoSubscriberMethods
+    ,
+    'Empty subscriber methods for Channels');
+
+  LSubscriber.Free;
+end;
+
+procedure TEventBusTest.TestInvalidArgNumberSubscriber;
+var
+  LSubscriber: TInvalidArgNumSubscriber;
+begin
+  LSubscriber := TInvalidArgNumSubscriber.Create;
+
+  Assert.WillRaise(
+    procedure begin
+      GlobalEventBus.RegisterSubscriberForEvents(LSubscriber);
+    end
+    ,
+    EInvalidSubscriberMethod
+    ,
+    'Invalid subscriber method argument number');
+
+  Assert.WillRaise(
+    procedure begin
+      GlobalEventBus.RegisterSubscriberForChannels(LSubscriber);
+    end
+    ,
+    EInvalidSubscriberMethod
+    ,
+    'Invalid subscriber method argument number');
+
+  LSubscriber.Free;
+end;
+
+procedure TEventBusTest.TestInvalidArgTypeSubscriber;
+var
+  LSubscriber: TInvalidArgTypeSubscriber;
+begin
+  LSubscriber := TInvalidArgTypeSubscriber.Create;
+
+  Assert.WillRaise(
+    procedure begin
+      GlobalEventBus.RegisterSubscriberForEvents(LSubscriber);
+    end
+    ,
+    EInvalidSubscriberMethod
+    ,
+    'Invalid subscriber method argument type');
+
+  Assert.WillRaise(
+    procedure begin
+      GlobalEventBus.RegisterSubscriberForChannels(LSubscriber);
+    end
+    ,
+    EInvalidSubscriberMethod
+    ,
+    'Invalid subscriber method argument type');
+
+  LSubscriber.Free;
 end;
 
 initialization
