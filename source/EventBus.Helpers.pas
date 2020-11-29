@@ -16,8 +16,13 @@ type
     class function HasAttribute<T: class>(ARttiMember: TRttiType; out AAttribute: T): Boolean; overload;
   end;
 
-  // This code is taken from Stefan Glienke from
-  // https://stackoverflow.com/questions/39584234/how-to-obtain-rtti-from-an-interface-reference-in-delphi
+  /// <summary>
+  ///   Provides interface type helper.
+  /// </summary>
+  /// <remarks>
+  ///   TInterfaceHelper borrows the code from the anwer to this StackOverflow question:
+  ///   <see href="https://stackoverflow.com/questions/39584234/how-to-obtain-rtti-from-an-interface-reference-in-delphi" />
+  /// </remarks>
   TInterfaceHelper = record
   strict private type
     TInterfaceTypes = TDictionary<TGUID, TRttiInterfaceType>;
