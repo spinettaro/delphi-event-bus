@@ -47,11 +47,8 @@ uses
 type
   TEventBus = class(TInterfacedObject, IEventBus)
   strict private
-    class var  FMultiReadExclusiveWriteSync: TMultiReadExclusiveWriteSynchronizer;
-    class constructor Create;
-    class destructor Destroy;
-  strict private
     FChannelsOfGivenSubscriber: TObjectDictionary<TObject, TList<string>>;
+    FMultiReadExclusiveWriteSync: TMultiReadExclusiveWriteSynchronizer;
     FSubscriptionsOfGivenChannel: TObjectDictionary<string, TObjectList<TSubscription>>;
     FSubscriptionsOfGivenEventType: TObjectDictionary<string, TObjectList<TSubscription>>;
     FTypesOfGivenSubscriber: TObjectDictionary<TObject, TList<string>>;
@@ -97,10 +94,6 @@ begin
   FTypesOfGivenSubscriber := TObjectDictionary<TObject, TList<string>>.Create([doOwnsValues]);
   FSubscriptionsOfGivenChannel := TObjectDictionary<string, TObjectList<TSubscription>>.Create([doOwnsValues]);
   FChannelsOfGivenSubscriber := TObjectDictionary<TObject, TList<string>>.Create([doOwnsValues]);
-end;
-
-class constructor TEventBus.Create;
-begin
   FMultiReadExclusiveWriteSync := TMultiReadExclusiveWriteSynchronizer.Create;
 end;
 
@@ -110,12 +103,8 @@ begin
   FreeAndNil(FTypesOfGivenSubscriber);
   FreeAndNil(FSubscriptionsOfGivenChannel);
   FreeAndNil(FChannelsOfGivenSubscriber);
-  inherited;
-end;
-
-class destructor TEventBus.Destroy;
-begin
   FMultiReadExclusiveWriteSync.Free;
+  inherited;
 end;
 
 function TEventBus.GenerateThreadProc(ASubscription: TSubscription; AMessage: string): TThreadProcedure;
