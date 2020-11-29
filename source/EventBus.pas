@@ -21,6 +21,9 @@ unit EventBus;
 
 interface
 
+uses
+  System.SysUtils;
+
 type
   /// <summary>
   ///   Provides public interface of event bus implementation. Two types of
@@ -88,8 +91,16 @@ type
     ///   Registers a new subscriber for named-channel messages.
     /// </summary>
     /// <param name="ASubscriber">
-    ///   The subscriber object to register, which should have methods with Channel attribute.
+    ///   The subscriber object to register, which should have methods with
+    ///   Channel attribute.
     /// </param>
+    /// <exception cref="EInvalidSubscriberMethod">
+    ///   When any subscriber method of the subscriber object has invalid number of arguments or invalid
+    ///   argument type.
+    /// </exception>
+    /// <exception cref="EObjectHasNoSubscriberMethods">
+    ///   When the subscriber object contains no subscriber methods.
+    /// </exception>
     procedure RegisterSubscriberForChannels(ASubscriber: TObject);
 
     /// <summary>
@@ -107,6 +118,13 @@ type
     ///   The subscriber object to register, which should have methods with Subscribe attributes.
     ///   attribute.
     /// </param>
+    /// <exception cref="EInvalidSubscriberMethod">
+    ///   When any subscriber method of the subscriber object has invalid number of arguments or invalid
+    ///   argument type.
+    /// </exception>
+    /// <exception cref="EObjectHasNoSubscriberMethods">
+    ///   When the subscriber object contains no subscriber methods.
+    /// </exception>
     procedure RegisterSubscriberForEvents(ASubscriber: TObject);
 
     /// <summary>
@@ -255,6 +273,14 @@ type
     ///   Associated channel of the subscriber method.
     /// </summary>
     property Channel: string read FChannel;
+  end;
+
+  EInvalidSubscriberMethod = class(Exception)
+
+  end;
+
+  EObjectHasNoSubscriberMethods = class(Exception)
+
   end;
 
 /// <summary>
