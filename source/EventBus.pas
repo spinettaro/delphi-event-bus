@@ -82,7 +82,7 @@ type
     ///   Context of the event. It will be jointly used by the event bus
     ///   to route the event to proper subscriber methods.
     /// </param>
-    procedure Post(AEvent: IInterface; const AContext: string = ''); overload;
+    procedure Post(const AEvent: IInterface; const AContext: string = ''); overload;
 
     /// <summary>
     ///   Registers a new subscriber for named-channel messages.

@@ -34,23 +34,23 @@ type
     class procedure RefreshCache; static;
 
     // Get RTTI from interface
-    class function GetType(AIntf: IInterface): TRttiInterfaceType; overload; static;
-    class function GetType(AGuid: TGUID): TRttiInterfaceType; overload; static;
-    class function GetType(AIntfInTValue: TValue): TRttiInterfaceType; overload; static;
+    class function GetType(const AIntf: IInterface): TRttiInterfaceType; overload; static;
+    class function GetType(const AGuid: TGUID): TRttiInterfaceType; overload; static;
+    class function GetType(const AIntfInTValue: TValue): TRttiInterfaceType; overload; static;
 
     // Get type name from interface
-    class function GetTypeName(AIntf: IInterface): string; overload; static;
-    class function GetTypeName(AGuid: TGUID): string; overload; static;
-    class function GetQualifiedName(AIntf: IInterface): string; overload; static;
-    class function GetQualifiedName(AGuid: TGUID): string; overload; static;
+    class function GetTypeName(const AIntf: IInterface): string; overload; static;
+    class function GetTypeName(const AGuid: TGUID): string; overload; static;
+    class function GetQualifiedName(const AIntf: IInterface): string; overload; static;
+    class function GetQualifiedName(const AGuid: TGUID): string; overload; static;
 
     // Get methods
-    class function GetMethods(AIntf: IInterface): TArray<TRttiMethod>; static;
-    class function GetMethod(AIntf: IInterface; const MethodName: string): TRttiMethod; static;
+    class function GetMethods(const AIntf: IInterface): TArray<TRttiMethod>; static;
+    class function GetMethod(const AIntf: IInterface; const MethodName: string): TRttiMethod; static;
 
     // Invoke method
-    class function InvokeMethod(AIntf: IInterface; const MethodName: string; const Args: array of TValue): TValue; overload; static;
-    class function InvokeMethod(AIntfInTValue: TValue; const MethodName: string; const Args: array of TValue): TValue; overload; static;
+    class function InvokeMethod(const AIntf: IInterface; const MethodName: string; const Args: array of TValue): TValue; overload; static;
+    class function InvokeMethod(const AIntfInTValue: TValue; const MethodName: string; const Args: array of TValue): TValue; overload; static;
   end;
 
 implementation
@@ -59,7 +59,7 @@ uses
   System.Classes, System.SyncObjs, DUnitX.Utils;
 
 { TInterfaceHelper }
-class function TInterfaceHelper.GetType(AIntf: IInterface): TRttiInterfaceType;
+class function TInterfaceHelper.GetType(const AIntf: IInterface): TRttiInterfaceType;
 var
   LImplObj: TObject;
   LGUID: TGUID;
@@ -115,7 +115,7 @@ begin
   FInterfaceTypes.DisposeOf;
 end;
 
-class function TInterfaceHelper.GetQualifiedName(AIntf: IInterface): string;
+class function TInterfaceHelper.GetQualifiedName(const AIntf: IInterface): string;
 var
   LType: TRttiInterfaceType;
 begin
@@ -126,7 +126,7 @@ begin
     Result := LType.QualifiedName;
 end;
 
-class function TInterfaceHelper.GetMethod(AIntf: IInterface; const MethodName: string): TRttiMethod;
+class function TInterfaceHelper.GetMethod(const AIntf: IInterface; const MethodName: string): TRttiMethod;
 var
   LType: TRttiInterfaceType;
 begin
@@ -137,7 +137,7 @@ begin
     Result := LType.GetMethod(MethodName);
 end;
 
-class function TInterfaceHelper.GetMethods(AIntf: IInterface): TArray<TRttiMethod>;
+class function TInterfaceHelper.GetMethods(const AIntf: IInterface): TArray<TRttiMethod>;
 var
   LType: TRttiInterfaceType;
 begin
@@ -148,7 +148,7 @@ begin
     Result := LType.GetMethods;
 end;
 
-class function TInterfaceHelper.GetQualifiedName(AGuid: TGUID): string;
+class function TInterfaceHelper.GetQualifiedName(const AGuid: TGUID): string;
 var
   LType: TRttiInterfaceType;
 begin
@@ -159,13 +159,13 @@ begin
     Result := LType.QualifiedName;
 end;
 
-class function TInterfaceHelper.GetType(AGuid: TGUID): TRttiInterfaceType;
+class function TInterfaceHelper.GetType(const AGuid: TGUID): TRttiInterfaceType;
 begin
   CacheIfNotCachedAndWaitFinish;
   Result := FInterfaceTypes.Items[AGuid];
 end;
 
-class function TInterfaceHelper.GetTypeName(AGuid: TGUID): string;
+class function TInterfaceHelper.GetTypeName(const AGuid: TGUID): string;
 var
   LType: TRttiInterfaceType;
 begin
@@ -176,7 +176,7 @@ begin
     Result := LType.Name;
 end;
 
-class function TInterfaceHelper.InvokeMethod(AIntfInTValue: TValue; const MethodName: string; const Args: array of TValue): TValue;
+class function TInterfaceHelper.InvokeMethod(const AIntfInTValue: TValue; const MethodName: string; const Args: array of TValue): TValue;
 var
   LMethod: TRttiMethod;
   LType: TRttiInterfaceType;
@@ -193,7 +193,7 @@ begin
   Result := LMethod.Invoke(AIntfInTValue, Args);
 end;
 
-class function TInterfaceHelper.InvokeMethod(AIntf: IInterface; const MethodName: string; const Args: array of TValue): TValue;
+class function TInterfaceHelper.InvokeMethod(const AIntf: IInterface; const MethodName: string; const Args: array of TValue): TValue;
 var
   LMethod: TRttiMethod;
 begin
@@ -205,7 +205,7 @@ begin
   Result := LMethod.Invoke(TValue.From<IInterface>(AIntf), Args);
 end;
 
-class function TInterfaceHelper.GetTypeName(AIntf: IInterface): string;
+class function TInterfaceHelper.GetTypeName(const AIntf: IInterface): string;
 var
   LType: TRttiInterfaceType;
 begin
@@ -275,7 +275,7 @@ begin
   end;
 end;
 
-class function TInterfaceHelper.GetType(AIntfInTValue: TValue): TRttiInterfaceType;
+class function TInterfaceHelper.GetType(const AIntfInTValue: TValue): TRttiInterfaceType;
 var
   LType: TRttiType;
 begin
