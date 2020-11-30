@@ -12,8 +12,8 @@ type
   TRttiUtils = class sealed
   public
     class var Ctx: TRttiContext;
-    class function HasAttribute<T: class>(ARttiMember: TRttiMember; out AAttribute: T): Boolean; overload;
-    class function HasAttribute<T: class>(ARttiMember: TRttiType; out AAttribute: T): Boolean; overload;
+    class function HasAttribute<T: TCustomAttribute>(ARttiMember: TRttiMember; out AAttribute: T): Boolean; overload;
+    class function HasAttribute<T: TCustomAttribute>(ARttiMember: TRttiType; out AAttribute: T): Boolean; overload;
   end;
 
   /// <summary>
