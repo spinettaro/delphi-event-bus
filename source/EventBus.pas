@@ -280,6 +280,10 @@ type
     ///   Thread mode of the subscriber method
     /// </param>
     constructor Create(const AChannel: string; AThreadMode: TThreadMode = TThreadMode.Posting);
+
+    /// <summary>
+    ///   Name of the channel.
+    /// </summary>
     property Channel: string read Get_Channel;
   end;
 
