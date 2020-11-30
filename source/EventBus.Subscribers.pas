@@ -22,66 +22,159 @@ uses
   System.Rtti, EventBus;
 
 type
-  TSubscriberMethod = class(TObject)
-  private
+  /// <summary>
+  ///   Encapsulates subscriber method as an object with relevant properties.
+  /// </summary>
+  /// <remarks>
+  ///   TSubscriberMethod.EventType is represented by the qualified name of type of the method's
+  ///   event argument. The type of the event argument must be a descendant of interface type. EventType
+  ///   can uniquely identify the type of the event.
+  /// </remarks>
+  TSubscriberMethod = class sealed(TObject)
+  strict private
     FContext: string;
     FEventType: string;
     FMethod: TRttiMethod;
+    FPriority: Integer;
     FThreadMode: TThreadMode;
-    procedure SetContext(const AValue: string);
-    procedure SetEventType(const AValue: string);
-    procedure SetMethod(const AValue: TRttiMethod);
-    procedure SetThreadMode(const AValue: TThreadMode);
   public
-    constructor Create(
-      ARttiMethod: TRttiMethod;
-      AEventType: string;
-      AThreadMode: TThreadMode;
-      const AContext: string = '';
-      APriority: Integer = 1
-    );
+    /// <param name="ARttiMethod">
+    ///   Rtti information about the subject method.
+    /// </param>
+    /// <param name="AEventType">
+    ///   Event type of the method.
+    /// </param>
+    /// <param name="AThreadMode">
+    ///   Designated thread mode.
+    /// </param>
+    /// <param name="AContext">
+    ///   Context of the method.
+    /// </param>
+    /// <param name="APriority">
+    ///   Dispatching priority of the method.
+    /// </param>
+    constructor Create(ARttiMethod: TRttiMethod; const AEventType: string; AThreadMode: TThreadMode;
+      const AContext: string = ''; APriority: Integer = 1);
 
-    destructor Destroy; override;
+    /// <summary>
+    ///   Checkes if two subscriber methods are equal. Returns true if an only
+    ///   if when both method names and argument types are identical.
+    /// </summary>
+    /// <param name="AObject">
+    ///   The object to compare
+    /// </param>
     function Equals(AObject: TObject): Boolean; override;
 
-    property Context: string read FContext write SetContext;
-    property EventType: string read FEventType write SetEventType;
-    property Method: TRttiMethod read FMethod write SetMethod;
-    property ThreadMode: TThreadMode read FThreadMode write SetThreadMode;
+    /// <summary>
+    ///   Context of the subscriber method
+    /// </summary>
+    property Context: string read FContext;
+    /// <summary>
+    ///   Event type of the subscriber method. It is actually the fully
+    ///   qualified name of the event type.
+    /// </summary>
+    property EventType: string read FEventType;
+    /// <summary>
+    ///   Rtti information of the subscriber method.
+    /// </summary>
+    property Method: TRttiMethod read FMethod;
+    /// <summary>
+    ///   Dispatching priority of the subscriber method. Currently just a place
+    ///   holder with no impact on actual event dispatching.
+    /// </summary>
+    property Priority: Integer read FPriority;
+    /// <summary>
+    ///   Thread mode of the subscriber method.
+    /// </summary>
+    property ThreadMode: TThreadMode read FThreadMode;
   end;
 
-  TSubscription = class(TObject)
+  /// <summary>
+  ///   Encapsulates the subscriber method and its owner subscriber object.
+  /// </summary>
+  TSubscription = class sealed(TObject)
   private
     FActive: Boolean;
     FSubscriber: TObject;
     FSubscriberMethod: TSubscriberMethod;
-    function GetActive: Boolean;
-    procedure SetActive(const AValue: Boolean);
-    function GetContext: string;
-    procedure SetSubscriber(const AValue: TObject);
-    procedure SetSubscriberMethod(const AValue: TSubscriberMethod);
+    {$REGION 'Property Gettors and Settors'}
+    /// <summary>
+    ///   Encapsulates the subscriber method and its defining subscriber
+    ///   object.
+    /// </summary>
+    procedure Set_Active(const AValue: Boolean);
+    function Get_Context: string;
+    {$ENDREGION}
   public
     constructor Create(ASubscriber: TObject; ASubscriberMethod: TSubscriberMethod);
     destructor Destroy; override;
+
+    /// <summary>
+    ///   Checks if two subscriptions are equal. Returns True when both
+    ///   having the same subscriber object and the same subscriber method.
+    /// </summary>
     function Equals(AObject: TObject): Boolean; override;
 
-    property Active: Boolean read GetActive write SetActive;
-    property Context: string read GetContext;
-    property Subscriber: TObject read FSubscriber write SetSubscriber;
-    property SubscriberMethod: TSubscriberMethod read FSubscriberMethod write SetSubscriberMethod;
+    /// <summary>
+    ///   Whether the subject subscription is active
+    /// </summary>
+    property Active: Boolean read FActive write Set_Active;
+    /// <summary>
+    ///   Context of the subscriber method.
+    /// </summary>
+    property Context: string read Get_Context;
+    /// <summary>
+    ///   The subscriber object.
+    /// </summary>
+    property Subscriber: TObject read FSubscriber;
+    /// <summary>
+    ///   The subscriber method.
+    /// </summary>
+    property SubscriberMethod: TSubscriberMethod read FSubscriberMethod;
   end;
 
   TSubscribersFinder = class(TObject)
   public
-    class function FindEventsSubscriberMethods(
-      ASubscriberClass: TClass;
-      ARaiseExcIfEmpty: Boolean = False
-    ): TArray<TSubscriberMethod>;
+    /// <summary>
+    ///   Collects all subscriber methods from a given subscriber class. Each
+    ///   collected subscriber method must have Subscribe attribute specified.
+    /// </summary>
+    /// <param name="ASubscriberClass">
+    ///   The subscriber class to collect subscriber methods from.
+    /// </param>
+    /// <param name="ARaiseExcIfEmpty">
+    ///   Whether to raise an EObjectHasNoSubscriberMethods when none of the
+    ///   methods of the subscriber class has Subscribe attribute specified.
+    /// </param>
+    /// <exception cref="EInvalidSubscriberMethod">
+    ///   When any subscriber method of the subscriber class has invalid number of arguments or invalid
+    ///   argument type.
+    /// </exception>
+    /// <exception cref="EObjectHasNoSubscriberMethods">
+    ///   When the subscriber class contains no subscriber methods, and
+    ///   ARaiseExcIfEmpty is True.
+    /// </exception>
+    class function FindEventsSubscriberMethods(ASubscriberClass: TClass; ARaiseExcIfEmpty: Boolean = False): TArray<TSubscriberMethod>;
 
-    class function FindChannelsSubcriberMethods(
-      ASubscriberClass: TClass;
-      ARaiseExcIfEmpty: Boolean = False
-    ): TArray<TSubscriberMethod>;
+    /// <summary>
+    ///   Collects all subscriber methods from a given subscriber class. Each
+    ///   collected subscriber method must have Channel attribute specified.
+    /// </summary>
+    /// <param name="ASubscriberClass">
+    ///   The subscriber class to collect subscriber methods from.
+    /// </param>
+    /// <param name="ARaiseExcIfEmpty">
+    ///   Whether to raise an EObjectHasNoSubscriberMethods when none of the methods of the
+    ///   subscriber class has Channel attribute specified.
+    /// </param>
+    /// <exception cref="EInvalidSubscriberMethod">
+    ///   When any subscriber method of the subscriber class has invalid number of arguments or invalid
+    ///   argument type.
+    /// </exception>
+    /// <exception cref="EObjectHasNoSubscriberMethods">
+    ///   When the subscriber class contains no subscriber methods, and ARaiseExcIfEmpty is True.
+    /// </exception>
+    class function FindChannelsSubcriberMethods(ASubscriberClass: TClass; ARaiseExcIfEmpty: Boolean = False): TArray<TSubscriberMethod>;
   end;
 
 implementation
@@ -89,57 +182,32 @@ implementation
 uses
   System.SysUtils, System.TypInfo, EventBus.Helpers;
 
-constructor TSubscriberMethod.Create(ARttiMethod: TRttiMethod; AEventType: string; AThreadMode: TThreadMode;
+constructor TSubscriberMethod.Create(ARttiMethod: TRttiMethod; const AEventType: string; AThreadMode: TThreadMode;
   const AContext: string = ''; APriority: Integer = 1);
 begin
   FMethod := ARttiMethod;
   FEventType := AEventType;
   FThreadMode := AThreadMode;
   FContext := AContext;
-end;
-
-destructor TSubscriberMethod.Destroy;
-begin
-  inherited;
+  FPriority := APriority;
 end;
 
 function TSubscriberMethod.Equals(AObject: TObject): Boolean;
 var
   LOtherSubscriberMethod: TSubscriberMethod;
 begin
-  if (inherited Equals(AObject)) then begin
-    Exit(True)
-  end else begin
-    if (AObject is TSubscriberMethod) then begin
-      LOtherSubscriberMethod := TSubscriberMethod(AObject);
-      Exit(LOtherSubscriberMethod.Method.Tostring = Method.Tostring);
-    end else begin
-      Exit(False);
-    end;
-  end;
+  if not (AObject is TSubscriberMethod) then
+    Exit(False);
+
+  if (inherited Equals(AObject)) then
+    Exit(True);
+
+  LOtherSubscriberMethod := TSubscriberMethod(AObject);
+  Result := (LOtherSubscriberMethod.Method.Tostring = Method.Tostring) and (LOtherSubscriberMethod.EventType = EventType);
 end;
 
-procedure TSubscriberMethod.SetContext(const AValue: string);
-begin
-  FContext := AValue;
-end;
-
-procedure TSubscriberMethod.SetEventType(const AValue: string);
-begin
-  FEventType := AValue;
-end;
-
-procedure TSubscriberMethod.SetMethod(const AValue: TRttiMethod);
-begin
-  FMethod := AValue;
-end;
-
-procedure TSubscriberMethod.SetThreadMode(const AValue: TThreadMode);
-begin
-  FThreadMode := AValue;
-end;
-
-class function TSubscribersFinder.FindChannelsSubcriberMethods(ASubscriberClass: TClass; ARaiseExcIfEmpty: Boolean): TArray<TSubscriberMethod>;
+class function TSubscribersFinder.FindChannelsSubcriberMethods(ASubscriberClass: TClass;
+  ARaiseExcIfEmpty: Boolean = False): TArray<TSubscriberMethod>;
 var
   LChannelAttribute: ChannelAttribute;
   LMethod: TRttiMethod;
@@ -157,11 +225,12 @@ begin
       LParamsLength := Length(LMethod.GetParameters);
 
       if ((LParamsLength <> 1) or (LMethod.GetParameters[0].ParamType.TypeKind <> tkUstring)) then
-        raise Exception.CreateFmt(
-          'Method  %s has Channel attribute but requires %d arguments. Methods must require a single argument of string type.',
-          [LMethod.Name, LParamsLength]);
+        raise EInvalidSubscriberMethod.CreateFmt(
+          'Method %s.%s has Channel attribute with %d argument(s) and argument[0] is of type %s.' +
+          'Only one argument allowed and that argument must be of string type.',
+          [ASubscriberClass.ClassName, LMethod.Name, LParamsLength, LMethod.GetParameters[0].ParamType.Name]);
 
-      LSubMethod := TSubscriberMethod.Create(LMethod, '',  LChannelAttribute.ThreadMode, LChannelAttribute.Channel);
+      LSubMethod := TSubscriberMethod.Create(LMethod, '', LChannelAttribute.ThreadMode, LChannelAttribute.Channel);
 {$IF CompilerVersion >= 28.0}
       Result := Result + [LSubMethod];
 {$ELSE}
@@ -172,12 +241,13 @@ begin
   end;
 
   if (Length(Result) < 1) and ARaiseExcIfEmpty then
-    raise Exception.CreateFmt(
-      'Class %s and its super classes have no public methods with the Channel attribute specified.',
+    raise EObjectHasNoSubscriberMethods.CreateFmt(
+      'Class %s and its super classes have no public methods with Channel attribute.',
       [ASubscriberClass.QualifiedClassName]);
 end;
 
-class function TSubscribersFinder.FindEventsSubscriberMethods(ASubscriberClass: TClass; ARaiseExcIfEmpty: Boolean = False): TArray<TSubscriberMethod>;
+class function TSubscribersFinder.FindEventsSubscriberMethods(ASubscriberClass: TClass;
+  ARaiseExcIfEmpty: Boolean = False): TArray<TSubscriberMethod>;
 var
   LEventType: string;
   LMethod: TRttiMethod;
@@ -195,15 +265,11 @@ begin
     if TRttiUtils.HasAttribute<SubscribeAttribute>(LMethod, LSubscribeAttribute) then begin
       LParamsLength := Length(LMethod.GetParameters);
 
-      if (LParamsLength <> 1) then
-        raise Exception.CreateFmt(
-          'Method  %s has Subscribe attribute but requires %d arguments. Only single argument is permitted.',
-          [LMethod.Name, LParamsLength]);
-
-      if (LMethod.GetParameters[0].ParamType.TypeKind <> TTypeKind.tkInterface) then
-        raise Exception.CreateFmt(
-          'Method  %s has Subscribe attribute but the Event argument is NOT of interface type.',
-          [LMethod.Name]);
+      if (LParamsLength <> 1) or (LMethod.GetParameters[0].ParamType.TypeKind <> TTypeKind.tkInterface) then
+        raise EInvalidSubscriberMethod.CreateFmt(
+          'Method %s.%s has Subscribe attribute with %d argument(s) and argument[0] is of type %s.' +
+          'Only 1 argument allowed and that argument must be of interface type.',
+          [ASubscriberClass.ClassName, LMethod.Name, LParamsLength, LMethod.GetParameters[0].ParamType.Name]);
 
       LEventType := LMethod.GetParameters[0].ParamType.QualifiedName;
       LSubMethod := TSubscriberMethod.Create(LMethod, LEventType, LSubscribeAttribute.ThreadMode, LSubscribeAttribute.Context);
@@ -217,8 +283,8 @@ begin
   end;
 
   if (Length(Result) < 1) and ARaiseExcIfEmpty then
-    raise Exception.CreateFmt(
-      'Class %s and its super classes have no public methods with the Subscribe attribute specified',
+    raise EObjectHasNoSubscriberMethods.CreateFmt(
+      'Class %s and its super classes have no public methods with Subscribe attribute.',
       [ASubscriberClass.QualifiedClassName]);
 end;
 
@@ -240,25 +306,14 @@ function TSubscription.Equals(AObject: TObject): Boolean;
 var
   LOtherSubscription: TSubscription;
 begin
-  if (AObject is TSubscription) then begin
-    LOtherSubscription := TSubscription(AObject);
-    Exit((Subscriber = LOtherSubscription.Subscriber) and (SubscriberMethod.Equals(LOtherSubscription.SubscriberMethod)));
-  end else begin
+  if not (AObject is TSubscription) then
     Exit(False);
-  end;
+
+  LOtherSubscription := TSubscription(AObject);
+  Result := (Subscriber = LOtherSubscription.Subscriber) and (SubscriberMethod.Equals(LOtherSubscription.SubscriberMethod));
 end;
 
-function TSubscription.GetActive: Boolean;
-begin
-  TMonitor.Enter(Self);
-  try
-    Result := FActive;
-  finally
-    TMonitor.Exit(Self);
-  end;
-end;
-
-procedure TSubscription.SetActive(const AValue: Boolean);
+procedure TSubscription.Set_Active(const AValue: Boolean);
 begin
   TMonitor.Enter(Self);
   try
@@ -268,19 +323,10 @@ begin
   end;
 end;
 
-function TSubscription.GetContext: string;
+function TSubscription.Get_Context: string;
 begin
   Result := SubscriberMethod.Context;
 end;
 
-procedure TSubscription.SetSubscriber(const AValue: TObject);
-begin
-  FSubscriber := AValue;
-end;
-
-procedure TSubscription.SetSubscriberMethod(const AValue: TSubscriberMethod);
-begin
-  FSubscriberMethod := AValue;
-end;
-
 end.
+

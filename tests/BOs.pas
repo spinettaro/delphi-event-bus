@@ -144,6 +144,29 @@ type
     property PersonList: TObjectList<TPerson> read FPersonList write Set_PersonList;
   end;
 
+  TEmptySubscriber = class
+
+  end;
+
+
+  TInvalidArgNumSubscriber = class
+  public
+    [Subscribe]
+    procedure OnEvent(AEvent: IEventBusEvent; AExtraArg: Integer);
+
+    [Channel('Test')]
+    procedure OnChannelMessage(const AMesage: string; AExtraArg: Integer);
+  end;
+
+  TInvalidArgTypeSubscriber = class
+  public
+    [Subscribe]
+    procedure OnEvent(AEvent: Integer);
+
+    [Channel('Test')]
+    procedure OnChannelMessage(const AMesage: Integer);
+  end;
+
 implementation
 
 uses
@@ -345,6 +368,26 @@ begin
   LastChannelMsg := AMsg;
   LastEventThreadID := TThread.CurrentThread.ThreadID;
   Event.SetEvent;
+end;
+
+procedure TInvalidArgNumSubscriber.OnChannelMessage(const AMesage: string; AExtraArg: Integer);
+begin
+  // No-Op
+end;
+
+procedure TInvalidArgNumSubscriber.OnEvent(AEvent: IEventBusEvent; AExtraArg: Integer);
+begin
+  // No-Op
+end;
+
+procedure TInvalidArgTypeSubscriber.OnChannelMessage(const AMesage: Integer);
+begin
+  // No-Op
+end;
+
+procedure TInvalidArgTypeSubscriber.OnEvent(AEvent: Integer);
+begin
+  // No-Op
 end;
 
 end.
