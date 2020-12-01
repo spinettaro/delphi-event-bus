@@ -57,8 +57,15 @@ type
     constructor Create(ARttiMethod: TRttiMethod; const AEventType: string; AThreadMode: TThreadMode;
       const AContext: string = ''; APriority: Integer = 1);
 
-    class function EncodeCategory(const AContext, AEventType: string): string; overload;
-    class function EncodeCategory(const AChannel: string): string; overload;
+    /// <summary>
+    ///   Encodes Context string and EventType string to a Category string,
+    ///   representing the category a subscriber method belongs to.
+    /// </summary>
+    /// <remarks>
+    ///   Named-channel event is a special case of the general event, where the
+    ///   channel name is the Context, and System.string is the event type.
+    /// </remarks>
+    class function EncodeCategory(const AContext: string; const AEventType: string = 'System.string'): string;
 
     /// <summary>
     ///   Checkes if two subscriber methods are equal. Returns true when
@@ -188,14 +195,9 @@ begin
   FPriority := APriority;
 end;
 
-class function TSubscriberMethod.EncodeCategory(const AContext, AEventType: string): string;
+class function TSubscriberMethod.EncodeCategory(const AContext: string; const AEventType: string = 'System.string'): string;
 begin
   Result := Format('%s:%s', [AContext, AEventType]);
-end;
-
-class function TSubscriberMethod.EncodeCategory(const AChannel: string): string;
-begin
-  Result := EncodeCategory(AChannel, 'System.string');
 end;
 
 function TSubscriberMethod.Equals(AObject: TObject): Boolean;
@@ -218,7 +220,7 @@ begin
 end;
 
 class function TSubscribersFinder.FindSubscriberMethods<T>(ASubscriberClass: TClass;
- ARaiseExcIfEmpty: Boolean = False): TArray<TSubscriberMethod>;
+  ARaiseExcIfEmpty: Boolean = False): TArray<TSubscriberMethod>;
 var
   LEventType: string;
   LMethod: TRttiMethod;

@@ -292,7 +292,6 @@ type
   ///   invalid argument type.
   /// </summary>
   EInvalidSubscriberMethod = class(Exception)
-
   end;
 
   /// <summary>
@@ -300,7 +299,6 @@ type
   ///   or Subscribe attribute defined.
   /// </summary>
   EObjectHasNoSubscriberMethods = class(Exception)
-
   end;
 
   /// <summary>
@@ -308,7 +306,18 @@ type
   ///   that has been already registered.
   /// </summary>
   ESubscriberMethodAlreadyRegistered = class(Exception)
+  end;
 
+  /// <summary>
+  ///   Throws when an unknown thread mode is specified.
+  /// </summary>
+  EUnknownThreadMode = class(Exception)
+  end;
+
+  /// <summary>
+  ///   Throws when exception occurs during subscriber method invokation.
+  /// </summary>
+  EInvokeSubscriberError = class(Exception)
   end;
 
 /// <summary>
