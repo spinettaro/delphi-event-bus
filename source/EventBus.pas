@@ -198,18 +198,18 @@ type
     ///   IEventBus.Post is called.
     /// </summary>
     Posting,
-    
+
     /// <summary>
     ///   The subscriber method will be invoked in the main thread.
     /// </summary>
     Main,
-    
+
     /// <summary>
     ///   The subscriber method will be invoked asynchronously in a new thread
     ///   other than the posting thread.
     /// </summary>
     Async,
-    
+
     /// <summary>
     ///   If the posting thread is the main thread, the subscriber method will
     ///   be invoked asynchronously in a new thread other than the posting
@@ -220,7 +220,7 @@ type
   );
 
 type
-  TEventBusSubscriberMethodAttribute = class abstract (TCustomAttribute)
+  TSubscriberMethodAttribute = class abstract (TCustomAttribute)
   strict private
     FContext: string;
     FThreadMode: TThreadMode;
@@ -256,7 +256,7 @@ type
   ///   Subscriber attribute must be specified to subscriber methods in
   ///   order to receive interface-typed events.
   /// </summary>
-  SubscribeAttribute = class(TEventBusSubscriberMethodAttribute)
+  SubscribeAttribute = class(TSubscriberMethodAttribute)
   strict protected
     function Get_ArgTypeKind: TTypeKind; override;
   public
@@ -267,7 +267,7 @@ type
   ///   Channel attribute must be specified to subscriber methods in order
   ///   to receive named-channel messages.
   /// </summary>
-  ChannelAttribute = class(TEventBusSubscriberMethodAttribute)
+  ChannelAttribute = class(TSubscriberMethodAttribute)
   strict private
     function Get_Channel: string;
   strict protected
@@ -300,6 +300,14 @@ type
   ///   or Subscribe attribute defined.
   /// </summary>
   EObjectHasNoSubscriberMethods = class(Exception)
+
+  end;
+
+  /// <summary>
+  ///   Throws when a user trying to register a method of a subscriber object
+  ///   that has been already registered.
+  /// </summary>
+  ESubscriberMethodAlreadyRegistered = class(Exception)
 
   end;
 
@@ -384,7 +392,7 @@ begin
   Result := Context;
 end;
 
-constructor TEventBusSubscriberMethodAttribute.Create(AThreadMode: TThreadMode; const AContext: string);
+constructor TSubscriberMethodAttribute.Create(AThreadMode: TThreadMode; const AContext: string);
 begin
   inherited Create;
   FContext := AContext;
