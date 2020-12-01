@@ -37,6 +37,7 @@ type
     FMethod: TRttiMethod;
     FPriority: Integer;
     FThreadMode: TThreadMode;
+    function Get_Category: string;
   public
     /// <param name="ARttiMethod">
     ///   Rtti information about the subject method.
@@ -56,6 +57,9 @@ type
     constructor Create(ARttiMethod: TRttiMethod; const AEventType: string; AThreadMode: TThreadMode;
       const AContext: string = ''; APriority: Integer = 1);
 
+    class function EncodeCategory(const AContext, AEventType: string): string; overload;
+    class function EncodeCategory(const AChannel: string): string; overload;
+
     /// <summary>
     ///   Checkes if two subscriber methods are equal. Returns true when
     ///   both method names and argument types are identical.
@@ -64,6 +68,11 @@ type
     ///   The object to compare
     /// </param>
     function Equals(AObject: TObject): Boolean; override;
+
+    /// <summary>
+    ///   Category of the subscriber method. Internally it takes value of "Context:EventType".
+    /// </summary>
+    property Category: string read Get_Category;
 
     /// <summary>
     ///   Context of the subscriber method.
@@ -134,54 +143,33 @@ type
   end;
 
   TSubscribersFinder = class(TObject)
-  private
-    class function FindSubscriberMethods<T: TEventBusSubscriberMethodAttribute>(ASubscriberClass: TClass;
-      ARaiseExcIfEmpty: Boolean = False): TArray<TSubscriberMethod>;
   public
     /// <summary>
     ///   Collects all subscriber methods from a given subscriber class. Each
-    ///   collected subscriber method must have Subscribe attribute specified.
+    ///   collected subscriber method must have Subscribe or Channel attribute
+    ///   specified.
     /// </summary>
+    /// <typeparam name="T">
+    ///   An attribute class inherited from TEventBusSubscriberMethodAttribute.
+    /// </typeparam>
     /// <param name="ASubscriberClass">
     ///   The subscriber class to collect subscriber methods from.
     /// </param>
     /// <param name="ARaiseExcIfEmpty">
     ///   Whether to raise an EObjectHasNoSubscriberMethods exception when the
-    ///   subscriber class does not have any methods with Subscribe attribute
-    ///   specified.
+    ///   subscriber class does not have any methods with Subscribe or Channel
+    ///   attribute specified.
     /// </param>
     /// <exception cref="EInvalidSubscriberMethod">
-    ///   Throws whenever a subscriber method of the subscriber class has invalid
-    ///   number of arguments or invalid argument type.
+    ///   Throws whenever a subscriber method of the subscriber class has
+    ///   invalid number of arguments or invalid argument type.
     /// </exception>
     /// <exception cref="EObjectHasNoSubscriberMethods">
     ///   Throws when the subscriber class does not have any methods with
-    ///   Subscribe attribute specified, and ARaiseExcIfEmpty is True.
+    ///   Subscribe or Channel attribute specified, and ARaiseExcIfEmpty is
+    ///   True.
     /// </exception>
-    class function FindEventsSubscriberMethods(ASubscriberClass: TClass;
-      ARaiseExcIfEmpty: Boolean = False): TArray<TSubscriberMethod>;
-
-    /// <summary>
-    ///   Collects all subscriber methods from a given subscriber class. Each
-    ///   collected subscriber method must have Channel attribute specified.
-    /// </summary>
-    /// <param name="ASubscriberClass">
-    ///   The subscriber class to collect subscriber methods from.
-    /// </param>
-    /// <param name="ARaiseExcIfEmpty">
-    ///   Whether to raise an EObjectHasNoSubscriberMethods exception when the
-    ///   subscriber class does not have any methods with Channel attribute
-    ///   specified.
-    /// </param>
-    /// <exception cref="EInvalidSubscriberMethod">
-    ///   Throws whenever a subscriber method of the subscriber class has invalid
-    ///   number of arguments or invalid argument type.
-    /// </exception>
-    /// <exception cref="EObjectHasNoSubscriberMethods">
-    ///   Throws when the subscriber class does not have any methods with
-    ///   Channel attribute specified, and ARaiseExcIfEmpty is True.
-    /// </exception>
-    class function FindChannelsSubcriberMethods(ASubscriberClass: TClass;
+    class function FindSubscriberMethods<T: TSubscriberMethodAttribute>(ASubscriberClass: TClass;
       ARaiseExcIfEmpty: Boolean = False): TArray<TSubscriberMethod>;
   end;
 
@@ -200,6 +188,16 @@ begin
   FPriority := APriority;
 end;
 
+class function TSubscriberMethod.EncodeCategory(const AContext, AEventType: string): string;
+begin
+  Result := Format('%s:%s', [AContext, AEventType]);
+end;
+
+class function TSubscriberMethod.EncodeCategory(const AChannel: string): string;
+begin
+  Result := EncodeCategory(AChannel, 'System.string');
+end;
+
 function TSubscriberMethod.Equals(AObject: TObject): Boolean;
 var
   LOtherSubscriberMethod: TSubscriberMethod;
@@ -214,16 +212,9 @@ begin
   Result := (LOtherSubscriberMethod.Method.Tostring = Method.Tostring) and (LOtherSubscriberMethod.EventType = EventType);
 end;
 
-class function TSubscribersFinder.FindChannelsSubcriberMethods(ASubscriberClass: TClass;
-  ARaiseExcIfEmpty: Boolean = False): TArray<TSubscriberMethod>;
+function TSubscriberMethod.Get_Category: string;
 begin
-  Result := FindSubscriberMethods<ChannelAttribute>(ASubscriberClass, ARaiseExcIfEmpty);
-end;
-
-class function TSubscribersFinder.FindEventsSubscriberMethods(ASubscriberClass: TClass;
-  ARaiseExcIfEmpty: Boolean = False): TArray<TSubscriberMethod>;
-begin
-  Result := FindSubscriberMethods<SubscribeAttribute>(ASubscriberClass, ARaiseExcIfEmpty);
+  Result := EncodeCategory(Context, EventType);
 end;
 
 class function TSubscribersFinder.FindSubscriberMethods<T>(ASubscriberClass: TClass;
