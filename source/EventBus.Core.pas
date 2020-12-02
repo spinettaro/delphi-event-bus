@@ -114,7 +114,7 @@ begin
   except
     on E: Exception do begin
       raise EInvokeSubscriberError.CreateFmt(
-        'Error invoking subscriber method. Subscriber class: %s. Event type: %s. Original exception: %s: %s',
+        'Error invoking subscriber method. Subscriber class: %s. Event type: %s. Original exception %s: %s.',
         [
           ASubscription.Subscriber.ClassName,
           ASubscription.SubscriberMethod.EventType,
@@ -248,7 +248,7 @@ begin
       TThread.CreateAnonymousThread(LProc).Start;
       {$ENDIF}
   else
-    raise EUnknownThreadMode.CreateFmt('Unknown thread mode: %s', [Ord(ASubscription.SubscriberMethod.ThreadMode)]);
+    raise EUnknownThreadMode.CreateFmt('Unknown thread mode: %s.', [Ord(ASubscription.SubscriberMethod.ThreadMode)]);
   end;
 end;
 
@@ -259,8 +259,12 @@ begin
   if not Assigned(ASubscription.Subscriber) then
     Exit;
 
-  LProc := procedure begin
-    InvokeSubscriber(ASubscription, [AEvent as TObject]);
+  LProc := procedure
+  var
+    LEvent: IInterface;
+  begin
+    LEvent := AEvent; // Capture AEvent save it to local so reference count bumps up 1
+    InvokeSubscriber(ASubscription, [LEvent as TObject]); // LEvent as TObject won't increment reference count.
   end;
 
   case ASubscription.SubscriberMethod.ThreadMode of
@@ -346,7 +350,7 @@ begin
     LSubscriptions := LCategoryToSubscriptionsMap[LCategory];
     if (LSubscriptions.Contains(LNewSubscription)) then begin
       LNewSubscription.Free;
-      raise ESubscriberMethodAlreadyRegistered.CreateFmt('Subscriber %s already registered to %s ', [ASubscriber.ClassName, LCategory]);
+      raise ESubscriberMethodAlreadyRegistered.CreateFmt('Subscriber %s already registered to %s.', [ASubscriber.ClassName, LCategory]);
     end;
   end;
 
