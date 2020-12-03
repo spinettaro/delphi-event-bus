@@ -259,12 +259,8 @@ begin
   if not Assigned(ASubscription.Subscriber) then
     Exit;
 
-  LProc := procedure
-  var
-    LEvent: IInterface;
-  begin
-    LEvent := AEvent; // Capture AEvent save it to local so reference count bumps up 1
-    InvokeSubscriber(ASubscription, [LEvent as TObject]); // LEvent as TObject won't increment reference count.
+  LProc := procedure begin
+     InvokeSubscriber(ASubscription, [AEvent as TObject]);
   end;
 
   case ASubscription.SubscriberMethod.ThreadMode of
