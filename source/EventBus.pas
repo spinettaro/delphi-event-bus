@@ -95,11 +95,12 @@ type
     ///   Channel attribute.
     /// </param>
     /// <exception cref="EInvalidSubscriberMethod">
-    ///   When any subscriber method of the subscriber object has invalid number of arguments or invalid
-    ///   argument type.
+    ///   Throws whenever a subscriber method of the subscriber object has
+    ///   invalid number of arguments or invalid argument type.
     /// </exception>
     /// <exception cref="EObjectHasNoSubscriberMethods">
-    ///   When the subscriber object contains no subscriber methods.
+    ///   Throws when the subscriber object does not have any methods with
+    ///   Channel attribute defined.
     /// </exception>
     procedure RegisterSubscriberForChannels(ASubscriber: TObject);
 
@@ -115,15 +116,16 @@ type
     ///   Registers a subscriber for interface-typed events.
     /// </summary>
     /// <param name="ASubscriber">
-    ///   The subscriber object to register, which should have methods with Subscribe attributes.
-    ///   attribute.
+    ///   The subscriber object to register, which should have methods with
+    ///   Subscribe attributes. attribute.
     /// </param>
     /// <exception cref="EInvalidSubscriberMethod">
-    ///   When any subscriber method of the subscriber object has invalid number of arguments or invalid
-    ///   argument type.
+    ///   Throws whenever a subscriber method of the subscriber object has
+    ///   invalid number of arguments or invalid argument type.
     /// </exception>
     /// <exception cref="EObjectHasNoSubscriberMethods">
-    ///   When the subscriber object contains no subscriber methods.
+    ///   Throws when the subscriber object does not have any methods with
+    ///   Subscribe attribute defined.
     /// </exception>
     procedure RegisterSubscriberForEvents(ASubscriber: TObject);
 
@@ -196,18 +198,18 @@ type
     ///   IEventBus.Post is called.
     /// </summary>
     Posting,
-    
+
     /// <summary>
     ///   The subscriber method will be invoked in the main thread.
     /// </summary>
     Main,
-    
+
     /// <summary>
     ///   The subscriber method will be invoked asynchronously in a new thread
     ///   other than the posting thread.
     /// </summary>
     Async,
-    
+
     /// <summary>
     ///   If the posting thread is the main thread, the subscriber method will
     ///   be invoked asynchronously in a new thread other than the posting
@@ -218,15 +220,13 @@ type
   );
 
 type
-  /// <summary>
-  ///   Subscriber attribute must be specified to subscriber methods in
-  ///   order to receive interface-typed events.
-  /// </summary>
-  SubscribeAttribute = class(TCustomAttribute)
-  private
+  TSubscriberMethodAttribute = class abstract (TCustomAttribute)
+  strict private
     FContext: string;
     FThreadMode: TThreadMode;
-  public
+  strict protected
+    function Get_ArgTypeKind: TTypeKind; virtual; abstract;
+
     /// <param name="AThreadMode">
     ///   Thread mode of the subscriber method.
     /// </param>
@@ -234,8 +234,8 @@ type
     ///   Context of event.
     /// </param>
     /// <seealso cref="TEventBusThreadMode" />
-    constructor Create(AThreadMode: TThreadMode = TThreadMode.Posting; const AContext: string = '');
-
+    constructor Create(AThreadMode: TThreadMode; const AContext: string);
+  public
     /// <summary>
     ///   Thread mode of the subscriber method.
     /// </summary>
@@ -245,16 +245,33 @@ type
     ///   Context of the subscriber method.
     /// </summary>
     property Context: string read FContext;
+
+    /// <summary>
+    ///   Required argment type of the subscriber method.
+    /// </summary>
+    property ArgTypeKind: TTypeKind read Get_ArgTypeKind;
+  end;
+
+  /// <summary>
+  ///   Subscriber attribute must be specified to subscriber methods in
+  ///   order to receive interface-typed events.
+  /// </summary>
+  SubscribeAttribute = class(TSubscriberMethodAttribute)
+  strict protected
+    function Get_ArgTypeKind: TTypeKind; override;
+  public
+    constructor Create(AThreadMode: TThreadMode = TThreadMode.Posting; const AContext: string = '');
   end;
 
   /// <summary>
   ///   Channel attribute must be specified to subscriber methods in order
   ///   to receive named-channel messages.
   /// </summary>
-  ChannelAttribute = class(TCustomAttribute)
-  private
-    FChannel: string;
-    FThreadMode: TThreadMode;
+  ChannelAttribute = class(TSubscriberMethodAttribute)
+  strict private
+    function Get_Channel: string;
+  strict protected
+    function Get_ArgTypeKind: TTypeKind; override;
   public
     /// <param name="AChannel">
     ///   Name of the channel
@@ -265,22 +282,42 @@ type
     constructor Create(const AChannel: string; AThreadMode: TThreadMode = TThreadMode.Posting);
 
     /// <summary>
-    ///   Thread mode of the subscriber method
+    ///   Name of the channel.
     /// </summary>
-    property ThreadMode: TThreadMode read FThreadMode;
-
-    /// <summary>
-    ///   Associated channel of the subscriber method.
-    /// </summary>
-    property Channel: string read FChannel;
+    property Channel: string read Get_Channel;
   end;
 
+  /// <summary>
+  ///   Throws whenever a subscriber method has invalid number of arguments or
+  ///   invalid argument type.
+  /// </summary>
   EInvalidSubscriberMethod = class(Exception)
-
   end;
 
+  /// <summary>
+  ///   Throws when a subscriber object does not have any methods with Channel
+  ///   or Subscribe attribute defined.
+  /// </summary>
   EObjectHasNoSubscriberMethods = class(Exception)
+  end;
 
+  /// <summary>
+  ///   Throws when a user trying to register a method of a subscriber object
+  ///   that has been already registered.
+  /// </summary>
+  ESubscriberMethodAlreadyRegistered = class(Exception)
+  end;
+
+  /// <summary>
+  ///   Throws when an unknown thread mode is specified.
+  /// </summary>
+  EUnknownThreadMode = class(Exception)
+  end;
+
+  /// <summary>
+  ///   Throws when exception occurs during subscriber method invokation.
+  /// </summary>
+  EInvokeSubscriberError = class(Exception)
   end;
 
 /// <summary>
@@ -341,15 +378,35 @@ end;
 
 constructor SubscribeAttribute.Create(AThreadMode: TThreadMode = TThreadMode.Posting; const AContext: string = '');
 begin
+  inherited Create(AThreadMode, AContext);
+end;
+
+function SubscribeAttribute.Get_ArgTypeKind: TTypeKind;
+begin
+  Result := TTypeKind.tkInterface;
+end;
+
+constructor ChannelAttribute.Create(const AChannel: string; AThreadMode: TThreadMode = TThreadMode.Posting);
+begin
+  inherited Create(AThreadMode, AChannel);
+end;
+
+function ChannelAttribute.Get_ArgTypeKind: TTypeKind;
+begin
+  Result := TTypeKind.tkUString;
+end;
+
+function ChannelAttribute.Get_Channel: string;
+begin
+  Result := Context;
+end;
+
+constructor TSubscriberMethodAttribute.Create(AThreadMode: TThreadMode; const AContext: string);
+begin
   inherited Create;
   FContext := AContext;
   FThreadMode := AThreadMode;
 end;
 
-constructor ChannelAttribute.Create(const AChannel: string; AThreadMode: TThreadMode = TThreadMode.Posting);
-begin
-  FThreadMode := AThreadMode;
-  FChannel := AChannel;
-end;
-
 end.
+
