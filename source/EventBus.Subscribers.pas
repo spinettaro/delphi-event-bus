@@ -236,14 +236,14 @@ begin
   SetLength(Result, 0);
   {$ENDIF}
 
-  LRttiType := TRttiUtils.Ctx.GetType(ASubscriberClass);
+  LRttiType := TRttiUtils.Context.GetType(ASubscriberClass);
   LRttiMethods := LRttiType.GetMethods;
 
   for LMethod in LRttiMethods do begin
     if TRttiUtils.HasAttribute<T>(LMethod, LAttribute) then begin
       LParamsLength := Length(LMethod.GetParameters);
 
-      if (LParamsLength <> 1) or (LMethod.GetParameters[0].ParamType.TypeKind <> LAttribute.ArgTypeKind) then
+      if (LParamsLength <> 1) or (LMethod.GetParameters[0].ParamType.TypeKind <> LAttribute.ArgTypeKind) then begin
         raise EInvalidSubscriberMethod.CreateFmt(
           'Method %s.%s has attribute %s with %d argument(s) and argument[0] is of type %s.' +
           'Only 1 argument allowed and that argument must be of %s type.',
@@ -255,6 +255,7 @@ begin
             LMethod.GetParameters[0].ParamType.Name,
             TRttiEnumerationType.GetName(LAttribute.ArgTypeKind)
           ]);
+      end;
 
       LEventType := LMethod.GetParameters[0].ParamType.QualifiedName;
       LSubMethod := TSubscriberMethod.Create(LMethod, LEventType, LAttribute.ThreadMode, LAttribute.Context);
@@ -268,10 +269,11 @@ begin
     end;
   end;
 
-  if (Length(Result) < 1) and ARaiseExcIfEmpty then
+  if (Length(Result) < 1) and ARaiseExcIfEmpty then begin
     raise EObjectHasNoSubscriberMethods.CreateFmt(
       'Class %s and its super classes have no public methods with attribute %s defined.',
       [ASubscriberClass.QualifiedClassName, T.ClassName]);
+  end;
 end;
 
 constructor TSubscription.Create(ASubscriber: TObject; ASubscriberMethod: TSubscriberMethod);
