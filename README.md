@@ -8,6 +8,11 @@ It was inspired by EventBus framework for the Android platform.
 
 ![alt text](/docs/DelphiEventBusArchitecture.png "Delphi Event Bus Architecture")
 
+## Give it a star
+Please "star" this project in GitHub! It costs nothing but helps to reference the code
+
+![alt text](/docs/star_project.png "Give it a star")
+
 ## Features
 * __Easy and clean:__ DelphiEventBus is super easy to learn and use because it respects KISS and "Convention over configuration" design principles. By using default TEventBus instance, you can start immediately to delivery and receive events 
 * __Designed to decouple different parts/layers of your application__
