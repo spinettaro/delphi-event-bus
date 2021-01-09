@@ -29,7 +29,7 @@ Please "star" this project in GitHub! It costs nothing but helps to reference th
 1.Define events:
 
 ```delphi
-IEvent = inteface(IInterface)
+IEvent = interface(IInterface)
 ['{3522E1C5-547F-4AB6-A799-5B3D3574D2FA}']
 // additional information here
 end;
