@@ -65,7 +65,7 @@ type
 
     procedure InvokeSubscriber(ASubscription: TSubscription; const Args: array of TValue);
     function IsRegistered<T: TSubscriberMethodAttribute>(ASubscriber: TObject): Boolean;
-    procedure RegisterSubscriber<T: TSubscriberMethodAttribute>(ASubscriber: TObject);
+    procedure RegisterSubscriber<T: TSubscriberMethodAttribute>(ASubscriber: TObject; ARaiseExcIfEmpty: Boolean);
     procedure Subscribe<T: TSubscriberMethodAttribute>(ASubscriber: TObject; ASubscriberMethod: TSubscriberMethod);
     procedure UnregisterSubscriber<T: TSubscriberMethodAttribute>(ASubscriber: TObject);
     procedure Unsubscribe<T: TSubscriberMethodAttribute>(ASubscriber: TObject; const AMethodCategory: TMethodCategory);
@@ -79,12 +79,14 @@ type
     {$REGION'IEventBus interface methods'}
     function IsRegisteredForChannels(ASubscriber: TObject): Boolean;
     function IsRegisteredForEvents(ASubscriber: TObject): Boolean;
-    procedure Post(const AChannel: string; const AMessage: string); overload; virtual;
-    procedure Post(const AEvent: IInterface; const AContext: string = ''); overload; virtual;
-    procedure RegisterSubscriberForChannels(ASubscriber: TObject); virtual;
-    procedure RegisterSubscriberForEvents(ASubscriber: TObject); virtual;
-    procedure UnregisterForChannels(ASubscriber: TObject); virtual;
-    procedure UnregisterForEvents(ASubscriber: TObject); virtual;
+    procedure Post(const AChannel: string; const AMessage: string); overload;
+    procedure Post(const AEvent: IInterface; const AContext: string = ''); overload;
+    procedure RegisterSubscriberForChannels(ASubscriber: TObject);
+    procedure SilentRegisterSubscriberForChannels(ASubscriber: TObject);
+    procedure RegisterSubscriberForEvents(ASubscriber: TObject);
+    procedure SilentRegisterSubscriberForEvents(ASubscriber: TObject);
+    procedure UnregisterForChannels(ASubscriber: TObject);
+    procedure UnregisterForEvents(ASubscriber: TObject);
     {$ENDREGION}
   end;
 
@@ -291,7 +293,7 @@ begin
   end;
 end;
 
-procedure TEventBus.RegisterSubscriber<T>(ASubscriber: TObject);
+procedure TEventBus.RegisterSubscriber<T>(ASubscriber: TObject; ARaiseExcIfEmpty: Boolean);
 var
   LSubscriberClass: TClass;
   LSubscriberMethods: TArray<TSubscriberMethod>;
@@ -301,7 +303,7 @@ begin
 
   try
     LSubscriberClass := ASubscriber.ClassType;
-    LSubscriberMethods := TSubscribersFinder.FindSubscriberMethods<T>(LSubscriberClass, True);
+    LSubscriberMethods := TSubscribersFinder.FindSubscriberMethods<T>(LSubscriberClass, ARaiseExcIfEmpty);
     for LSubscriberMethod in LSubscriberMethods do Subscribe<T>(ASubscriber, LSubscriberMethod);
   finally
     FMultiReadExclWriteSync.EndWrite;
@@ -310,12 +312,22 @@ end;
 
 procedure TEventBus.RegisterSubscriberForChannels(ASubscriber: TObject);
 begin
-  RegisterSubscriber<ChannelAttribute>(ASubscriber);
+  RegisterSubscriber<ChannelAttribute>(ASubscriber, True);
 end;
 
 procedure TEventBus.RegisterSubscriberForEvents(ASubscriber: TObject);
 begin
-  RegisterSubscriber<SubscribeAttribute>(ASubscriber);
+  RegisterSubscriber<SubscribeAttribute>(ASubscriber, True);
+end;
+
+procedure TEventBus.SilentRegisterSubscriberForChannels(ASubscriber: TObject);
+begin
+  RegisterSubscriber<ChannelAttribute>(ASubscriber, False);
+end;
+
+procedure TEventBus.SilentRegisterSubscriberForEvents(ASubscriber: TObject);
+begin
+  RegisterSubscriber<SubscribeAttribute>(ASubscriber, False);
 end;
 
 procedure TEventBus.Subscribe<T>(ASubscriber: TObject; ASubscriberMethod: TSubscriberMethod);

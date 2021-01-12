@@ -105,6 +105,23 @@ type
     procedure RegisterSubscriberForChannels(ASubscriber: TObject);
 
     /// <summary>
+    ///   Registers a new subscriber for named-channel messages.
+    /// </summary>
+    /// <param name="ASubscriber">
+    ///   The subscriber object to register, which should have methods with
+    ///   Channel attribute.
+    /// </param>
+    /// <exception cref="EInvalidSubscriberMethod">
+    ///   Throws whenever a subscriber method of the subscriber object has
+    ///   invalid number of arguments or invalid argument type.
+    /// </exception>
+    /// <remarks>
+    ///   There won't be any exception thrown if the subscriber object has no
+    ///   subscriber methods defined.
+    /// </remarks>
+    procedure SilentRegisterSubscriberForChannels(ASubscriber: TObject);
+
+    /// <summary>
     ///   Unregisters a subscriber from receiving named-channel messages.
     /// </summary>
     /// <param name="ASubscriber">
@@ -117,7 +134,7 @@ type
     /// </summary>
     /// <param name="ASubscriber">
     ///   The subscriber object to register, which should have methods with
-    ///   Subscribe attributes. attribute.
+    ///   Subscribe attributes.
     /// </param>
     /// <exception cref="EInvalidSubscriberMethod">
     ///   Throws whenever a subscriber method of the subscriber object has
@@ -128,6 +145,23 @@ type
     ///   Subscribe attribute defined.
     /// </exception>
     procedure RegisterSubscriberForEvents(ASubscriber: TObject);
+
+    /// <summary>
+    ///   Registers a subscriber for interface-typed events.
+    /// </summary>
+    /// <param name="ASubscriber">
+    ///   The subscriber object to register, which should have methods with
+    ///   Subscribe attributes.
+    /// </param>
+    /// <exception cref="EInvalidSubscriberMethod">
+    ///   Throws whenever a subscriber method of the subscriber object has
+    ///   invalid number of arguments or invalid argument type.
+    /// </exception>
+    /// <remarks>
+    ///   There won't be any exception thrown if the subscriber object has no
+    ///   subscriber methods defined.
+    /// </remarks>
+    procedure SilentRegisterSubscriberForEvents(ASubscriber: TObject);
 
     /// <summary>
     ///   Unregisters a subscriber from receiving interface-typed events.
