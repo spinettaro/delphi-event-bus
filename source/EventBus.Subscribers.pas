@@ -58,6 +58,11 @@ type
       const AContext: string = ''; APriority: Integer = 1);
 
     /// <summary>
+    ///   Changes the Context
+    /// </summary>
+    procedure setcontext(const newcontext:string);
+
+    /// <summary>
     ///   Encodes Context string and EventType string to a Category string,
     ///   representing the category a subscriber method belongs to.
     /// </summary>
@@ -217,6 +222,11 @@ end;
 function TSubscriberMethod.Get_Category: string;
 begin
   Result := EncodeCategory(Context, EventType);
+end;
+
+procedure TSubscriberMethod.setcontext(const newcontext: string);
+begin
+  FContext:=newcontext;
 end;
 
 class function TSubscribersFinder.FindSubscriberMethods<T>(ASubscriberClass: TClass;
