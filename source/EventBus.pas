@@ -153,6 +153,23 @@ type
     ///   The subscriber object to register, which should have methods with
     ///   Subscribe attributes.
     /// </param>
+    /// <param name="newcontext">
+    ///   The Instance based Context that will the context if the attribute 
+    ///   based context is defined as InstanceBased.
+    /// </param>
+    /// <exception cref="EObjectHasNoSubscriberMethods">
+    ///   Throws when the subscriber object does not have any methods with
+    ///   Subscribe attribute defined.
+    /// </exception>
+    procedure RegisterCustomContextSubscriberForEvents(ASubscriber: TObject; newcontext:string);
+
+/// <summary>
+    ///   Registers a subscriber for interface-typed events.
+    /// </summary>
+    /// <param name="ASubscriber">
+    ///   The subscriber object to register, which should have methods with
+    ///   Subscribe attributes.
+    /// </param>
     /// <exception cref="EInvalidSubscriberMethod">
     ///   Throws whenever a subscriber method of the subscriber object has
     ///   invalid number of arguments or invalid argument type.
