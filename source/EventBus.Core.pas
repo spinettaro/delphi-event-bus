@@ -36,6 +36,7 @@ implementation
 uses
   System.Classes,
   System.Generics.Collections,
+  System.Generics.Defaults,
   System.Rtti,
   System.SysUtils,
   {$IF CompilerVersion >= 28.0}
@@ -341,6 +342,7 @@ var
   LAttrName: TAttributeName;
 begin
   LAttrName := T.ClassName;
+
   if not FCategoryToSubscriptionsByAttrName.ContainsKey(LAttrName) then begin
     LCategoryToSubscriptionsMap := TMethodCategoryToSubscriptionsMap.Create([doOwnsValues]);
     FCategoryToSubscriptionsByAttrName.Add(LAttrName, LCategoryToSubscriptionsMap);
@@ -348,17 +350,29 @@ begin
     LCategoryToSubscriptionsMap := FCategoryToSubscriptionsByAttrName[LAttrName];
   end;
 
-  LCategory := ASubscriberMethod.Category;
+  LCategory := ASubscriberMethod.Category; // Category = Context:EventType
   LNewSubscription := TSubscription.Create(ASubscriber, ASubscriberMethod);
 
   if (not LCategoryToSubscriptionsMap.ContainsKey(LCategory)) then begin
-    LSubscriptions := TSubscriptions.Create;
+    LSubscriptions := TSubscriptions.Create(
+      TComparer<TSubscription>.Construct(
+        function(const Left, Right: TSubscription): Integer
+        begin
+          if Left.Equals(Right) then
+            Result := 0
+          else
+            Result := Left.GetHashCode - Right.GetHashCode;
+        end)
+      ,
+      True // Owns the object for its life cycle.
+    );
+
     LCategoryToSubscriptionsMap.Add(LCategory, LSubscriptions);
   end else begin
     LSubscriptions := LCategoryToSubscriptionsMap[LCategory];
     if (LSubscriptions.Contains(LNewSubscription)) then begin
       LNewSubscription.Free;
-      raise ESubscriberMethodAlreadyRegistered.CreateFmt('Subscriber %s already registered to %s.', [ASubscriber.ClassName, LCategory]);
+      raise ESubscriberMethodAlreadyRegistered.CreateFmt('Subscriber [%s] already registered to %s.', [ASubscriber.ClassName, LCategory]);
     end;
   end;
 

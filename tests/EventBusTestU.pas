@@ -18,6 +18,8 @@ type
     procedure TestIsRegisteredFalseAfterUnregisterEvents;
     [Test]
     procedure TestRegisterUnregisterMultipleSubscriberEvents;
+    [Test]
+    procedure TestDuplicateRegister;
 
     [Test]
     procedure TestRegisterUnregisterChannels;
@@ -485,6 +487,27 @@ begin
   Assert.AreNotEqual(MainThreadID, Subscriber.LastEventThreadID);
 end;
 
+procedure TEventBusTest.TestDuplicateRegister;
+var
+  LSubscriber: TSubscriberCopy;
+begin
+  LSubscriber := TSubscriberCopy.Create;
+
+  try
+    GlobalEventBus.RegisterSubscriberForEvents(LSubscriber);
+
+    Assert.WillRaise(
+      procedure begin
+        GlobalEventBus.RegisterSubscriberForEvents(LSubscriber);
+      end
+      ,
+      ESubscriberMethodAlreadyRegistered
+      ,
+      'Duplicate registering subscriber for events.');
+  finally
+    LSubscriber.Free;
+  end;
+end;
 
 procedure TEventBusTest.TestEmptySubscriber;
 var
