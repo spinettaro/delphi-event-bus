@@ -66,7 +66,7 @@ type
 
     procedure InvokeSubscriber(ASubscription: TSubscription; const Args: array of TValue);
     function IsRegistered<T: TSubscriberMethodAttribute>(ASubscriber: TObject): Boolean;
-    procedure RegisterSubscriber<T: TSubscriberMethodAttribute>(ASubscriber: TObject; ARaiseExcIfEmpty: Boolean);
+    procedure RegisterSubscriber<T: TSubscriberMethodAttribute>(ASubscriber: TObject; ARaiseExcIfEmpty: Boolean; const AInstanceContext: string = '');
     procedure Subscribe<T: TSubscriberMethodAttribute>(ASubscriber: TObject; ASubscriberMethod: TSubscriberMethod);
     procedure UnregisterSubscriber<T: TSubscriberMethodAttribute>(ASubscriber: TObject);
     procedure Unsubscribe<T: TSubscriberMethodAttribute>(ASubscriber: TObject; const AMethodCategory: TMethodCategory);
@@ -84,8 +84,8 @@ type
     procedure Post(const AEvent: IInterface; const AContext: string = ''); overload;
     procedure RegisterSubscriberForChannels(ASubscriber: TObject);
     procedure SilentRegisterSubscriberForChannels(ASubscriber: TObject);
-    procedure RegisterSubscriberForEvents(ASubscriber: TObject);
-    procedure SilentRegisterSubscriberForEvents(ASubscriber: TObject);
+    procedure RegisterSubscriberForEvents(ASubscriber: TObject; const AInstanceContext: string = '');
+    procedure SilentRegisterSubscriberForEvents(ASubscriber: TObject; const AInstanceContext: string = '');
     procedure UnregisterForChannels(ASubscriber: TObject);
     procedure UnregisterForEvents(ASubscriber: TObject);
     {$ENDREGION}
@@ -294,7 +294,7 @@ begin
   end;
 end;
 
-procedure TEventBus.RegisterSubscriber<T>(ASubscriber: TObject; ARaiseExcIfEmpty: Boolean);
+procedure TEventBus.RegisterSubscriber<T>(ASubscriber: TObject; ARaiseExcIfEmpty: Boolean; const AInstanceContext: string = '');
 var
   LSubscriberClass: TClass;
   LSubscriberMethods: TArray<TSubscriberMethod>;
@@ -305,7 +305,13 @@ begin
   try
     LSubscriberClass := ASubscriber.ClassType;
     LSubscriberMethods := TSubscribersFinder.FindSubscriberMethods<T>(LSubscriberClass, ARaiseExcIfEmpty);
-    for LSubscriberMethod in LSubscriberMethods do Subscribe<T>(ASubscriber, LSubscriberMethod);
+
+    for LSubscriberMethod in LSubscriberMethods do begin
+      // If the method do not have its Context specified, we assign the instance-specific context to it.
+      // Note - the instance-specific context itself may be empty.
+      if LSubscriberMethod.Context = '' then LSubscriberMethod.SetNewContext(AInstanceContext);
+      Subscribe<T>(ASubscriber, LSubscriberMethod);
+    end;
   finally
     FMultiReadExclWriteSync.EndWrite;
   end;
@@ -316,7 +322,7 @@ begin
   RegisterSubscriber<ChannelAttribute>(ASubscriber, True);
 end;
 
-procedure TEventBus.RegisterSubscriberForEvents(ASubscriber: TObject);
+procedure TEventBus.RegisterSubscriberForEvents(ASubscriber: TObject; const AInstanceContext: string = '');
 begin
   RegisterSubscriber<SubscribeAttribute>(ASubscriber, True);
 end;
@@ -326,7 +332,7 @@ begin
   RegisterSubscriber<ChannelAttribute>(ASubscriber, False);
 end;
 
-procedure TEventBus.SilentRegisterSubscriberForEvents(ASubscriber: TObject);
+procedure TEventBus.SilentRegisterSubscriberForEvents(ASubscriber: TObject; const AInstanceContext: string = '');
 begin
   RegisterSubscriber<SubscribeAttribute>(ASubscriber, False);
 end;

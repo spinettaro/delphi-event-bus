@@ -136,6 +136,11 @@ type
     ///   The subscriber object to register, which should have methods with
     ///   Subscribe attributes.
     /// </param>
+    /// <param name="AInstanceContext">
+    ///   An instance-specific context specified during runtime. If a
+    ///   subscriber method has its SubscriberAttribute.Context unspecified,
+    ///   then the instance context specified here will apply to that method.
+    /// </param>
     /// <exception cref="EInvalidSubscriberMethod">
     ///   Throws whenever a subscriber method of the subscriber object has
     ///   invalid number of arguments or invalid argument type.
@@ -144,7 +149,10 @@ type
     ///   Throws when the subscriber object does not have any methods with
     ///   Subscribe attribute defined.
     /// </exception>
-    procedure RegisterSubscriberForEvents(ASubscriber: TObject);
+    /// <exception cref="ESubscriberMethodAlreadyRegistered">
+    ///   Throws when the subscriber object has already been registered.
+    /// </exception>
+    procedure RegisterSubscriberForEvents(ASubscriber: TObject; const AInstanceContext: string = '');
 
     /// <summary>
     ///   Registers a subscriber for interface-typed events.
@@ -153,15 +161,24 @@ type
     ///   The subscriber object to register, which should have methods with
     ///   Subscribe attributes.
     /// </param>
+    /// <param name="AInstanceContext">
+    ///   An instance-specific context specified during runtime. If a
+    ///   subscriber method has its SubscriberAttribute.Context value
+    ///   unspecified then the instance context specified here will apply to
+    ///   that method.
+    /// </param>
     /// <exception cref="EInvalidSubscriberMethod">
     ///   Throws whenever a subscriber method of the subscriber object has
     ///   invalid number of arguments or invalid argument type.
+    /// </exception>
+    /// <exception cref="ESubscriberMethodAlreadyRegistered">
+    ///   Throws when the subscriber object has already been registered.
     /// </exception>
     /// <remarks>
     ///   There won't be any exception thrown if the subscriber object has no
     ///   subscriber methods defined.
     /// </remarks>
-    procedure SilentRegisterSubscriberForEvents(ASubscriber: TObject);
+    procedure SilentRegisterSubscriberForEvents(ASubscriber: TObject; const AInstanceContext: string = '');
 
     /// <summary>
     ///   Unregisters a subscriber from receiving interface-typed events.
@@ -265,11 +282,16 @@ type
     ///   Thread mode of the subscriber method.
     /// </param>
     /// <param name="AContext">
-    ///   Context of event.
+    ///   Context of event. If set to an empty string, then instance context will be used.
     /// </param>
     /// <seealso cref="TEventBusThreadMode" />
     constructor Create(AThreadMode: TThreadMode; const AContext: string);
   public
+    /// <summary>
+    ///   Required argment type of the subscriber method.
+    /// </summary>
+    property ArgTypeKind: TTypeKind read Get_ArgTypeKind;
+
     /// <summary>
     ///   Thread mode of the subscriber method.
     /// </summary>
@@ -280,10 +302,6 @@ type
     /// </summary>
     property Context: string read FContext;
 
-    /// <summary>
-    ///   Required argment type of the subscriber method.
-    /// </summary>
-    property ArgTypeKind: TTypeKind read Get_ArgTypeKind;
   end;
 
   /// <summary>
