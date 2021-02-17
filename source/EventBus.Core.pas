@@ -84,6 +84,7 @@ type
     procedure RegisterSubscriberForChannels(ASubscriber: TObject);
     procedure SilentRegisterSubscriberForChannels(ASubscriber: TObject);
     procedure RegisterSubscriberForEvents(ASubscriber: TObject);
+    procedure RegisterCustomContextSubscriberForEvents(ASubscriber: TObject; newcontext:string);
     procedure SilentRegisterSubscriberForEvents(ASubscriber: TObject);
     procedure UnregisterForChannels(ASubscriber: TObject);
     procedure UnregisterForEvents(ASubscriber: TObject);
@@ -293,7 +294,7 @@ begin
   end;
 end;
 
-procedure TEventBus.RegisterSubscriber<T>(ASubscriber: TObject; ARaiseExcIfEmpty: Boolean);
+procedure TEventBus.RegisterSubscriber<T>(ASubscriber: TObject; ARaiseExcIfEmpty: Boolean; newcontext:string);
 var
   LSubscriberClass: TClass;
   LSubscriberMethods: TArray<TSubscriberMethod>;
@@ -304,7 +305,11 @@ begin
   try
     LSubscriberClass := ASubscriber.ClassType;
     LSubscriberMethods := TSubscribersFinder.FindSubscriberMethods<T>(LSubscriberClass, ARaiseExcIfEmpty);
-    for LSubscriberMethod in LSubscriberMethods do Subscribe<T>(ASubscriber, LSubscriberMethod);
+    for LSubscriberMethod in LSubscriberMethods do 
+      begin
+        if (newcontext<>'') and (lowercase(LSubscriberMethod.Context)='instancebased') then LSubscriberMethod.setcontext(newcontext);
+        Subscribe<T>(ASubscriber, LSubscriberMethod);
+      end;
   finally
     FMultiReadExclWriteSync.EndWrite;
   end;
@@ -312,22 +317,27 @@ end;
 
 procedure TEventBus.RegisterSubscriberForChannels(ASubscriber: TObject);
 begin
-  RegisterSubscriber<ChannelAttribute>(ASubscriber, True);
+  RegisterSubscriber<ChannelAttribute>(ASubscriber, True,'');
 end;
 
 procedure TEventBus.RegisterSubscriberForEvents(ASubscriber: TObject);
 begin
-  RegisterSubscriber<SubscribeAttribute>(ASubscriber, True);
+  RegisterSubscriber<SubscribeAttribute>(ASubscriber, True,'');
 end;
 
 procedure TEventBus.SilentRegisterSubscriberForChannels(ASubscriber: TObject);
 begin
-  RegisterSubscriber<ChannelAttribute>(ASubscriber, False);
+  RegisterSubscriber<ChannelAttribute>(ASubscriber, False,'');
 end;
 
 procedure TEventBus.SilentRegisterSubscriberForEvents(ASubscriber: TObject);
 begin
-  RegisterSubscriber<SubscribeAttribute>(ASubscriber, False);
+  RegisterSubscriber<SubscribeAttribute>(ASubscriber, False,'');
+end;
+
+procedure TEventBus.RegisterCustomContextSubscriberForEvents(ASubscriber: TObject; newcontext:string);
+begin
+  RegisterSubscriber<SubscribeAttribute>(ASubscriber, False,newcontext);
 end;
 
 procedure TEventBus.Subscribe<T>(ASubscriber: TObject; ASubscriberMethod: TSubscriberMethod);
