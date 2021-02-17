@@ -49,7 +49,7 @@ type
     ///   Designated thread mode.
     /// </param>
     /// <param name="AContext">
-    ///   Context of the method.
+    ///   Context of the method, as obtained from the SubscriberAttribute.
     /// </param>
     /// <param name="APriority">
     ///   Dispatching priority of the method.
@@ -75,6 +75,14 @@ type
     ///   The object to compare
     /// </param>
     function Equals(AObject: TObject): Boolean; override;
+
+    /// <summary>
+    ///   Set a new context to the method, overriding the existing one.
+    /// </summary>
+    /// <param name="ANewContext">
+    ///   The new context string to set.
+    /// </param>
+    procedure SetNewContext(const ANewContext: string);
 
     /// <summary>
     ///   Category of the subscriber method. Internally it takes value of "Context:EventType".
@@ -217,6 +225,11 @@ end;
 function TSubscriberMethod.Get_Category: string;
 begin
   Result := EncodeCategory(Context, EventType);
+end;
+
+procedure TSubscriberMethod.SetNewContext(const ANewContext: string);
+begin
+  FContext := ANewContext;
 end;
 
 class function TSubscribersFinder.FindSubscriberMethods<T>(ASubscriberClass: TClass;
