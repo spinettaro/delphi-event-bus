@@ -20,6 +20,8 @@ type
     procedure TestRegisterUnregisterMultipleSubscriberEvents;
     [Test]
     procedure TestDuplicateRegister;
+    [Test]
+    procedure TestRegisterSubscriberObjectWithInstanceContext;
 
     [Test]
     procedure TestRegisterUnregisterChannels;
@@ -589,6 +591,42 @@ begin
 
   LSubscriber.Free;
 end;
+
+
+procedure TEventBusTest.TestRegisterSubscriberObjectWithInstanceContext;
+var
+  LSubscriber: TSubscriberCopy;
+  LEvent: IEventBusEvent;
+  LMsg, LInstanceContext: string;
+begin
+  LSubscriber := TSubscriberCopy.Create;
+
+  try
+    // Test for an explicit instance context
+    LInstanceContext := 'INSTANCE_CTX';
+    GlobalEventBus.RegisterSubscriberForEvents(LSubscriber, LInstanceContext);
+    LEvent := TEventBusEvent.Create;
+    LMsg := 'TestSimplePost with instance context';
+    LEvent.Data := LMsg;
+    GlobalEventBus.Post(LEvent, LInstanceContext);
+    Assert.IsTrue(GlobalEventBus.IsRegisteredForEvents(LSubscriber));
+    Assert.AreEqual(LMsg, LSubscriber.LastEvent.Data);
+    GlobalEventBus.UnRegisterForEvents(LSubscriber);
+
+    // Test without an explict instance context
+    GlobalEventBus.RegisterSubscriberForEvents(LSubscriber);
+    LMsg := 'TestSimplePost without instance context';
+    LEvent.Data := LMsg;
+    GlobalEventBus.Post(LEvent);
+    Assert.IsTrue(GlobalEventBus.IsRegisteredForEvents(LSubscriber));
+    Assert.AreEqual(LMsg, LSubscriber.LastEvent.Data);
+    GlobalEventBus.UnRegisterForEvents(LSubscriber);
+
+  finally
+    LSubscriber.Free;
+  end;
+end;
+
 
 initialization
   TDUnitX.RegisterTestFixture(TEventBusTest);
