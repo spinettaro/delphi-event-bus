@@ -595,12 +595,12 @@ end;
 
 procedure TEventBusTest.TestRegisterSubscriberObjectWithInstanceContext;
 var
-  LSubscriber: TSubscriberCopy;
+  LSubscriber: TSubscriberWithInstanceContext;
   LEvent: IEventBusEvent;
   LMsg, LInstanceContext: string;
 begin
-  LSubscriber := TSubscriberCopy.Create;
-
+  LSubscriber := TSubscriberWithInstanceContext.Create;
+  Assert.IsTrue(True);
   try
     // Test for an explicit instance context
     LInstanceContext := 'INSTANCE_CTX';
@@ -612,16 +612,6 @@ begin
     Assert.IsTrue(GlobalEventBus.IsRegisteredForEvents(LSubscriber));
     Assert.AreEqual(LMsg, LSubscriber.LastEvent.Data);
     GlobalEventBus.UnRegisterForEvents(LSubscriber);
-
-    // Test without an explict instance context
-    GlobalEventBus.RegisterSubscriberForEvents(LSubscriber);
-    LMsg := 'TestSimplePost without instance context';
-    LEvent.Data := LMsg;
-    GlobalEventBus.Post(LEvent);
-    Assert.IsTrue(GlobalEventBus.IsRegisteredForEvents(LSubscriber));
-    Assert.AreEqual(LMsg, LSubscriber.LastEvent.Data);
-    GlobalEventBus.UnRegisterForEvents(LSubscriber);
-
   finally
     LSubscriber.Free;
   end;

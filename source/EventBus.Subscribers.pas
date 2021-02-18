@@ -33,6 +33,7 @@ type
   TSubscriberMethod = class sealed(TObject)
   strict private
     FContext: string;
+    FContextOption: TContextOption;
     FEventType: string;
     FMethod: TRttiMethod;
     FPriority: Integer;
@@ -49,13 +50,12 @@ type
     ///   Designated thread mode.
     /// </param>
     /// <param name="AContext">
-    ///   Context of the method, as obtained from the SubscriberAttribute.
+    ///   Context of the method.
     /// </param>
     /// <param name="APriority">
     ///   Dispatching priority of the method.
     /// </param>
-    constructor Create(ARttiMethod: TRttiMethod; const AEventType: string; AThreadMode: TThreadMode;
-      const AContext: string = ''; APriority: Integer = 1);
+    constructor Create(ARttiMethod: TRttiMethod; const AEventType: string; AThreadMode: TThreadMode; AContextOption: TContextOption; const AContext: string = ''; APriority: Integer = 1);
 
     /// <summary>
     ///   Encodes Context string and EventType string to a Category string,
@@ -93,6 +93,9 @@ type
     ///   Context of the subscriber method.
     /// </summary>
     property Context: string read FContext;
+
+    property ContextOption: TContextOption read FContextOption;
+
     /// <summary>
     ///   Event type of the subscriber method. It is actually the fully
     ///   qualified name of the event type.
@@ -193,13 +196,13 @@ implementation
 uses
   System.SysUtils, System.TypInfo, EventBus.Helpers;
 
-constructor TSubscriberMethod.Create(ARttiMethod: TRttiMethod; const AEventType: string; AThreadMode: TThreadMode;
-  const AContext: string = ''; APriority: Integer = 1);
+constructor TSubscriberMethod.Create(ARttiMethod: TRttiMethod; const AEventType: string; AThreadMode: TThreadMode; AContextOption: TContextOption; const AContext: string = ''; APriority: Integer = 1);
 begin
   FMethod := ARttiMethod;
   FEventType := AEventType;
   FThreadMode := AThreadMode;
   FContext := AContext;
+  FContextOption := AContextOption;
   FPriority := APriority;
 end;
 
@@ -271,7 +274,7 @@ begin
       end;
 
       LEventType := LMethod.GetParameters[0].ParamType.QualifiedName;
-      LSubMethod := TSubscriberMethod.Create(LMethod, LEventType, LAttribute.ThreadMode, LAttribute.Context);
+      LSubMethod := TSubscriberMethod.Create(LMethod, LEventType, LAttribute.ThreadMode, LAttribute.ContextOption, LAttribute.Context);
 
       {$IF CompilerVersion >= 28.0}
       Result := Result + [LSubMethod];

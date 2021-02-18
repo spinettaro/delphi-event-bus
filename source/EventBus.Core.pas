@@ -290,7 +290,7 @@ begin
       TThread.CreateAnonymousThread(LProc)).Start;
       {$ENDIF}
   else
-    raise Exception.Create('Unknown thread mode');
+    raise EUnknownThreadMode.CreateFmt('Unknown thread mode: %s.', [Ord(ASubscription.SubscriberMethod.ThreadMode)]);
   end;
 end;
 
@@ -307,9 +307,15 @@ begin
     LSubscriberMethods := TSubscribersFinder.FindSubscriberMethods<T>(LSubscriberClass, ARaiseExcIfEmpty);
 
     for LSubscriberMethod in LSubscriberMethods do begin
-      // If the method do not have its Context specified, we assign the instance-specific context to it.
-      // Note - the instance-specific context itself may be empty.
-      if LSubscriberMethod.Context = '' then LSubscriberMethod.SetNewContext(AInstanceContext);
+      if LSubscriberMethod.ContextOption = TContextOption.UseInstanceContext then begin
+        if AInstanceContext <> '' then
+          LSubscriberMethod.SetNewContext(AInstanceContext)
+        else
+          raise EUnspecifiedInstanceContext.CreateFmt(
+            'Subscriber [%s] has methods with UseInstanceContext enabled, but no instance context is specified.',
+            [ASubscriber.ClassName]);
+      end;
+
       Subscribe<T>(ASubscriber, LSubscriberMethod);
     end;
   finally
