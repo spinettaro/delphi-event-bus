@@ -114,8 +114,6 @@ var
   LSubscription: TSubscription;
   LExtractedSubscription: TSubscription;
   LSubscriptions: TSubscriptions;
-  LCategories: TMethodCategories;
-  LCategory: TMethodCategory;
   LCategoryToSubscriptionsMap: TMethodCategoryToSubscriptionsMap;
   LSubscriberToCategoriesMap: TSubscriberToMethodCategoriesMap;
   LAttrName: TAttributeName;
@@ -137,7 +135,7 @@ begin
     end
   end;
 
-  if LSubscription = nil then
+  if LExtractedSubscription = nil then
     Exit(Nil);
 
   Unsubscribe<T>(ASubscriber, ACategory);
