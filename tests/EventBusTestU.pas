@@ -55,6 +55,8 @@ type
     [Test]
     procedure TestPostContextKOOnMainThread;
     [Test]
+    procedure TestRegisterNewContext;
+    [Test]
     procedure TestBackgroundPost;
     [Test]
     procedure TestBackgroundsPost;
@@ -160,6 +162,21 @@ begin
   end;
 
   Assert.IsFalse(LRaisedException);
+end;
+
+procedure TEventBusTest.TestRegisterNewContext;
+var
+  LEvent: IEventBusEvent;
+  LMsg: string;
+begin
+  GlobalEventBus.RegisterSubscriberForEvents(Subscriber);
+  LEvent := TEventBusEvent.Create;
+  LMsg := 'TestSimplePost';
+  LEvent.Data := LMsg;
+  GlobalEventBus.RegisterNewContext( Subscriber, LEvent, 'MyNewContext');
+  GlobalEventBus.Post(LEvent, 'MyNewContext');
+  Assert.IsNotNull( Subscriber.LastEvent);
+  Assert.AreEqual(LMsg, Subscriber.LastEvent.Data);
 end;
 
 procedure TEventBusTest.TestRegisterUnregisterChannels;

@@ -69,6 +69,9 @@ type
     procedure Subscribe<T: TSubscriberMethodAttribute>(ASubscriber: TObject; ASubscriberMethod: TSubscriberMethod);
     procedure UnregisterSubscriber<T: TSubscriberMethodAttribute>(ASubscriber: TObject);
     procedure Unsubscribe<T: TSubscriberMethodAttribute>(ASubscriber: TObject; const AMethodCategory: TMethodCategory);
+
+    function RemoveSubscription<T: TSubscriberMethodAttribute>(ASubscriber: TObject; const ACategory: String): TSubscription;
+    function TryGetMethodCategory<T: TSubscriberMethodAttribute>(ASubscriber: TObject; AEvent: IInterface; out AMethodCategory: string): Boolean;
   protected
     procedure PostToChannel(ASubscription: TSubscription; const AMessage: string; AIsMainThread: Boolean); virtual;
     procedure PostToSubscription(ASubscription: TSubscription; const AEvent: IInterface; AIsMainThread: Boolean); virtual;
@@ -85,6 +88,7 @@ type
     procedure SilentRegisterSubscriberForChannels(ASubscriber: TObject);
     procedure RegisterSubscriberForEvents(ASubscriber: TObject);
     procedure SilentRegisterSubscriberForEvents(ASubscriber: TObject);
+    procedure RegisterNewContext(ASubscriber: TObject; AEvent: IInterface; ANewContext: String);
     procedure UnregisterForChannels(ASubscriber: TObject);
     procedure UnregisterForEvents(ASubscriber: TObject);
     {$ENDREGION}
@@ -104,6 +108,44 @@ begin
   FSubscriberToCategoriesByAttrName.Free;
   FMultiReadExclWriteSync.Free;
   inherited;
+end;
+
+function TEventBus.RemoveSubscription<T>(ASubscriber: TObject; const ACategory: String): TSubscription;
+var
+  LSubscription: TSubscription;
+  LExtractedSubscription: TSubscription;
+  LSubscriptions: TSubscriptions;
+  LCategories: TMethodCategories;
+  LCategory: TMethodCategory;
+  LCategoryToSubscriptionsMap: TMethodCategoryToSubscriptionsMap;
+  LSubscriberToCategoriesMap: TSubscriberToMethodCategoriesMap;
+  LAttrName: TAttributeName;
+begin
+  LAttrName := T.ClassName;
+
+  if (not FCategoryToSubscriptionsByAttrName.TryGetValue(LAttrName, LCategoryToSubscriptionsMap)) then
+    Exit(Nil);
+
+  if (not LCategoryToSubscriptionsMap.TryGetValue(ACategory, LSubscriptions)) then
+    Exit(Nil);
+
+  for LSubscription in LSubscriptions do
+  begin
+    if LSubscription.Subscriber = ASubscriber then
+    begin
+        LExtractedSubscription:= LSubscriptions.Extract( LSubscription);
+        break;
+    end
+  end;
+
+  if LSubscription = nil then
+    Exit(Nil);
+
+  Unsubscribe<T>(ASubscriber, ACategory);
+
+  LSubscription.Active:= False;
+  Result:= LSubscription;
+
 end;
 
 procedure TEventBus.InvokeSubscriber(ASubscription: TSubscription; const Args: array of TValue);
@@ -293,6 +335,29 @@ begin
   end;
 end;
 
+procedure TEventBus.RegisterNewContext(ASubscriber: TObject; AEvent: IInterface; ANewContext: String);
+var
+  LMethodCategory: String;
+  LSubscription: TSubscription;
+  LOldSubMethod: TSubscriberMethod;
+  LNewSubMethod: TSubscriberMethod;
+begin
+    if not TryGetMethodCategory<SubscribeAttribute>( ASubscriber, AEvent, LMethodCategory) then
+        raise Exception.Create('Cannot find the registered Method for the given Subscriber');
+
+    LSubscription:= RemoveSubscription<SubscribeAttribute>( ASubscriber, LMethodCategory);
+    if LSubscription = nil then
+        raise Exception.Create('Cannot find the Subscription');
+    try
+        LOldSubMethod:= LSubscription.SubscriberMethod;
+        LNewSubMethod:= TSubscriberMethod.Create( LOldSubMethod.Method, LOldSubMethod.EventType, LOldSubMethod.ThreadMode, ANewContext, LOldSubMethod.Priority );
+        Subscribe<SubscribeAttribute>(ASubscriber, LNewSubMethod );
+    finally
+        LSubscription.Free;
+    end;
+
+end;
+
 procedure TEventBus.RegisterSubscriber<T>(ASubscriber: TObject; ARaiseExcIfEmpty: Boolean);
 var
   LSubscriberClass: TClass;
@@ -377,6 +442,33 @@ begin
   end;
 
   LCategories.Add(LCategory);
+end;
+
+function TEventBus.TryGetMethodCategory<T>(ASubscriber: TObject; AEvent: IInterface; out AMethodCategory: string): Boolean;
+var
+  LSubscriberToMethodCategoriesMap: TSubscriberToMethodCategoriesMap;
+  LMethodCategories: TMethodCategories;
+  LMethodCategory: String;
+  LQualifiedEventName: String;
+begin
+  if not FSubscriberToCategoriesByAttrName.TryGetValue(SubscribeAttribute.ClassName, LSubscriberToMethodCategoriesMap) then
+    exit(False);
+
+  if not LSubscriberToMethodCategoriesMap.TryGetValue(ASubscriber, LMethodCategories) then
+    exit(False);
+
+  LQualifiedEventName:= TInterfaceHelper.GetQualifiedName( AEvent);
+  for LMethodCategory in LMethodCategories do
+  begin
+    if LMethodCategory.Contains( LQualifiedEventName) then
+    begin
+        AMethodCategory:= LMethodCategory;
+        Exit(true);
+    end;
+  end;
+
+  Result:= False;
+
 end;
 
 procedure TEventBus.UnregisterSubscriber<T>(ASubscriber: TObject);
