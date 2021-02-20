@@ -166,17 +166,21 @@ end;
 
 procedure TEventBusTest.TestRegisterNewContext;
 var
-  LEvent: IEventBusEvent;
+  LEvent: IMainEvent;
   LMsg: string;
 begin
   GlobalEventBus.RegisterSubscriberForEvents(Subscriber);
-  LEvent := TEventBusEvent.Create;
-  LMsg := 'TestSimplePost';
+  LEvent := TMainEvent.Create;
+  LMsg := 'TestPostOnMainThread';
   LEvent.Data := LMsg;
-  GlobalEventBus.RegisterNewContext( Subscriber, LEvent, 'MyNewContext');
+  GlobalEventBus.RegisterNewContext( Subscriber, LEvent, 'TestCtx', 'MyNewContext');
+
+  GlobalEventBus.Post(LEvent, 'TestCtx');
+  Assert.IsNull( Subscriber.LastEvent);
+
   GlobalEventBus.Post(LEvent, 'MyNewContext');
-  Assert.IsNotNull( Subscriber.LastEvent);
   Assert.AreEqual(LMsg, Subscriber.LastEvent.Data);
+  Assert.AreEqual(MainThreadID, Subscriber.LastEventThreadID);
 end;
 
 procedure TEventBusTest.TestRegisterUnregisterChannels;

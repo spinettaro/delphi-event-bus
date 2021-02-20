@@ -71,7 +71,6 @@ type
     procedure Unsubscribe<T: TSubscriberMethodAttribute>(ASubscriber: TObject; const AMethodCategory: TMethodCategory);
 
     function RemoveSubscription<T: TSubscriberMethodAttribute>(ASubscriber: TObject; const ACategory: String): TSubscription;
-    function TryGetMethodCategory<T: TSubscriberMethodAttribute>(ASubscriber: TObject; AEvent: IInterface; out AMethodCategory: string): Boolean;
   protected
     procedure PostToChannel(ASubscription: TSubscription; const AMessage: string; AIsMainThread: Boolean); virtual;
     procedure PostToSubscription(ASubscription: TSubscription; const AEvent: IInterface; AIsMainThread: Boolean); virtual;
@@ -88,7 +87,7 @@ type
     procedure SilentRegisterSubscriberForChannels(ASubscriber: TObject);
     procedure RegisterSubscriberForEvents(ASubscriber: TObject);
     procedure SilentRegisterSubscriberForEvents(ASubscriber: TObject);
-    procedure RegisterNewContext(ASubscriber: TObject; AEvent: IInterface; ANewContext: String);
+    procedure RegisterNewContext(ASubscriber: TObject; AEvent: IInterface; const AOldContext: String; const ANewContext: String);
     procedure UnregisterForChannels(ASubscriber: TObject);
     procedure UnregisterForEvents(ASubscriber: TObject);
     {$ENDREGION}
@@ -335,15 +334,16 @@ begin
   end;
 end;
 
-procedure TEventBus.RegisterNewContext(ASubscriber: TObject; AEvent: IInterface; ANewContext: String);
+procedure TEventBus.RegisterNewContext(ASubscriber: TObject; AEvent: IInterface; const AOldContext: String; const ANewContext: String);
 var
   LMethodCategory: String;
   LSubscription: TSubscription;
   LOldSubMethod: TSubscriberMethod;
   LNewSubMethod: TSubscriberMethod;
 begin
-    if not TryGetMethodCategory<SubscribeAttribute>( ASubscriber, AEvent, LMethodCategory) then
-        raise Exception.Create('Cannot find the registered Method for the given Subscriber');
+  FMultiReadExclWriteSync.BeginWrite;
+  try
+    LMethodCategory:= TSubscriberMethod.EncodeCategory( AOldContext, TInterfaceHelper.GetQualifiedName( AEvent));
 
     LSubscription:= RemoveSubscription<SubscribeAttribute>( ASubscriber, LMethodCategory);
     if LSubscription = nil then
@@ -355,7 +355,9 @@ begin
     finally
         LSubscription.Free;
     end;
-
+  finally
+        FMultiReadExclWriteSync.EndWrite;
+  end;
 end;
 
 procedure TEventBus.RegisterSubscriber<T>(ASubscriber: TObject; ARaiseExcIfEmpty: Boolean);
@@ -442,33 +444,6 @@ begin
   end;
 
   LCategories.Add(LCategory);
-end;
-
-function TEventBus.TryGetMethodCategory<T>(ASubscriber: TObject; AEvent: IInterface; out AMethodCategory: string): Boolean;
-var
-  LSubscriberToMethodCategoriesMap: TSubscriberToMethodCategoriesMap;
-  LMethodCategories: TMethodCategories;
-  LMethodCategory: String;
-  LQualifiedEventName: String;
-begin
-  if not FSubscriberToCategoriesByAttrName.TryGetValue(SubscribeAttribute.ClassName, LSubscriberToMethodCategoriesMap) then
-    exit(False);
-
-  if not LSubscriberToMethodCategoriesMap.TryGetValue(ASubscriber, LMethodCategories) then
-    exit(False);
-
-  LQualifiedEventName:= TInterfaceHelper.GetQualifiedName( AEvent);
-  for LMethodCategory in LMethodCategories do
-  begin
-    if LMethodCategory.Contains( LQualifiedEventName) then
-    begin
-        AMethodCategory:= LMethodCategory;
-        Exit(true);
-    end;
-  end;
-
-  Result:= False;
-
 end;
 
 procedure TEventBus.UnregisterSubscriber<T>(ASubscriber: TObject);

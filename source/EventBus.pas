@@ -181,9 +181,12 @@ type
     ///   The event you want to change the context.
     /// </param>
     /// <param name="ANewContext">
+    ///   The old context value to replace.
+    /// </param>
+    /// <param name="ANewContext">
     ///   The new context value.
     /// </param>
-    procedure RegisterNewContext(ASubscriber: TObject; AEvent: IInterface; ANewContext: String);
+    procedure RegisterNewContext(ASubscriber: TObject; AEvent: IInterface; const AOldContext: String; const ANewContext: String);
   end;
 
 type
