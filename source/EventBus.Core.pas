@@ -334,7 +334,7 @@ end;
 
 procedure TEventBus.RegisterNewContext(ASubscriber: TObject; AEvent: IInterface; const AOldContext: String; const ANewContext: String);
 var
-  LMethodCategory: String;
+  LMethodCategory: string;
   LSubscription: TSubscription;
   LOldSubMethod: TSubscriberMethod;
   LNewSubMethod: TSubscriberMethod;
