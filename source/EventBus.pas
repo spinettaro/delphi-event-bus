@@ -170,6 +170,23 @@ type
     ///   The subscriber object to unregister.
     /// </param>
     procedure UnregisterForEvents(ASubscriber: TObject);
+
+    /// <summary>
+    ///   Register a new context for a given event of a specific subscriber.
+    /// </summary>
+    /// <param name="ASubscriber">
+    ///   The subscriber object who holds the event.
+    /// </param>
+    /// <param name="AEvent">
+    ///   The event you want to change the context.
+    /// </param>
+    /// <param name="ANewContext">
+    ///   The old context value to replace.
+    /// </param>
+    /// <param name="ANewContext">
+    ///   The new context value.
+    /// </param>
+    procedure RegisterNewContext(ASubscriber: TObject; AEvent: IInterface; const AOldContext: String; const ANewContext: String);
   end;
 
 type
