@@ -108,33 +108,23 @@ type
   /// <summary>
   ///   Encapsulates the subscriber method and its owner subscriber object.
   /// </summary>
-  TSubscription = class sealed(TObject)
-  private
-    FActive: Boolean;
-    FSubscriber: TObject;
-    FSubscriberMethod: TSubscriberMethod;
-    {$REGION 'Property Gettors and Settors'}
-    /// <summary>
-    ///   Encapsulates the subscriber method and its defining subscriber
-    ///   object.
-    /// </summary>
+  IDEBSubscription = interface
+  ['{9D9F9FCF-75B0-4EDA-A882-A16F503687D3}']
     procedure Set_Active(const AValue: Boolean);
     function Get_Context: string;
-    {$ENDREGION}
-  public
-    constructor Create(ASubscriber: TObject; ASubscriberMethod: TSubscriberMethod);
-    destructor Destroy; override;
-
+    function GetSubscriber: TObject;
+    function GetSubscriberMethod: TSubscriberMethod;
+    function GetActive: Boolean;
     /// <summary>
     ///   Checks if two subscriptions are equal. Returns True when both
     ///   having the same subscriber object and the same subscriber method.
     /// </summary>
-    function Equals(AObject: TObject): Boolean; override;
+    function Equals(AObject: TObject): Boolean;
 
     /// <summary>
     ///   Whether the subject subscription is active.
     /// </summary>
-    property Active: Boolean read FActive write Set_Active;
+    property Active: Boolean read GetActive write Set_Active;
     /// <summary>
     ///   Context of the subscriber method.
     /// </summary>
@@ -142,11 +132,11 @@ type
     /// <summary>
     ///   The subscriber object.
     /// </summary>
-    property Subscriber: TObject read FSubscriber;
+    property Subscriber: TObject read GetSubscriber;
     /// <summary>
     ///   The subscriber method.
     /// </summary>
-    property SubscriberMethod: TSubscriberMethod read FSubscriberMethod;
+    property SubscriberMethod: TSubscriberMethod read GetSubscriberMethod;
   end;
 
   TSubscribersFinder = class(TObject)
@@ -180,10 +170,61 @@ type
       ARaiseExcIfEmpty: Boolean = False): TArray<TSubscriberMethod>;
   end;
 
+  function NewSubscription(const ASubscriber: TObject; const ASubscriberMethod: TSubscriberMethod): IDEBSubscription;
+
 implementation
 
 uses
   System.SysUtils, System.TypInfo, EventBus.Helpers;
+
+type
+
+  /// <summary>
+  ///   Encapsulates the subscriber method and its owner subscriber object.
+  /// </summary>
+  TSubscription = class sealed(TInterfacedObject, IDEBSubscription)
+  private
+    FActive: Boolean;
+    FSubscriber: TObject;
+    FSubscriberMethod: TSubscriberMethod;
+    {$REGION 'Property Gettors and Settors'}
+    /// <summary>
+    ///   Encapsulates the subscriber method and its defining subscriber
+    ///   object.
+    /// </summary>
+    procedure Set_Active(const AValue: Boolean);
+    function Get_Context: string;
+    function GetSubscriber: TObject;
+    function GetSubscriberMethod: TSubscriberMethod;
+    function GetActive: Boolean;
+    {$ENDREGION}
+  public
+    constructor Create(const ASubscriber: TObject; const ASubscriberMethod: TSubscriberMethod);
+    destructor Destroy; override;
+
+    /// <summary>
+    ///   Checks if two subscriptions are equal. Returns True when both
+    ///   having the same subscriber object and the same subscriber method.
+    /// </summary>
+    function Equals(AObject: TObject): Boolean; override;
+
+    /// <summary>
+    ///   Whether the subject subscription is active.
+    /// </summary>
+    property Active: Boolean read GetActive write Set_Active;
+    /// <summary>
+    ///   Context of the subscriber method.
+    /// </summary>
+    property Context: string read Get_Context;
+    /// <summary>
+    ///   The subscriber object.
+    /// </summary>
+    property Subscriber: TObject read GetSubscriber;
+    /// <summary>
+    ///   The subscriber method.
+    /// </summary>
+    property SubscriberMethod: TSubscriberMethod read GetSubscriberMethod;
+  end;
 
 constructor TSubscriberMethod.Create(ARttiMethod: TRttiMethod; const AEventType: string; AThreadMode: TThreadMode;
   const AContext: string = ''; APriority: Integer = 1);
@@ -276,7 +317,7 @@ begin
   end;
 end;
 
-constructor TSubscription.Create(ASubscriber: TObject; ASubscriberMethod: TSubscriberMethod);
+constructor TSubscription.Create(const ASubscriber: TObject; const ASubscriberMethod: TSubscriberMethod);
 begin
   inherited Create;
   FSubscriber := ASubscriber;
@@ -311,9 +352,30 @@ begin
   end;
 end;
 
+function TSubscription.GetActive: Boolean;
+begin
+  Result:= FActive;
+end;
+
+function TSubscription.GetSubscriber: TObject;
+begin
+  Result:= FSubscriber;
+end;
+
+function TSubscription.GetSubscriberMethod: TSubscriberMethod;
+begin
+  Result:= FSubscriberMethod;
+end;
+
 function TSubscription.Get_Context: string;
 begin
   Result := SubscriberMethod.Context;
+end;
+
+
+function NewSubscription(const ASubscriber: TObject; const ASubscriberMethod: TSubscriberMethod): IDEBSubscription;
+begin
+  Result:= TSubscription.Create( ASubscriber, ASubscriberMethod);
 end;
 
 end.

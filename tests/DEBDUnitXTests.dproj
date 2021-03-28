@@ -1,7 +1,7 @@
 ﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
     <PropertyGroup>
         <ProjectGuid>{803E5C08-94B4-4AC6-A3C0-C08D9DE5CB52}</ProjectGuid>
-        <ProjectVersion>19.1</ProjectVersion>
+        <ProjectVersion>19.2</ProjectVersion>
         <MainSource>DEBDUnitXTests.dpr</MainSource>
         <Base>True</Base>
         <Config Condition="'$(Config)'==''">VCL_GUI</Config>
@@ -59,7 +59,7 @@
         <Icns_MainIcns>$(BDS)\bin\delphi_PROJECTICNS.icns</Icns_MainIcns>
         <SanitizedProjectName>DEBDUnitXTests</SanitizedProjectName>
         <UsingDelphiRTL>true</UsingDelphiRTL>
-        <DCC_UnitSearchPath>$(DUnitX);..\source;..\source\external;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
+        <DCC_UnitSearchPath>$(DUnitX);..\source;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
         <DCC_Namespace>System;Xml;Data;Datasnap;Web;Soap;$(DCC_Namespace)</DCC_Namespace>
         <DCC_DcuOutput>.\$(Platform)\$(Config)</DCC_DcuOutput>
         <DCC_ExeOutput>.\$(Platform)\$(Config)</DCC_ExeOutput>
@@ -110,6 +110,10 @@
         <DCCReference Include="EventBusTestU.pas"/>
         <DCCReference Include="BOs.pas"/>
         <DCCReference Include="BaseTestU.pas"/>
+        <DCCReference Include="..\source\EventBus.pas"/>
+        <DCCReference Include="..\source\EventBus.Helpers.pas"/>
+        <DCCReference Include="..\source\EventBus.Subscribers.pas"/>
+        <DCCReference Include="..\source\EventBus.Core.pas"/>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>
         </BuildConfiguration>
@@ -305,6 +309,16 @@
                     </Platform>
                     <Platform Name="Android64">
                         <RemoteDir>res\drawable-xxhdpi</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="Android_LauncherIcon192">
+                    <Platform Name="Android">
+                        <RemoteDir>res\drawable-xxxhdpi</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="Android64">
+                        <RemoteDir>res\drawable-xxxhdpi</RemoteDir>
                         <Operation>1</Operation>
                     </Platform>
                 </DeployClass>
