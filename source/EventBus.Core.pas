@@ -151,6 +151,9 @@ begin
     if not ASubscription.Active then
       Exit;
 
+    if not Assigned( ASubscription.Subscriber) then
+      Exit;
+
     ASubscription.SubscriberMethod.Method.Invoke(ASubscription.Subscriber, Args);
   except
     on E: Exception do begin
