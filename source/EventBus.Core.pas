@@ -59,6 +59,7 @@ type
 
   TEventBus = class(TInterfacedObject, IEventBus)
   strict private
+    FDebThreadPool: TThreadPool;
     FCategoryToSubscriptionsByAttrName: TMethodCategoryToSubscriptionsByAttributeName;
     FMultiReadExclWriteSync: TMultiReadExclusiveWriteSynchronizer;
     FSubscriberToCategoriesByAttrName: TSubscriberToMethodCategoriesByAttributeName;
@@ -96,6 +97,7 @@ type
 constructor TEventBus.Create;
 begin
   inherited Create;
+  FDebThreadPool := TThreadPool.Create;
   FMultiReadExclWriteSync := TMultiReadExclusiveWriteSynchronizer.Create;
   FCategoryToSubscriptionsByAttrName := TMethodCategoryToSubscriptionsByAttributeName.Create([doOwnsValues]);
   FSubscriberToCategoriesByAttrName := TSubscriberToMethodCategoriesByAttributeName.Create([doOwnsValues]);
@@ -106,6 +108,7 @@ begin
   FCategoryToSubscriptionsByAttrName.Free;
   FSubscriberToCategoriesByAttrName.Free;
   FMultiReadExclWriteSync.Free;
+  FDebThreadPool.Free;
   inherited;
 end;
 
@@ -276,7 +279,7 @@ begin
     Background:
       if (AIsMainThread) then
         {$IF CompilerVersion >= 28.0}
-        TTask.Run(LProc)
+        TTask.Run(LProc, FDebThreadPool)
         {$ELSE}
         TThread.CreateAnonymousThread(LProc).Start
         {$ENDIF}
@@ -284,7 +287,7 @@ begin
         LProc();
     Async:
       {$IF CompilerVersion >= 28.0}
-      TTask.Run(LProc);
+      TTask.Run(LProc, FDebThreadPool);
       {$ELSE}
       TThread.CreateAnonymousThread(LProc).Start;
       {$ENDIF}
@@ -315,7 +318,7 @@ begin
     Background:
       if (AIsMainThread) then
         {$IF CompilerVersion >= 28.0}
-        TTask.Run(LProc)
+        TTask.Run(LProc, FDebThreadPool)
         {$ELSE}
         TThread.CreateAnonymousThread(LProc).Start
         {$ENDIF}
@@ -323,7 +326,7 @@ begin
         LProc();
     Async:
       {$IF CompilerVersion >= 28.0}
-      TTask.Run(LProc);
+      TTask.Run(LProc, FDebThreadPool);
       {$ELSE}
       TThread.CreateAnonymousThread(LProc)).Start;
       {$ENDIF}
