@@ -96,6 +96,10 @@ GlobalEventBus.post(MY_CHANNEL, 'My Message');
 
 ## Release Notes
 
+### DEB 2.1
+
+* NEW! Introduced dedicated thread pool for DEB threading 
+
 ### DEB 2.0
 
 * NEW! Added new Interface based mechanism to declare and handle events!
