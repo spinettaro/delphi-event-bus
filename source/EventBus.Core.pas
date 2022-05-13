@@ -46,7 +46,7 @@ uses
 
 type
   {$REGION 'Type aliases to improve readability'}
-  TSubscriptions = TObjectList<TSubscription>;
+  TSubscriptions = TList<IDEBSubscription>;
   TMethodCategory = string;
   TMethodCategories = TList<TMethodCategory>;
   TMethodCategoryToSubscriptionsMap = TObjectDictionary<TMethodCategory, TSubscriptions>;
@@ -64,17 +64,17 @@ type
     FMultiReadExclWriteSync: TMultiReadExclusiveWriteSynchronizer;
     FSubscriberToCategoriesByAttrName: TSubscriberToMethodCategoriesByAttributeName;
 
-    procedure InvokeSubscriber(ASubscription: TSubscription; const Args: array of TValue);
+    procedure InvokeSubscriber(ASubscription: IDEBSubscription; const Args: array of TValue);
     function IsRegistered<T: TSubscriberMethodAttribute>(ASubscriber: TObject): Boolean;
     procedure RegisterSubscriber<T: TSubscriberMethodAttribute>(ASubscriber: TObject; ARaiseExcIfEmpty: Boolean);
     procedure Subscribe<T: TSubscriberMethodAttribute>(ASubscriber: TObject; ASubscriberMethod: TSubscriberMethod);
     procedure UnregisterSubscriber<T: TSubscriberMethodAttribute>(ASubscriber: TObject);
     procedure Unsubscribe<T: TSubscriberMethodAttribute>(ASubscriber: TObject; const AMethodCategory: TMethodCategory);
 
-    function RemoveSubscription<T: TSubscriberMethodAttribute>(ASubscriber: TObject; const ACategory: String): TSubscription;
+    function RemoveSubscription<T: TSubscriberMethodAttribute>(ASubscriber: TObject; const ACategory: String): IDEBSubscription;
   protected
-    procedure PostToChannel(ASubscription: TSubscription; const AMessage: string; AIsMainThread: Boolean); virtual;
-    procedure PostToSubscription(ASubscription: TSubscription; const AEvent: IInterface; AIsMainThread: Boolean); virtual;
+    procedure PostToChannel(ASubscription: IDEBSubscription; const AMessage: string; AIsMainThread: Boolean); virtual;
+    procedure PostToSubscription(ASubscription: IDEBSubscription; const AEvent: IInterface; AIsMainThread: Boolean); virtual;
   public
     constructor Create; virtual;
     destructor Destroy; override;
@@ -112,10 +112,10 @@ begin
   inherited;
 end;
 
-function TEventBus.RemoveSubscription<T>(ASubscriber: TObject; const ACategory: String): TSubscription;
+function TEventBus.RemoveSubscription<T>(ASubscriber: TObject; const ACategory: String): IDEBSubscription;
 var
-  LSubscription: TSubscription;
-  LExtractedSubscription: TSubscription;
+  LSubscription: IDEBSubscription;
+  LExtractedSubscription: IDEBSubscription;
   LSubscriptions: TSubscriptions;
   LCategoryToSubscriptionsMap: TMethodCategoryToSubscriptionsMap;
   LSubscriberToCategoriesMap: TSubscriberToMethodCategoriesMap;
@@ -148,10 +148,13 @@ begin
 
 end;
 
-procedure TEventBus.InvokeSubscriber(ASubscription: TSubscription; const Args: array of TValue);
+procedure TEventBus.InvokeSubscriber(ASubscription: IDEBSubscription; const Args: array of TValue);
 begin
   try
     if not ASubscription.Active then
+      Exit;
+
+    if not Assigned( ASubscription.Subscriber) then
       Exit;
 
     ASubscription.SubscriberMethod.Method.Invoke(ASubscription.Subscriber, Args);
@@ -200,7 +203,7 @@ end;
 procedure TEventBus.Post(const AChannel, AMessage: string);
 var
   LSubscriptions: TSubscriptions;
-  LSubscription: TSubscription;
+  LSubscription: IDEBSubscription;
   LIsMainThread: Boolean;
   LCategoryToSubscriptionsMap: TMethodCategoryToSubscriptionsMap;
   LAttrName: TAttributeName;
@@ -229,7 +232,7 @@ end;
 procedure TEventBus.Post(const AEvent: IInterface; const AContext: string = '');
 var
   LIsMainThread: Boolean;
-  LSubscription: TSubscription;
+  LSubscription: IDEBSubscription;
   LSubscriptions: TSubscriptions;
   LCategoryToSubscriptionsMap: TMethodCategoryToSubscriptionsMap;
   LEventType: string;
@@ -257,7 +260,7 @@ begin
   end;
 end;
 
-procedure TEventBus.PostToChannel(ASubscription: TSubscription; const AMessage: string; AIsMainThread: Boolean);
+procedure TEventBus.PostToChannel(ASubscription: IDEBSubscription; const AMessage: string; AIsMainThread: Boolean);
 var
   LProc: TProc;
 begin
@@ -296,7 +299,7 @@ begin
   end;
 end;
 
-procedure TEventBus.PostToSubscription(ASubscription: TSubscription; const AEvent: IInterface; AIsMainThread: Boolean);
+procedure TEventBus.PostToSubscription(ASubscription: IDEBSubscription; const AEvent: IInterface; AIsMainThread: Boolean);
 var
   LProc: TProc;
 begin
@@ -338,7 +341,7 @@ end;
 procedure TEventBus.RegisterNewContext(ASubscriber: TObject; AEvent: IInterface; const AOldContext: String; const ANewContext: String);
 var
   LMethodCategory: string;
-  LSubscription: TSubscription;
+  LSubscription: IDEBSubscription;
   LOldSubMethod: TSubscriberMethod;
   LNewSubMethod: TSubscriberMethod;
 begin
@@ -349,13 +352,9 @@ begin
     LSubscription:= RemoveSubscription<SubscribeAttribute>( ASubscriber, LMethodCategory);
     if LSubscription = nil then
         raise Exception.Create('Cannot find the Subscription');
-    try
-        LOldSubMethod:= LSubscription.SubscriberMethod;
-        LNewSubMethod:= TSubscriberMethod.Create( LOldSubMethod.Method, LOldSubMethod.EventType, LOldSubMethod.ThreadMode, ANewContext, LOldSubMethod.Priority );
-        Subscribe<SubscribeAttribute>(ASubscriber, LNewSubMethod );
-    finally
-        LSubscription.Free;
-    end;
+      LOldSubMethod:= LSubscription.SubscriberMethod;
+      LNewSubMethod:= TSubscriberMethod.Create( LOldSubMethod.Method, LOldSubMethod.EventType, LOldSubMethod.ThreadMode, ANewContext, LOldSubMethod.Priority );
+      Subscribe<SubscribeAttribute>(ASubscriber, LNewSubMethod );
   finally
         FMultiReadExclWriteSync.EndWrite;
   end;
@@ -400,7 +399,7 @@ end;
 
 procedure TEventBus.Subscribe<T>(ASubscriber: TObject; ASubscriberMethod: TSubscriberMethod);
 var
-  LNewSubscription: TSubscription;
+  LNewSubscription: IDEBSubscription;
   LSubscriptions: TSubscriptions;
   LCategories: TMethodCategories;
   LCategory: TMethodCategory;
@@ -417,15 +416,15 @@ begin
   end;
 
   LCategory := ASubscriberMethod.Category;
-  LNewSubscription := TSubscription.Create(ASubscriber, ASubscriberMethod);
+  LNewSubscription := NewSubscription(ASubscriber, ASubscriberMethod);
 
   if (not LCategoryToSubscriptionsMap.ContainsKey(LCategory)) then begin
     LSubscriptions := TSubscriptions.Create;
     LCategoryToSubscriptionsMap.Add(LCategory, LSubscriptions);
   end else begin
     LSubscriptions := LCategoryToSubscriptionsMap[LCategory];
-    if (LSubscriptions.Contains(LNewSubscription)) then begin
-      LNewSubscription.Free;
+    if (LSubscriptions.Contains(LNewSubscription)) then
+    begin
       raise ESubscriberMethodAlreadyRegistered.CreateFmt('Subscriber %s already registered to %s.', [ASubscriber.ClassName, LCategory]);
     end;
   end;
@@ -482,9 +481,9 @@ end;
 
 procedure TEventBus.Unsubscribe<T>(ASubscriber: TObject; const AMethodCategory: TMethodCategory);
 var
-  LSubscriptions: TObjectList<TSubscription>;
+  LSubscriptions: TSubscriptions;
   LSize, I: Integer;
-  LSubscription: TSubscription;
+  LSubscription: IDEBSubscription;
   LCategoryToSubscriptionsMap: TMethodCategoryToSubscriptionsMap;
   LAttrName: TAttributeName;
 begin
