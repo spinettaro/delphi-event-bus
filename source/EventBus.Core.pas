@@ -118,7 +118,6 @@ var
   LExtractedSubscription: IDEBSubscription;
   LSubscriptions: TSubscriptions;
   LCategoryToSubscriptionsMap: TMethodCategoryToSubscriptionsMap;
-  LSubscriberToCategoriesMap: TSubscriberToMethodCategoriesMap;
   LAttrName: TAttributeName;
 begin
   LAttrName := T.ClassName;
