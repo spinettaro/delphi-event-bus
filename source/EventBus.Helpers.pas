@@ -212,7 +212,7 @@ end;
 
 class destructor TInterfaceHelper.Destroy;
 begin
-  FInterfaceTypes.DisposeOf;
+  FInterfaceTypes.Free;
 end;
 
 class function TInterfaceHelper.GetQualifiedName(const AIntf: IInterface): string;
