@@ -212,6 +212,7 @@ end;
 
 class destructor TInterfaceHelper.Destroy;
 begin
+  WaitIfCaching;
   FInterfaceTypes.Free;
 end;
 
